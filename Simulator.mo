@@ -2090,9 +2090,9 @@ package Simulator
       phasMolEntr[1] = liqPhasMolFrac * phasMolEntr[2] + vapPhasMolFrac * phasMolEntr[3];
       compMolEntr[1, :] = compMolFrac[1, :] * phasMolEntr[1];
 //Bubble point calculation
-      P = sum((compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6])) ./ gamma[:]);
+      P = sum(compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
 //Dew point calculation
-      1 / P = sum((compMolFrac[1, :] .* gamma[:]) ./ exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6]));
+      1 / P = sum(compMolFrac[1, :] ./ exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6]));
   if T <= Tbubl then
 //below bubble point region
         compMolFrac[3, :] = zeros(NOC);
@@ -2114,6 +2114,8 @@ package Simulator
         MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
       end for;
     end Material_Stream;
+
+
 
 
 
@@ -3468,19 +3470,12 @@ package Simulator
       //input molar flow
         exp1.pressDrop = 10000;
       //pressure drop
-      end main;
-    
-    
-    
-    
-    
-    
-    
-    
+      end main;  
     end adia_exp1;
   
   
   end Test;
+
 
 
 end Simulator;

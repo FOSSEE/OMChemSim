@@ -1945,32 +1945,32 @@ package Simulator
         import Simulator.Files.*;
         Real totMolFlo[3], compMolFrac[3, NOC], Tdew(start = sum(comp[:].Tb) / NOC), Tbubl(start = sum(comp[:].Tb) / NOC), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac, vapPhasMolFrac, P, T;
       equation
-    //Mole Balance
+//Mole Balance
         totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
         compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
-    //Bubble point calculation
+//Bubble point calculation
         P = sum(compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
-    //Dew point calculation
+//Dew point calculation
         1 / P = sum(compMolFrac[1, :] ./ exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6]));
-        if T <= Tbubl then
-    //below bubble point region
+  if T <= Tbubl then
+//below bubble point region
           compMolFrac[3, :] = zeros(NOC);
           sum(compMolFrac[2, :]) = 1;
         elseif T >= Tdew then
-    //above dew point region
+//above dew point region
           compMolFrac[2, :] = zeros(NOC);
           sum(compMolFrac[3, :]) = 1;
         else
-    //VLE region
+//VLE region
           for i in 1:NOC loop
             compMolFrac[3, i] = K[i] * compMolFrac[2, i];
           end for;
           sum(compMolFrac[3, :]) = 1;
-    //sum y = 1
+//sum y = 1
         end if;
-    //Energy Balance
+//Energy Balance
         for i in 1:NOC loop
-    //Specific Heat and Enthalpy calculation
+//Specific Heat and Enthalpy calculation
           compMolSpHeat[2, i] = Thermodynamic_Functions.LiqCpId(comp[i].LiqCp, T);
           compMolSpHeat[3, i] = Thermodynamic_Functions.VapCpId(comp[i].VapCp, T);
           compMolEnth[2, i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
@@ -1988,7 +1988,7 @@ package Simulator
         compMolEnth[1, :] = compMolFrac[1, :] .* phasMolEnth[1];
         phasMolEntr[1] = liqPhasMolFrac * phasMolEntr[2] + vapPhasMolFrac * phasMolEntr[3];
         compMolEntr[1, :] = compMolFrac[1, :] * phasMolEntr[1];
-    //phase molar fractions
+//phase molar fractions
         liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
         vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
       end Flash;
@@ -2646,8 +2646,6 @@ package Simulator
       parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] "Component array";
       Real inP "Inlet Pressure", outP "Outlet Pressure", inT "Inlet Temperature", outT "Outlet Temperature", tempInc "Temperature increase", pressInc "Pressure Increase", inMixMolEnth "Inlet Mixture Molar Enthalpy", outMixMolEnth "Outlet Mixture Molar Enthalpy", reqPow "Power required", compDens[NOC](each min = 0) "Component density", dens(min = 0) "Density", vapPress "Vapor pressure of Mixture at outlet Temperature", NPSH "NPSH", inMixMolFlo(min = 0) "inlet Mixture Molar Flow", outMixMolFlo(min = 0) "Outlet Mixture Molar flow", inMixMolFrac[NOC](each min = 0, each max = 1) "Inlet Mixuture Molar Fraction", outMixMolFrac[NOC](each min = 0, each max = 1) "Outlet Mixture Molar Fraction";
       parameter Real eff "efficiency";
-      //  Simulator.Files.Connection.matConn inlet(connNOC = NOC), outlet(connNOC = NOC);
-      //  Simulator.Files.Connection.enConn energy;
       Files.Connection.matConn inlet(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
@@ -2686,6 +2684,7 @@ package Simulator
 //vap pressure of mixture at outT
       vapPress = sum(inMixMolFrac .* exp(comp[:].VP[2] + comp[:].VP[3] / outT + comp[:].VP[4] * log(outT) + comp[:].VP[5] .* outT .^ comp[:].VP[6]));
     end Centrifugal_Pump;
+
     
     model Adiabatic_Compressor
       // This is generic Adibatic Compressor model. For using this model we need to extend this model and incorporte ouput material stream since this model is not doing any flash calculations. Refer adia_comp models in Test section for this.
@@ -2706,7 +2705,7 @@ package Simulator
       Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       //========================================================================================
     equation
-    //connector equations
+//connector equations
       inlet.P = inP;
       inlet.T = inT;
       inlet.mixMolFlo = inMolFlo;
@@ -2722,18 +2721,18 @@ package Simulator
       outlet.mixMolFrac[:] = mixMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
       energy.enFlo = reqPow;
-    //=============================================================================================
+//=============================================================================================
       inMolFlo = outMolFlo;
-    //material balance
+//material balance
       outMixMolEnth = inMixMolEnth + (phasMolEnth[1] - inMixMolEnth) / eff;
       reqPow = inMolFlo * (phasMolEnth[1] - inMixMolEnth) / eff;
-    //energy balance
+//energy balance
       inP + pressInc = outP;
-    //pressure calculation
+//pressure calculation
       inT + tempInc = outT;
-    //temperature calculation
-    //=========================================================================
-    //ideal flash
+//temperature calculation
+//=========================================================================
+//ideal flash
       inMolFlo = totMolFlo[1];
       outP = P;
       inMixMolEntr = phasMolEntr[1];
@@ -2758,7 +2757,7 @@ package Simulator
         Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       //========================================================================================
     equation
-    //connector equations
+//connector equations
       inlet.P = inP;
       inlet.T = inT;
       inlet.mixMolFlo = inMolFlo;
@@ -2774,18 +2773,18 @@ package Simulator
       outlet.mixMolFrac[:] = mixMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
       energy.enFlo = genPow;
-    //=============================================================================================
+//=============================================================================================
       inMolFlo = outMolFlo;
-    //material balance
-      outMixMolEnth = inMixMolEnth + ((phasMolEnth[1] - inMixMolEnth) * eff);
+//material balance
+      outMixMolEnth = inMixMolEnth + (phasMolEnth[1] - inMixMolEnth) * eff;
       genPow = inMolFlo * (phasMolEnth[1] - inMixMolEnth) * eff;
-    //energy balance
+//energy balance
       inP - pressDrop = outP;
-    //pressure calculation
+//pressure calculation
       inT - tempDrop = outT;
-    //temperature calculation
-    //=========================================================================
-    //ideal flash
+//temperature calculation
+//=========================================================================
+//ideal flash
       inMolFlo = totMolFlo[1];
       outP = P;
       inMixMolEntr = phasMolEntr[1];
@@ -2799,7 +2798,7 @@ package Simulator
   package Test
     model msTP
       //we have to first instance components to give to material stream model.
-      Simulator.Files.Chemsep_Database data;
+      import data = Simulator.Files.Chemsep_Database;
       //instantiation of chemsep database
       parameter data.Methanol meth;
       //instantiation of methanol
@@ -2821,6 +2820,7 @@ package Simulator
       totMolFlo[1] = 100;
     end msTP;
 
+
     model msTVF
       // database and components are instantiated, material stream and thermodynamic package extended
       Simulator.Files.Chemsep_Database data;
@@ -2839,7 +2839,7 @@ package Simulator
     end msTVF;
 
     model msPVF
-      Simulator.Files.Chemsep_Database data;
+      import data = Simulator.Files.Chemsep_Database;
       parameter data.Methanol meth;
       parameter data.Ethanol eth;
       parameter data.Water wat;
@@ -2852,9 +2852,10 @@ package Simulator
       totMolFlo[1] = 100;
     end msPVF;
 
+
     model msPH
       //we have to first instance components to give to material stream model.
-      Simulator.Files.Chemsep_Database data;
+      import data = Simulator.Files.Chemsep_Database;
       //instantiation of chemsep database
       parameter data.Methanol meth;
       //instantiation of methanol
@@ -2878,9 +2879,10 @@ package Simulator
 //1 stands for mixture
     end msPH;
 
+
     model msPS
       //we have to first instance components to give to material stream model.
-      Simulator.Files.Chemsep_Database data;
+      import data = Simulator.Files.Chemsep_Database;
       //instantiation of chemsep database
       parameter data.Methanol meth;
       //instantiation of methanol
@@ -2904,9 +2906,10 @@ package Simulator
 //1 stands for mixture
     end msPS;
 
+
     model msTPbbp "material stream below bubble point"
       //we have to first instance components to give to material stream model.
-      Simulator.Files.Chemsep_Database data;
+      import data = Simulator.Files.Chemsep_Database;
       //instantiation of chemsep database
       parameter data.Methanol meth;
       //instantiation of methanol
@@ -2929,6 +2932,33 @@ package Simulator
 //1 stands for mixture
     end msTPbbp;
 
+  
+    
+    package cmpstms
+      model ms
+        extends Simulator.Streams.Material_Stream;
+        extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+      end ms;
+  
+      model main
+        //instance of database
+        import data = Simulator.Files.Chemsep_Database;
+        //instance of components
+        parameter data.Benzene benz;
+        parameter data.Toluene tol;
+        //declaration of NOC and comp
+        parameter Integer NOC = 2;
+        parameter data.General_Properties comp[NOC] = {benz, tol};
+  //instance of composite material stream
+        Simulator.Test.cmpstms.ms ms1(NOC = NOC, comp = comp) annotation(Placement(visible = true, transformation(origin = {-50, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      equation
+        ms1.P = 101325;
+        ms1.T = 368;
+        ms1.totMolFlo[1] = 100;
+        ms1.compMolFrac[1, :] = {0.5, 0.5};
+      end main;
+    end cmpstms;
+    
     package heater1
       model ms
         extends Simulator.Streams.Material_Stream;
@@ -2952,12 +2982,12 @@ package Simulator
         Simulator.Unit_Operations.Heater heater1(pressDrop = 101325, eff = 1, NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-28, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         //instances of composite material stream
-        ms inlet(NOC = NOC, comp = comp) annotation(
+        heater1.ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-74, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        Simulator.Test.heater1.ms outlet(NOC = NOC, comp = comp, T(start = 353), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.24, 0.31, 0.43}, {0.44, 0.34, 0.31}}), P(start = 101325)) annotation(
+        heater1.ms outlet(NOC = NOC, comp = comp, T(start = 353), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.24, 0.31, 0.43}, {0.44, 0.34, 0.31}}), P(start = 101325)) annotation(
           Placement(visible = true, transformation(origin = {18, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         //instance of energy stream
-        Streams.Energy_Stream energy annotation(
+        Simulator.Streams.Energy_Stream energy annotation(
           Placement(visible = true, transformation(origin = {-60, -38}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         connect(heater1.outlet, outlet.inlet) annotation(
@@ -2978,6 +3008,10 @@ package Simulator
         heater1.heatAdd = 2000000;
 //heat added
       end heat;
+
+
+
+
     end heater1;
 
     package cooler1
@@ -3046,11 +3080,13 @@ package Simulator
         //instantiation of ethanol
         parameter data.Water wat;
         //instantiation of water
-        Unit_Operations.Valve valve1(NOC = 3, comp = {meth, eth, wat}) annotation(
+        parameter Integer NOC = 3;
+        parameter data.General_Properties comp[NOC] = {meth, eth, wat};
+        Unit_Operations.Valve valve1(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {0, 4}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
-        Simulator.Test.valve1.ms inlet(NOC = 3, comp = {meth, eth, wat}) annotation(
+        valve1.ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-74, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms outlet(NOC = 3, comp = {meth, eth, wat}, T(start = 352), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.26, 0.32, 0.40}, {0.47, 0.34, 0.18}})) annotation(
+        valve1.ms outlet(NOC = NOC, comp = comp, T(start = 352), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.26, 0.32, 0.40}, {0.47, 0.34, 0.18}})) annotation(
           Placement(visible = true, transformation(origin = {66, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         connect(inlet.outlet, valve1.inlet) annotation(
@@ -3068,6 +3104,9 @@ package Simulator
         inlet.totMolFlo[1] = 100;
 //input molar flow
       end valve;
+
+
+
     end valve1;
 
     package mix1
@@ -3084,21 +3123,23 @@ package Simulator
         parameter data.Ethanol eth;
         parameter data.Methanol meth;
         parameter data.Water wat;
-        ms ms1(NOC = 3, comp = {meth, eth, wat}) annotation(
+        parameter Integer NOC = 3;
+        parameter data.General_Properties comp[NOC] = {meth, eth, wat};
+        ms ms1(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-84, 88}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms ms2(NOC = 3, comp = {meth, eth, wat}) annotation(
+        ms ms2(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-84, 58}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms ms3(NOC = 3, comp = {meth, eth, wat}) annotation(
+        ms ms3(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-86, 24}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms ms4(NOC = 3, comp = {meth, eth, wat}) annotation(
+        ms ms4(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-84, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms ms5(NOC = 3, comp = {meth, eth, wat}) annotation(
+        ms ms5(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-84, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms ms6(NOC = 3, comp = {meth, eth, wat}) annotation(
+        ms ms6(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-82, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        Unit_Operations.Mixer mixer1(NOC = 3, NI = 6, comp = {meth, eth, wat}, outPress = "Inlet_Average") annotation(
+        Unit_Operations.Mixer mixer1(NOC = NOC, NI = 6, comp = comp, outPress = "Inlet_Average") annotation(
           Placement(visible = true, transformation(origin = {0, 2}, extent = {{-26, -26}, {26, 26}}, rotation = 0)));
-        ms out1(NOC = 3, comp = {meth, eth, wat}, T(start = 354), totMolFlo(start = 1600)) annotation(
+        ms out1(NOC = NOC, comp = comp, T(start = 354), totMolFlo(start = 1600)) annotation(
           Placement(visible = true, transformation(origin = {62, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         connect(mixer1.outlet, out1.inlet) annotation(
@@ -3141,6 +3182,8 @@ package Simulator
         ms5.compMolFrac[1, :] = {0.2, 0.4, 0.4};
         ms6.compMolFrac[1, :] = {0, 1, 0};
       end mix;
+
+
     end mix1;
 
     package comp_sep1
@@ -3159,13 +3202,13 @@ package Simulator
           Placement(visible = true, transformation(origin = {-82, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         ms Outlet1(NOC = 2, comp = {benz, tol}) annotation(
           Placement(visible = true, transformation(origin = {64, 18}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms Outlet2(NOC = 2, comp = {benz, tol}) annotation(
-          Placement(visible = true, transformation(origin = {70, -32}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Test.comp_sep1.ms Outlet2(NOC = 2, comp = {benz, tol}) annotation(
+          Placement(visible = true, transformation(origin = {66, -20}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Streams.Energy_Stream Energy annotation(
           Placement(visible = true, transformation(origin = {-40, -50}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         connect(compound_Separator1.outlet2, Outlet2.inlet) annotation(
-          Line(points = {{22, -20}, {42, -20}, {42, -32}, {60, -32}, {60, -32}}));
+          Line(points = {{22, -20}, {56, -20}}));
         connect(compound_Separator1.outlet1, Outlet1.inlet) annotation(
           Line(points = {{22, 18}, {54, 18}, {54, 18}, {54, 18}}));
         connect(Inlet.outlet, compound_Separator1.inlet) annotation(
@@ -3181,21 +3224,14 @@ package Simulator
     end comp_sep1;
 
     package shortcut1
-      model Shortcut
-        import data = Simulator.Files.Chemsep_Database;
-        parameter data.Benzene benz;
-        parameter data.Toluene tol;
-        extends Simulator.Unit_Operations.Shortcut_Column;
-        extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
-      end Shortcut;
-
-      model ms
-        //  import data = Simulator.Files.Chemsep_Database;
-        //  parameter data.Benzene benz;
-        //  parameter data.Toluene tol;
+       model ms
         extends Simulator.Streams.Material_Stream;
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
       end ms;
+      model Shortcut
+        extends Simulator.Unit_Operations.Shortcut_Column;
+        extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+      end Shortcut;
 
       model main
         //use non linear solver homotopy for solving
@@ -3239,6 +3275,8 @@ package Simulator
       end main;
     end shortcut1;
 
+
+
     package flash
       model ms
         extends Simulator.Streams.Material_Stream;
@@ -3251,17 +3289,18 @@ package Simulator
       end fls;
 
       model test
-        parameter Integer NOC = 2;
         import data = Simulator.Files.Chemsep_Database;
         parameter data.Benzene benz;
         parameter data.Toluene tol;
-        flash.ms inlet(NOC = 2, comp = {benz, tol}) annotation(
+        parameter Integer NOC = 2;
+        parameter data.General_Properties comp[NOC] = {benz, tol};
+        flash.ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-70, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        fls fls1(NOC = 2, comp = {benz, tol}) annotation(
+        fls fls1(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-6, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        flash.ms outlet1(NOC = 2, comp = {benz, tol}) annotation(
+        flash.ms outlet1(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {66, -20}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        flash.ms outlet2(NOC = 2, comp = {benz, tol}) annotation(
+        flash.ms outlet2(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {58, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         connect(outlet2.inlet, fls1.vapor) annotation(
@@ -3275,6 +3314,7 @@ package Simulator
         inlet.compMolFrac[1, :] = {0.5, 0.5};
         inlet.totMolFlo[1] = 100;
       end test;
+
     end flash;
 
     package split
@@ -3287,13 +3327,15 @@ package Simulator
         import data = Simulator.Files.Chemsep_Database;
         parameter data.Benzene benz;
         parameter data.Toluene tol;
-        comp_sep1.ms inlet(NOC = 2, comp = {benz, tol}) annotation(
+        parameter Integer NOC = 2;
+        parameter data.General_Properties comp[NOC];
+        ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-80, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms outlet1(NOC = 2, comp = {benz, tol}) annotation(
+        ms outlet1(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {38, 56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms outlet2(NOC = 2, comp = {benz, tol}) annotation(
+        ms outlet2(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {38, -58}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        Simulator.Unit_Operations.Splitter split(NOC = 2, comp = {benz, tol}, NO = 2, calcType = "Molar_Flow") annotation(
+        Simulator.Unit_Operations.Splitter split(NOC = NOC, comp = comp, NO = 2, calcType = "Molar_Flow") annotation(
           Placement(visible = true, transformation(origin = {-12, 12}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         connect(inlet.outlet, split.inlet) annotation(
@@ -3308,6 +3350,8 @@ package Simulator
       end main;
 
 
+
+
     end split;
 
     package pump
@@ -3320,22 +3364,22 @@ package Simulator
         import data = Simulator.Files.Chemsep_Database;
         parameter data.Benzene benz;
         parameter data.Toluene tol;
-        ms inlet(NOC = 2, comp = {benz, tol}) annotation(
-          Placement(visible = true, transformation(origin = {-82, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Test.pump.ms inlet(NOC = 2, comp = {benz, tol}) annotation(
+          Placement(visible = true, transformation(origin = {-68, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Unit_Operations.Centrifugal_Pump pump(comp = {benz, tol}, NOC = 2, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-2, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  ms outlet(NOC = 2, comp = {benz, tol}, T(start = 300.089), compMolFrac(start = {{0.5, 0.5}, {0.5, 0.5}, {0, 0}}), totMolFlo(start = 100)) annotation(
-          Placement(visible = true, transformation(origin = {66, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  Simulator.Test.pump.ms outlet(NOC = 2, comp = {benz, tol}, T(start = 300.089), compMolFrac(start = {{0.5, 0.5}, {0.5, 0.5}, {0, 0}}), totMolFlo(start = 100)) annotation(
+          Placement(visible = true, transformation(origin = {68, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Streams.Energy_Stream energy annotation(
           Placement(visible = true, transformation(origin = {-38, -44}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
+    connect(pump.outlet, outlet.inlet) annotation(
+          Line(points = {{8, 2}, {58, 2}}));
+    connect(inlet.outlet, pump.inlet) annotation(
+          Line(points = {{-58, 2}, {-12, 2}}));
         connect(energy.outlet, pump.energy) annotation(
           Line(points = {{-28, -44}, {-2, -44}, {-2, -8}, {-2, -8}}));
-    connect(pump.outlet, outlet.inlet) annotation(
-          Line(points = {{8, 2}, {54, 2}, {54, -2}, {56, -2}}));
-    connect(inlet.outlet, pump.inlet) annotation(
-          Line(points = {{-72, 2}, {-12, 2}, {-12, 2}, {-12, 2}}));
-  inlet.totMolFlo[1] = 100;
+    inlet.totMolFlo[1] = 100;
         inlet.compMolFrac[1, :] = {0.5, 0.5};
         inlet.P = 101325;
         inlet.T = 300;
@@ -3345,35 +3389,9 @@ package Simulator
 
 
 
+
     end pump;
-
-    package cmpstms
-      model ms
-        extends Simulator.Streams.Material_Stream;
-        extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
-      end ms;
-
-      model main
-        //instance of database
-        import data = Simulator.Files.Chemsep_Database;
-        //instance of components
-        parameter data.Benzene benz;
-        parameter data.Toluene tol;
-        //declaration of NOC and comp
-        parameter Integer NOC = 2;
-        parameter data.General_Properties comp[NOC] = {benz, tol};
-  //instance of composite material stream
-        Simulator.Test.cmpstms.ms ms1(NOC = NOC, comp = comp) annotation(Placement(visible = true, transformation(origin = {-80, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      equation
-        ms1.P = 101325;
-        ms1.T = 368;
-        ms1.totMolFlo[1] = 100;
-        ms1.compMolFrac[1, :] = {0.5, 0.5};
-      end main;
-
-
-
-    end cmpstms;
+  
     
     package adia_comp1
       model ms
@@ -3382,7 +3400,10 @@ package Simulator
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
       end ms;
     
-    
+      model compres
+        extends Unit_Operations.Adiabatic_Compressor;
+        extends Files.Thermodynamic_Packages.Raoults_Law;
+      end compres;
     
       model main
         import data = Simulator.Files.Chemsep_Database;
@@ -3391,11 +3412,13 @@ package Simulator
         //instantiation of methanol
         parameter data.Toluene tol;
         //instantiation of ethanol
-        compres adiabatic_Compressor1(NOC = 2, comp = {ben, tol}, eff = 0.75) annotation(
+        parameter Integer NOC;
+        parameter data.General_Properties comp[NOC] = {ben, tol};
+        compres adiabatic_Compressor1(NOC = NOC, comp = comp, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-9, 7}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
-        Simulator.Test.adia_comp1.ms inlet(NOC = 2, comp = {ben, tol}) annotation(
+        Simulator.Test.adia_comp1.ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms outlet(NOC = 2, comp = {ben, tol}, T(start = 374)) annotation(
+        ms outlet(NOC = NOC, comp = comp, T(start = 374)) annotation(
           Placement(visible = true, transformation(origin = {58, 6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Streams.Energy_Stream power annotation(
           Placement(visible = true, transformation(origin = {-50, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -3407,27 +3430,19 @@ package Simulator
         connect(inlet.outlet, adiabatic_Compressor1.inlet) annotation(
           Line(points = {{-68, 8}, {-32, 8}}));
         inlet.compMolFrac[1, :] = {0.5, 0.5};
-    //mixture molar composition
+//mixture molar composition
         inlet.P = 202650;
-    //input pressure
+//input pressure
         inlet.T = 372;
-    //input temperature
+//input temperature
         inlet.totMolFlo[1] = 100;
-    //input molar flow
+//input molar flow
         adiabatic_Compressor1.pressInc = 10000;
-    //pressure increase
+//pressure increase
       end main;
-
-    
-    
-    
-    
-      model compres
-        extends Unit_Operations.Adiabatic_Compressor;
-        extends Files.Thermodynamic_Packages.Raoults_Law;
-      end compres;
     
     end adia_comp1;
+
     
     package adia_exp1
       model ms
@@ -3445,11 +3460,13 @@ package Simulator
         //instantiation of methanol
         parameter data.Toluene tol;
         //instantiation of ethanol
-        exp exp1(NOC = 2, comp = {ben, tol}, eff = 0.75) annotation(
+        parameter Integer NOC = 2;
+        parameter data.General_Properties comp[NOC];
+        exp exp1(NOC = NOC, comp = comp, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-9, 7}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
-        Simulator.Test.adia_comp1.ms inlet(NOC = 2, comp = {ben, tol}) annotation(
+        Simulator.Test.adia_comp1.ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        ms outlet(NOC = 2, comp = {ben, tol}, T(start = 374)) annotation(
+        ms outlet(NOC = NOC, comp = comp, T(start = 374)) annotation(
           Placement(visible = true, transformation(origin = {58, 6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Streams.Energy_Stream power annotation(
           Placement(visible = true, transformation(origin = {-50, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -3461,20 +3478,23 @@ package Simulator
         connect(inlet.outlet, exp1.inlet) annotation(
           Line(points = {{-68, 8}, {-32, 8}}));
         inlet.compMolFrac[1, :] = {0.5, 0.5};
-      //mixture molar composition
+//mixture molar composition
         inlet.P = 131325;
-      //input pressure
+//input pressure
         inlet.T = 372;
-      //input temperature
+//input temperature
         inlet.totMolFlo[1] = 100;
-      //input molar flow
+//input molar flow
         exp1.pressDrop = 10000;
-      //pressure drop
-      end main;  
+//pressure drop
+      end main;
+
+  
     end adia_exp1;
   
   
   end Test;
+
 
 
 

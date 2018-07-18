@@ -1765,15 +1765,47 @@ package Simulator
     package Thermodynamic_Packages
       model Raoults_Law
         import Simulator.Files.Thermodynamic_Functions.*;
-        Real K[NOC](each min = 0), resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
+        Real K[NOC](each min = 0), gamma[NOC], resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
       equation
         for i in 1:NOC loop
           K[i] = Psat(comp[i].VP, T) / P;
         end for;
+        gamma[:] = fill(1, NOC);
         resMolSpHeat[:] = zeros(3);
         resMolEnth[:] = zeros(3);
         resMolEntr = zeros(3);
       end Raoults_Law;
+
+      model NRTL
+        Real gamma[NOC], tau[NOC, NOC], G[NOC, NOC], alpha[NOC, NOC], A[NOC, NOC], BIPS[NOC, NOC, 2];
+        Real sum1[NOC], sum2[NOC];
+        constant Real R = 1.98;
+        Real K[NOC], resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
+      equation
+        BIPS = Simulator.Files.Thermodynamic_Functions.BIPNRTL(NOC, comp.name);
+        A = BIPS[:, :, 1];
+        alpha = BIPS[:, :, 2];
+        tau = A ./ (R * T);
+        G = exp(-alpha .* tau);
+        for i in 1:NOC loop
+          sum1[i] = sum(compMolFrac[2, :] .* G[:, i]);
+          sum2[i] = sum(compMolFrac[2, :] .* tau[:, i] .* G[:, i]);
+        end for;
+        for i in 1:NOC loop
+          log(gamma[i]) = sum(compMolFrac[2, :] .* tau[:, i] .* G[:, i]) / sum(compMolFrac[2, :] .* G[:, i]) + sum(compMolFrac[2, :] .* G[i, :] ./ sum1[:] .* (tau[i, :] .- sum2[:] ./ sum1[:]));
+        end for;
+//    gamma = {2.1922255, 1.3274275};
+        for i in 1:NOC loop
+          K[i] = gamma[i] * Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T) / P;
+        end for;
+        resMolSpHeat[:] = zeros(3);
+        resMolEnth[:] = zeros(3);
+        resMolEntr = zeros(3);
+      end NRTL;
+
+
+
+
     end Thermodynamic_Packages;
 
     package Thermodynamic_Functions
@@ -1915,6 +1947,80 @@ package Simulator
           density := P / (R * T * 1000);
         end if;
       end Dens;
+
+      function BIPNRTL
+        input Integer NOC;
+        input String Comp[NOC];
+        output Real value[NOC, NOC, 2];
+        constant String underscore = "_";
+        String c[NOC, NOC];
+        String d[NOC, NOC];
+        constant String Comp1_Comp2[352] = {"Butane_Methanol", "Pentane_Ethanol", "Twomethylbutane_Ethanol", "Hexane_Ethanol", "Hexane_Onepropanol", "Cyclohexane_Onepropanol", "Methylcyclohexane_Phenol", "Isobutylene_Methanol", "Twomethyltwobutene_Methanol", "Twomethyltwobutene_Ethanol", "Onehexene_Methanol", "Onehexene_Ethanol", "Onethreebutadiene_Methanol", "Onethreepentadiene_Methanol", "Transonethreepentadiene_Methanol", "Isoprene_Methanol", "Isoprene_Ethanol", "Cyclopentadiene_Methanol", "Benzene_Onepropanol", "Benzene_Chloroform", "Benzene_Phenol", "Benzene_Toluene", "Benzene_Pxylene", "Benzene_Tribromomethane", "Benzene_Nitromethane", "Benzene_Tetrachloroethylene", "Benzene_Trichloroethylene", "Benzene_Pentachloroethane", "Benzene_Oneonetwotwotetrachloroethane", "Benzene_Onetwodibromoethane", "Benzene_Onetwodichloroethane", "Benzene_Nmethylformamide", "Benzene_Nitroethane", "Benzene_Dimethylsulfoxide", "Benzene_Ethylenediamine", "Benzene_Nndimethylformamide", "Benzene_Onenitropropane", "Benzene_Twonitropropane", "Benzene_Thiophene", "Benzene_Pyridine", "Benzene_Hexafluorobenzene", "Benzene_Pdichlorobenzene", "Benzene_Bromobenzene", "Benzene_Chlorobenzene", "Benzene_Fluorobenzene", "Benzene_Nitrobenzene", "Benzene_Aniline", "Benzene_Cyclohexylamine", "Benzene_Triethylamine", "Benzene_Benzonitrile", "Benzene_Toluene", "Benzene_Nmethylcyclohexylamine", "Benzene_Styrene", "Benzene_Ethylbenzene", "Benzene_Mxylene", "Benzene_Pxylene", "Benzene_Nndiethylaniline", "Benzene_Isopropylbenzene", "Benzene_Propylbenzene", "Benzene_Mterphenyl", "Toluene_Chloroform", "Toluene_Pxylene", "Toluene_nitroethane", "Toluene_Dimethylsulfoxide", "Toluene_Ethylenediamine", "Toluene_Nndimethylformamide", "Toluene_Sulfolane", "Toluene_Pyridine", "Toluene_Bromobenzene", "Toluene_Chlorobenzene", "Toluene_Nitrobenzene", "Toluene_Twomethylpyridine", "Toluene_Threemethylpyridien", "Toluene_Benzonitrile", "Toluene_Ethylbenzene", "Toluene_Pxylene", "Ethylbenzene_Styrene", "Ethylbenzene_Nitrobenzene", "Ethylbenzene_Aniline", "Ethylbenzene_Isopropylbenzene", "Ethylbenzene_Butylbenzene", "Oxylene_Nndimethylformamide", "Mxylene_Nndimethylformamide", "Mxylene_Aniline", "Pxylene_Mxylene", "Pxylene_Nndimethylformamide", "Pxylene_Aniline", "Propylbenzene_Nitrobenzene", "Onetwofourtrimethylbenzene_Onetwothreetrimethylbenzene", "Butylbenzene_Nitrobenzene", "Pcymene_Aniline", "Styrene_Propylbenzene", "Twomethylnaphthalene_Onemethylnaphthanlene", "Propionicaldehyde_Methanol", "Isobutyraldehyde_Water", "Acetone_Methanol", "Acetone_Ethanol", "Acetone_Chloroform", "Acetone_Benzene", "Acetone_Phenol", "Acetone_Cyclohexane", "Acetone_Toluene", "Twobutanone_Onepropanol", "Twobutanone_Benzene", "Twobutanone_Cyclohexane", "Twobutanone_Toluene", "Twobutanone_Nheptane", "Twobutanone_Water", "Methanol_Tetrachloromethane", "Methanol_Tribromomethane", "Methanol_Acetonitrile", "Methanol_Onetwodichloroethane", "Methanol_Aceticacid", "Methanol_Ethanol", "Methanol_Dimethylsulfoxide", "Methanol_Propionicacid", "Methanol_Nndimethylformamide", "Methanol_Propanol", "Methanol_Thiophene", "Methanol_Methylacrylate", "Methanol_Twobutanone", "Methanol_Tetrahyrofuran", "Methanol_Onefourdioxane", "Methanol_Ethylacetate", "Methanol_Sulfolane", "Methanol_Onebutanol", "Methanol_Twobutanol", "Methanol_Onefourbutanediol", "Methanol_Pyridine", "Methanol_Methylmethacrylate", "Methanol_Methylisopropylketone", "Methanol_Piperidine", "Methanol_Hexafluorobenzene", "Methanol_Chlorobenzene", "Methanol_Benzene", "Methanol_Aniline", "Methanol_Twomethylpyridine", "Methanol_Threemethylpyridine", "Methanol_Fourmethylpyridine", "Methanol_Cyclohexene", "Methanol_Cyclohexane", "Methanol_Nbutylacetate", "Methanol_Hexane", "Methanol_Triethylamine", "Methanol_Toluene", "Methanol_Two6dimethylpyridine", "Methanol_Oneheptane", "Methanol_Methylcyclohexane", "Methanol_Heptane", "Methanol_Ethylbenzene", "Methanol_Mxylene", "Methanol_Pxylene", "Methanol_Oneoctene", "Methanol_Octane", "Methanol_Twotwofourtrimethylpentane", "Methanol_Water", "Methanol_Chloroform", "Methanol_Ethanol", "Methanol_Acetone", "Methanol_Benzene", "Methanol_Cyclohexane", "Methanol_Toluene", "Methanol_Nheptane", "Ethanol_Tetrachloroethylene", "Ethanol_Acetonitrile", "Ethanol_Onetwodichloroethane", "Ethanol_Aceticacid", "Ethanol_Onetwoethanediol", "Ethanol_Twopropanol", "Ethanol_Thiophene", "Ethanol_Twobutanone", "Ethanol_Onefourdioxane", "Ethanol_Sulfolane", "Ethanol_Twobutanol", "Ethanol_Twomethylonepropanol", "Ethanol_Pyridine", "Ethanol_Methylmethacrylate", "Ethanol_Methylisopropyl", "Ethanol_Propylacetate", "Ethanol_Threemethylonebutanol", "Ethanol_Bromobenzene", "Ethanol_Chlorobezene", "Ethanol_Benzene", "Ethanol_Aniline", "Ethanol_Threemethylpyridine", "Ethanol_Cyclohexane", "Ethanol_Cyclohexanol", "Ethanol_Butylacetate", "Ethanol_Dipropylether", "Ethanol_Triethylamine", "Ethanol_Toluene", "Ethanol_Anisole", "Ethanol_Two6dimethylpyridine", "Ethanol_Pentylacetate", "Ethanol_Heptane", "Ethanol_Ethylbezene", "Ethanol_Pxylene", "Ethanol_Octane", "Ethanol_Twotwofourtrimethylpentane", "Ethanol_Hexadecane", "Ethanol_Oleicacid", "Ethanol_Water", "Ethanol_Chloroform", "Ethanol_Acetone", "Ethanol_Twobutanone", "Ethanol_Benzene", "Ethanol_Cyclohexane", "Ethanol_Toluene", "Ethanol_Nheptane", "Ethanol_Pxylene", "Onepropanol_Tetrachloroethylene", "Onepropanol_Aceticacid", "Onepropanol_Propionicacid", "Onepropanol_Twomethoxyethanol", "Propylamine_Onepropanol", "Onepropanol_Methacrylicacid", "Onepropanol_Twomethylonepropanol", "Onepropanol_Pyridine", "Onepropanol_Methylmethacrylate", "Onepropnaol_Propylacetate", "Onepropanol_Threemethylbutanol", "Onepropnaol_Chlorobenzene", "Onepropanol_Twomethylpyridine", "Onepropanol_Threemethylpyridine", "Onepropanol_Fourmethylpyridine", "Onepropanol_Dipropylamine", "Onepropanol_Hexamethyldisiloxane", "Onepropanol_Toluene", "Onepropnaol_Two6dimethylpyridine", "Onepropanol_Heptane", "Onepropanol_Pxylene", "Onepropanol_Octane", "Onepropanol_Decane", "Onepropanol_Onedecanol", "Twopropanol_Onepropanol", "Isobutanol_Water", "Tertbutanol_Water", "Methylformate_Methanol", "Methylacetate_Methanol", "Methylacetate_Ethanol", "Ethylacetate_Ethanol", "Ethylacetate_Water", "Vinylacetate_Ethanol", "Diethylether_Methanol", "Diethylether_Ethanol", "Diethylether_Water", "Diisopropylether_Water", "Methyltertbutylether_Methanol", "Dimethoxymethane_Methanol", "Dimethoxymethane_Water", "Propyleneoxide_Methanol", "Tetrahydrofuran_Ethanol", "Tetrahydrofuran_Onepropanol", "Tetrahydrofuran_Water", "Tetrachloromethane_Methanol", "Tertachloromethane_Onepropanol", "Tetrachloromethane_Benzene", "Tetrachloromethane_Toluene", "Tetrachloromethane_Ethylbenzene", "Tetrachloromethane_Mxylene", "Tetrachloromethane_Pxylene", "Tetrachloromethane_Isopropylbenzene", "Chloroform_Benzene", "Vinylcloride_Methanol", "Dichloromethane_Methanol", "Dichloromethane_Ethanol", "Chloroform_Methanol", "Chloroform_Ethanol", "Chloroform_Toluene", "Onetwodichloroethane_Onepropanol", "Onetwodichloroethane_Toluene", "Onetwodichloroethane_Oxylene", "Onetwodichloroethane_Pxylene", "Oneoneonetrichloroethane_Benzene", "Trichloroethylene_Onepropanol", "Trichloroethylene_Toluenep", "Chlorobenzene_Ethylbenzene", "Chlorobenzene_Pxylene", "Butylchloride_Onepropanol", "Methyliodide_Benzene", "Ethyliodide_Benzene", "Dimethylamine_Methanol", "Dimethylamine_Ethanol", "Dimethylamine_Onepropanol", "Triethylamine_Onepropanol", "Triethylamine_Water", "Diethylamine_Water", "Diethylamine_Benzene", "Diethylamine_Toluene", "Diethylamine_Ethylbenzene", "Propylamine_Water", "Butylamine_Ethanol", "Butylamine_Onepropanol", "Nbutylamine_Water", "Butylamine_Benzene", "Tertbutylamine_Benzene", "Ethylenediamine_Oxylene", "Acetonitrile_Toluene", "Acetonitrile_Ethylbenzene", "Acetonitrile_Pxylene", "Propionitrile_Toluene", "Acrylontrile_Styrene", "Acrylonitrile_Ethylbenzene", "Pyridine_Mxylene", "Thiophene_Toluene", "Fluorobenzene_Toluene", "Hexafluorobenzene_Onepropnaol", "Hexafluorobenzene_Toluene", "Hexafluorobenzene_Pxylene", "Water_Acetone", "Water_Twobutanone", "Water_Phenol", "Water_Oneonetwotwotetrachloroethane", "Water_Onefourdioxane", "Water_Sulfolane", "Water_Nndimethylacetamide", "Water_Morpholine", "Water_Nbutanol", "Water_Onefourbutanediol", "Water_Twothreebutanediol", "Water_Diethylenegylcol", "Water_Furfural", "Water_Pyridine", "Water_Nmethylpyrrolidone", "Water_Threemethylbutanol", "Water_Twomethyltwobutanol", "Water_Phenol", "Water_Aniline", "Water_Twomethylpyridine", "Water_Threemethylpyridine", "Water_Fourmethylpyridine", "Water_Phenylhydrazine", "Water_Cyclohexanone", "Water_Mesityloxide", "Water_Cyclohexanol", "Water_Nbutylacetate", "Water_Diacetonealcohol", "Water_Onehexanol", "Water_Twohexanol", "Water_Twobutoxyethanol", "Water_Benzylalcohol", "Water_Two6dimethylpyridinr", "Water_Isopentylacetate", "Water_Acetophenone", "Water_Quinoline", "Water_Isopropylbenzene", "Carbondisulfide_Benzene", "Carbondisulfide_Toluene", "Halothane_Methanol", "Oneonetwotrichloroonetwotwotrifluoroethane_Benzene", "Methylisocyanate_Toluene", "Methanol_Formamide"};
+        constant Real BI_Values[352, 3] = {{1440.1498, 1053.7716, 0.4647}, {1183.3812, 412.7546, 0.2886}, {1610.2811, 935.1426, 0.496}, {1218.1065, 575.2985, 0.2882}, {1092.147, 480.674, 0.294}, {1707.7883, 353.2705, 0.5914}, {2587.873, -439.4469, 0.2836}, {1333.6, 556.3608, 0.3697}, {1355.6853, 660.9164, 0.3381}, {1412.7516, 674.7726, 0.4569}, {1222.6032, 1145.1085, 0.4402}, {1399.1806, 949.7239, 0.5011}, {1353.0599, 610.8292, 0.467}, {1545.3339, 799.1289, 0.4753}, {1514.2761, 782.1729, 0.4657}, {1445.6425, 543.527, 0.426}, {1402.5377, 653.4866, 0.5056}, {1541.9324, 736.0352, 0.4515}, {874.2419, 285.7774, 0.2899}, {-227.3671, -86.1025, 0.3062}, {373.4202, 318.1885, 0.2986}, {60.198, -51.0865, 0.3019}, {-50.2635, 14.218, 0.3056}, {893.4167, -566.9011, 0.255}, {273.5119, 524.903, 0.296}, {-94.1122, 288.6566, 0.302}, {140.5075, -127.4605, 0.306}, {-225.8274, 197.746, 0.303}, {-73.7504, -250.7743, 0.305}, {-100.924, 300.0048, 0.304}, {58.8289, -39.5526, 0.303}, {1512.9737, 639.2332, 0.523}, {527.2886, -57.1531, 0.3}, {810.544, 408.5646, 0.669}, {490.0693, 560.0207, 0.295}, {736.7867, -251.4046, 0.307}, {-157.3069, 595.6615, 0.301}, {1088.4773, -446.4137, 0.306}, {-347.2708, 503.5971, 0.304}, {541.0855, -319.8327, 0.279}, {1085.4557, -715.7662, 0.298}, {1441.9721, -865.5699, 0.283}, {1538.3464, -819.5924, 0.321}, {700.4097, -450.6274, 0.325}, {277.6641, -292.2391, 0.304}, {1311.3264, -523.3212, 0.311}, {776.8671, -178.3464, 0.299}, {717.4228, -684.6315, 0.29}, {130.6061, -27.3294, 0.303}, {1390.488, -636.1853, 0.285}, {111.1157, -121.2437, 0.303}, {52.3967, 94.0417, 0.302}, {-643.5999, 970.4264, 0.311}, {-70.8372, 57.0902, 0.303}, {-454.1872, 615.2806, 0.287}, {-50.2635, 14.218, 0.305}, {85.208, 104.9548, 0.301}, {1915.7178, -810.5032, 0.369}, {-192.1433, 141.5054, 0.303}, {64.1947, 78.657, 0.302}, {-583.6169, 629.2214, 0.2974}, {226.4602, -241.7457, 0.2874}, {537.4434, 21.7626, 0.301}, {1063.2839, 192.0041, 0.289}, {432.7908, 592.5054, 0.296}, {-2260.2463, 3666.1775, 0.071}, {5175.2573, 224.8869, 0.46}, {264.6428, -60.3423, 0.299}, {-47.4722, 15.063, 0.304}, {-40.5158, 15.0972, 0.303}, {806.4313, -288.9774, 0.296}, {396.5492, -97.1224, 0.302}, {-490.8706, 1036.9557, 0.296}, {-676.6725, 1239.9195, 0.3}, {663.0837, -482.5109, 0.3}, {226.4602, -241.7457, 0.287}, {-539.7919, 813.9959, 0.346}, {519.4154, -64.0219, 0.3}, {243.6463, 384.003, 0.298}, {26.256, -27.6358, 0.304}, {-789.9294, 957.1492, 0.302}, {559.7795, 332.8093, 0.294}, {308.9034, 548.667, 0.296}, {-259.4169, 1034.4099, 0.299}, {282.0248, -254.9358, 0.308}, {153.1239, 722.4999, 0.294}, {311.9792, 408.2084, 0.297}, {329.7212, 143.3943, 0.3}, {878.2759, -655.9008, 0.326}, {370.6529, 140.0817, 0.3}, {-118.3505, 885.1196, 0.295}, {649.8687, -453.4673, 0.306}, {-615.673, 811.3338, 0.335}, {1046.6524, -865.266, 0.3084}, {1166.8333, 1090.0262, 0.2862}, {184.2662, 226.558, 0.3009}, {36.2965, 434.8228, 0.2987}, {-651.1909, 301.8389, 0.3054}, {-396.4935, 886.5703, 0.2971}, {-754.9547, -280.383, 0.3086}, {429.8705, 727.649, 0.2925}, {-247.9492, 727.5102, 0.295}, {148.867, 213.3829, 0.3016}, {-644.8573, 898.3999, 0.1563}, {605.7381, 235.4493, 0.2963}, {503.0737, -181.5533, 0.2996}, {681.5104, 931.4616, 0.9809}, {674.4614, 1809.8868, 0.3536}, {378.8254, 1430.7379, 0.2892}, {879.0968, 1063.6098, 0.6381}, {343.7042, 314.5879, 0.2981}, {348.6035, 1020.1431, 0.2921}, {16.6465, -217.1261, 0.3051}, {-327.9991, 376.2667, 0.3057}, {-168.3182, -497.4171, 0.3079}, {-50.145, -78.0859, 0.3056}, {-124.0904, 0.3428, 9.1633}, {24.9003, 9.5349, 0.3011}, {-90.1051, 1217.1035, 0.2976}, {676.836, 169.9831, 0.2958}, {307.4271, 217.9098, 0.3003}, {169.4153, 383.1579, 0.3002}, {607.405, 76.7683, 0.2985}, {345.5416, 420.7355, 0.2962}, {1069.2756, 906.5741, 0.7182}, {793.8173, -486.3299, 0.2483}, {-308.561, 285.442, 0.3036}, {446.952, -450.5858, 0.3152}, {-45.0888, 84.1956, 0.3027}, {590.279, 380.8401, 0.2963}, {642.3761, -6.2901, 0.2987}, {590.882, -1169.7242, 0.1387}, {930.591, 1244.1303, 0.4701}, {857.0852, 1348.0903, 0.4707}, {721.6136, 1158.5131, 0.4694}, {407.744, 117.2473, 0.3008}, {226.082, -385.6823, 0.3095}, {-163.4505, -86.1482, 0.3075}, {304.2242, -452.3483, 0.3053}, {1178.5792, 1618.9792, 0.4568}, {1315.1631, 1497.2135, 0.4222}, {328.2162, 453.0017, 0.2961}, {1619.3829, 1622.2911, 0.4365}, {-476.8503, 1126.1143, 0.2874}, {939.7275, 1090.9297, 0.4643}, {-273.332, 59.625, 0.3051}, {1313.5497, 1143.9059, 0.4163}, {1444.585, 1719.4586, 0.4397}, {1500.2043, 1519.3346, 0.4277}, {1080.1231, 1038.1572, 0.4251}, {991.1609, 822.1357, 0.291}, {974.6545, 851.107, 0.2921}, {1456.3583, 1147.8132, 0.4396}, {1681.6918, 1511.4353, 0.4381}, {1447.0909, 1386.4703, 0.4313}, {-189.0469, 792.802, 0.2999}, {-105.4657, 1335.3416, 0.2873}, {67.2902, -70.5092, 0.3009}, {296.2432, 118.0803, 0.3003}, {761.7553, 1094.8556, 0.4893}, {1313.9316, 1862.4639, 0.441}, {884.023, 1008.0037, 0.4064}, {1566.439, 1598.3126, 0.4408}, {685.8542, 807.5935, 0.29}, {529.7267, 338.1632, 0.2964}, {333.3502, 939.387, 0.2926}, {-34.1971, -190.7763, 0.305}, {1644.0484, -203.7691, 0.3704}, {690.1392, -529.3472, 0.3125}, {222.3096, 1057.7115, 0.2918}, {64.4957, 463.1931, 0.301}, {505.5637, 111.8389, 0.2988}, {1195.1601, 705.0897, 0.5676}, {-559.8205, 802.5411, 0.2721}, {53.1671, 82.0442, 0.3023}, {163.6655, -169.9802, 0.3017}, {456.9676, 386.5893, 0.2963}, {-54.0946, 639.6806, 0.3009}, {760.4933, 129.397, 0.295}, {51.1705, -42.8613, 0.3009}, {820.8023, 1349.6853, 0.4995}, {645.7829, 1383.711, 0.5229}, {516.141, 1065.9086, 0.4774}, {1823.3542, -523.0474, 0.3005}, {315.6078, -339.0825, 0.3056}, {876.7933, 1390.4162, 0.4485}, {1719.8644, -833.8389, 0.292}, {841.9935, -55.3231, 0.2958}, {442.6124, 634.1687, 0.2945}, {-248.0407, 697.9004, 0.2996}, {713.5653, 1147.8607, 0.5292}, {3458.4788, -1438.8884, 0.1704}, {-48.2159, -19.6212, 0.3016}, {552.3897, 266.1248, 0.2964}, {1137.265, 1453.5947, 0.4786}, {801.7191, 1006.8831, 0.4962}, {768.3633, 760.08, 0.2914}, {1206.8097, 1385.3721, 0.4717}, {1091.0432, 1500.6711, 0.4738}, {2359.4082, 1509.2033, 0.4448}, {975.6816, -343.5446, 0.2988}, {-57.9601, 1241.7396, 0.2937}, {-285.3881, 1289.2198, 0.2909}, {375.3497, 45.3706, 0.3006}, {437.1923, 33.6363, 0.3022}, {255.3591, 1047.1959, 0.297}, {761.7739, 1393.7993, 0.4376}, {542.4128, 772.4394, 0.2937}, {1114.2947, 1305.9242, 0.4758}, {1020.8405, 889.3461, 0.618}, {608.3777, 646.0412, 0.2913}, {256.8999, -327.5173, 0.3044}, {-189.7856, -32.4657, 0.307}, {-406.3767, 830.8897, 0.3013}, {-602.9687, -45.3543, 0.3061}, {276.6356, -423.9162, 0.3025}, {-2.8139, -13.8657, 0.3034}, {374.8691, -412.2861, 0.311}, {504.09, 125.6451, 0.2993}, {340.021, 111.7437, 0.3005}, {12.2207, -31.8303, 0.3033}, {456.2867, 538.5114, 0.2946}, {529.6444, -608.3163, 0.3054}, {479.7439, -540.4699, 0.3045}, {523.8291, -603.0924, 0.3084}, {617.3558, -459.5845, 0.2892}, {1615.0711, -498.3638, 0.1028}, {25.622, 922.0009, 0.0175}, {472.9353, -545.1853, 0.296}, {1198.972, 1377.2975, 0.5193}, {563.6173, 475.5966, 0.2921}, {1109.304, 334.2112, 0.2907}, {945.3159, 520.2926, 0.2895}, {1068.0694, -588.3325, 0.2958}, {167.2501, -175.2928, 0.3057}, {639.8173, 2491.0163, 0.4385}, {471.7718, 2030.8877, 0.5155}, {584.572, 298.5567, 0.2962}, {381.4559, 346.536, 0.2965}, {188.3139, 158.0118, 0.3013}, {305.6041, 330.5105, 0.2988}, {1285.988, 1606.082, 0.4393}, {505.1637, 320.7403, 0.2959}, {705.9989, 211.158, 0.2953}, {763.6707, 71.1984, 0.2946}, {1544.0251, 2086.4776, 0.3792}, {2665.1471, 4202.0746, 0.5409}, {851.4954, 465.836, 0.8178}, {608.9115, 712.0226, 0.7259}, {1608.07, 1818.2947, 0.4898}, {924.8499, -61.1796, 0.2986}, {661.3708, -200.6915, 0.3015}, {562.4611, -302.2498, 0.3003}, {915.745, 1725.0977, 0.4522}, {1339.9, 488.6648, 0.4622}, {1537.6384, 537.2439, 0.631}, {-4.9421, 84.0212, 0.305}, {-69.681, 95.3839, 0.304}, {-172.3762, 122.4657, 0.303}, {-232.4578, 163.8924, 0.304}, {-192.9687, 121.7193, 0.304}, {-106.8166, 13.4903, 0.303}, {176.8791, -288.2136, 0.306}, {1789.7165, -34.9448, 0.2912}, {1560.0282, 441.3372, 0.6234}, {1332.8036, -153.0761, 0.3057}, {1414.2712, -141.803, 0.2949}, {1438.3602, -327.5518, 0.3023}, {629.2214, -583.6169, 0.297}, {636.9927, 364.0596, 0.2956}, {-217.7768, 251.5704, 0.309}, {718.2538, -479.1971, 0.287}, {848.1184, -557.9036, 0.273}, {-73.4845, 97.5682, 0.303}, {926.6139, 196.0696, 0.3007}, {185.3799, -250.7688, 0.306}, {357.7079, -307.8057, 0.307}, {-395.6312, 359.7555, 0.305}, {1201.9959, 506.8982, 0.5468}, {294.4424, -185.2944, 0.301}, {394.5891, 298.1172, 0.3}, {-1018.143, -54.3882, 0.3134}, {-1224.5739, 370.7683, 0.3105}, {81.487, -703.3731, 0.2697}, {991.6157, -435.2018, 0.3067}, {-5096.528, 28437.138, 0.0381}, {-169.1652, 1372.3121, 0.2932}, {52.3512, -42.2029, 0.281}, {91.4853, -153.9388, 5.101}, {928.9662, -553.9006, 0.345}, {-455.9152, 1301.6396, 0.2981}, {-612.3956, -5.7834, 0.3062}, {-698.951, 34.7593, 0.3001}, {160.3429, 2104.4002, 0.6379}, {65.9717, 67.1231, 0.302}, {-344.6666, 757.993, 0.306}, {1357.7269, -110.2727, 0.196}, {790.725, 724.0955, 0.935}, {1102.5396, 5.3234, 0.298}, {1413.0042, -210.0314, 0.293}, {-95.6685, 717.0741, 0.3}, {598.0263, -130.4323, 0.302}, {1304.6073, -338.2481, 0.299}, {-78.8985, 351.0029, 0.3}, {510.1471, -197.5696, 0.301}, {386.4643, -304.6112, 0.308}, {922.5224, 528.5894, 0.2937}, {668.6525, -666.7128, 0.241}, {1004.5491, -949.1003, 0.29}, {1324.9767, 814.1435, 0.5663}, {653.9718, 1883.6007, 0.3607}, {2419.3354, 1844.3794, 0.6308}, {2435.8879, 102.7658, 0.0972}, {715.9592, 548.8965, 0.292}, {1160.1372, 467.9008, 0.5573}, {75.5965, 328.8977, 0.3009}, {-803.1654, 1732.7268, 0.2954}, {2633.6951, 504.0381, 0.4447}, {1310.8994, 1920.1402, 0.5778}, {2531.7402, -758.0034, 0.302}, {1186.7304, -99.9, 0.2974}, {2602.6374, 436.9686, 0.395}, {1835.0881, 419.8087, 0.6802}, {-239.6197, 573.8298, 0.3055}, {3633.533, -494.8389, 0.2816}, {19947.2334, -15910.4563, 0.0056}, {2385.3714, 282.697, 0.4942}, {11965.5274, -7391.5468, 0.0235}, {1979.5492, 197.0009, 0.6371}, {2559.3708, 418.7524, 0.5361}, {2325.9141, 162.3029, 0.5622}, {1473.9606, -66.4169, 0.0811}, {2983.8991, -171.666, 0.2673}, {2121.4973, 101.3068, 0.1504}, {2232.9727, 641.3504, 0.4399}, {3805.0038, 918.2419, 0.2951}, {1323.2731, 845.9826, 0.678}, {2991.1845, -464.8054, 0.1563}, {1880.1699, 489.1746, 0.2938}, {1914.0077, 220.0262, 0.4776}, {4689.8409, 301.3998, 0.3168}, {2222.596, 831.9908, 0.5706}, {1874.8967, 856.9565, 0.3734}, {725.1364, 858.8268, 0}, {11675.1604, -3887.1802, 0.0902}, {2986.1161, -84.8485, 0.086}, {161.2943, 431.5524, 0.3}, {-591.6879, 1052.858, 0.243}, {9870.353, -6982.8569, 0.0187}, {-53.1528, 551.963, 0.301}, {-167.8974, 104.6027, 0.302}, {617.5847, -153.4695, 0.3003}};
+      algorithm
+//for i in 1:NOC loop
+//  for j in 1:NOC loop
+//    if i > j then
+//      for k in 1:2 loop
+//        value[i, j, k] := 0;
+//      end for;
+//    end if;
+//  end for;
+//end for;
+//for i in 1:NOC loop
+//  for k in 1:2 loop
+//    value[i, i, k] := 0;
+//  end for;
+//end for;
+        for i in 1:NOC loop
+          for j in 1:NOC loop
+            for k in 1:2 loop
+              value[i, j, k] := 0;
+            end for;
+          end for;
+        end for;
+//for i in 1:NOC loop
+//  for j in 1:NOC loop
+//    if i > j then
+//      c[i,j] := Comp[i]+underscore+Comp[j];
+//      d[i,j] := Comp[j]+underscore+Comp[i];
+//      for k in 1:352 loop
+//        if c[i,j] == Comp1_Comp2[k]then
+//          value[i,j,1] := BI_Values[k,1];
+//          value[j,i,1] := BI_Values[k,2];
+//          value[i,j,2] := BI_Values[k,3];
+//          value[j,i,2] := BI_Values[k,3];
+//        elseif d[i,j] == Comp1_Comp2[k]then
+//          value[j,i,1] := BI_Values[k,1];
+//          value[i,j,1] := BI_Values[k,2];
+//          value[i,j,2] := BI_Values[k,3];
+//          value[j,i,2] := BI_Values[k,3];
+//        end if;
+//      end for;
+//    end if;
+//  end for;
+//end for;
+        for i in 1:NOC loop
+          for j in 1:NOC loop
+            c[i, j] := Comp[i] + underscore + Comp[j];
+            d[i, j] := Comp[j] + underscore + Comp[i];
+            for k in 1:352 loop
+              if c[i, j] == Comp1_Comp2[k] then
+                value[i, j, 1] := BI_Values[k, 1];
+                value[j, i, 1] := BI_Values[k, 2];
+                value[i, j, 2] := BI_Values[k, 3];
+                value[j, i, 2] := BI_Values[k, 3];
+              end if;
+              if d[i, j] == Comp1_Comp2[k] then
+                value[j, i, 1] := BI_Values[k, 1];
+                value[i, j, 1] := BI_Values[k, 2];
+                value[i, j, 2] := BI_Values[k, 3];
+                value[j, i, 2] := BI_Values[k, 3];
+              end if;
+            end for;
+          end for;
+        end for;
+      end BIPNRTL;
     end Thermodynamic_Functions;
 
     package Connection
@@ -1938,7 +2044,7 @@ package Simulator
           Icon(coordinateSystem(initialScale = 0.1), graphics = {Rectangle(fillColor = {8, 184, 211}, fillPattern = FillPattern.Solid, extent = {{-100, 100}, {100, -100}})}));
       end trayConn;
     end Connection;
-    
+
     package Models
       model Flash
         //this is basic flash model.  comp and NOC has to be defined in model. thermodyanamic model must also be extended along with this model for K value.
@@ -1949,10 +2055,10 @@ package Simulator
         totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
         compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
 //Bubble point calculation
-        P = sum(compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
+        P = sum(gamma[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
 //Dew point calculation
-        1 / P = sum(compMolFrac[1, :] ./ exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6]));
-  if T <= Tbubl then
+        1 / P = sum(compMolFrac[1, :] ./(gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6])));
+        if T <= Tbubl then
 //below bubble point region
           compMolFrac[3, :] = zeros(NOC);
           sum(compMolFrac[2, :]) = 1;
@@ -1992,11 +2098,9 @@ package Simulator
         liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
         vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
       end Flash;
-    
-    end Models;
-  
-  end Files;
 
+    end Models;
+  end Files;
 
   model Streams
     extends Modelica.Icons.VariantsPackage;
@@ -2044,7 +2148,7 @@ package Simulator
       for i in 1:NOC loop
         compMolFlo[:, i] = compMolFrac[:, i] .* totMolFlo[:];
       end for;
-  if T <= Tbubl then
+      if T <= Tbubl then
 //below bubble point region
         compMasFrac[3, :] = zeros(NOC);
         compMasFlo[1, :] = compMasFrac[1, :] .* totMasFlo[1];
@@ -2090,10 +2194,10 @@ package Simulator
       phasMolEntr[1] = liqPhasMolFrac * phasMolEntr[2] + vapPhasMolFrac * phasMolEntr[3];
       compMolEntr[1, :] = compMolFrac[1, :] * phasMolEntr[1];
 //Bubble point calculation
-      P = sum(compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
+      P = sum(gamma[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
 //Dew point calculation
-      1 / P = sum(compMolFrac[1, :] ./ exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6]));
-  if T <= Tbubl then
+      1 / P = sum(compMolFrac[1, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6])));
+      if T <= Tbubl then
 //below bubble point region
         compMolFrac[3, :] = zeros(NOC);
         sum(compMolFrac[2, :]) = 1;
@@ -2114,8 +2218,6 @@ package Simulator
         MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
       end for;
     end Material_Stream;
-
-
 
 
 
@@ -2319,47 +2421,47 @@ package Simulator
     end Valve;
 
     model Shortcut_Column
-      //1 - Feed, 2 - Bottoms, 3 - Distillate
-      Real mixMolFlo[3] "Total molar flow", mixMolFrac[3, NOC] "Component mole fractions", vapPress[NOC] "Vapor pressure", shortP[3] "Pressure", shortT[3] "Temperature", vapPhasMolFrac[3], mixMolEnth[3] "Mixture molar enthalpy", mixMolEntr[3] "Mixture molar entropy", minN(min = 0.1) "Minimum number of stages";
-      Real condTdew(start = max(comp[:].Tb)) "dew point temperature at condensor", condVapMolFrac[NOC] "Condensor vapor mole fraction", condLiqMolFrac[NOC] "condensor liquid mole fraction", condVapCompMolEnth[NOC] "components vap phase molar enthalpy at condensor", condLiqCompMolEnth[NOC] "components liq phase molar enthalpy in condensor", condVapMixMolEnth "vapor molar enthapy in condensor", condLiqMixMolEnth "Liquid molar enthalpy at condensor";
-      Real rebDuty "Reboiler Duty", condDuty "condenser Duty";
-      Real alpha[NOC], actR, actN, x, y, feedN;
-      Real rectLiq, rectVap, stripLiq, stripVap;
-      Real q, theta(start = 1), minR(min = 0);
+      import data = Simulator.Files.Chemsep_Database;
+      parameter data.General_Properties comp[NOC];
+      parameter Integer NOC;
+      Real mixMolFlo[3](each min = 0), mixMolFrac[3, NOC](each start = 1 / NOC, each min = 0, each max = 1), mixMolEnth[3], mixMolEntr[3];
+      Real minN(min = 0, start = 1), minR, q;
+      Real alpha[NOC], theta;
       Real P, T;
-      //for thermodynamic models
+      Real condT(start = max(comp[:].Tb)), condP, rebP, rebT(start = min(comp[:].Tb));
+      parameter Integer HKey, LKey;
       parameter String condType = "Total";
-      // "Condenser Type"
-      parameter Integer NOC "number of compounds", HKey, LKey;
-      parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-      Files.Connection.matConn feed(connNOC = NOC) annotation(
+      Real vapPhasMolFrac[3], condLiqMixMolEnth, condVapMixMolEnth, condVapCompMolEnth[NOC], condLiqCompMolEnth[NOC], condLiqMolFrac[NOC], condVapMolFrac[NOC];
+      Real actR, actN, x, y, feedN;
+      Real rectLiq, rectVap, stripLiq, stripVap, rebDuty, condDuty;
+      Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      Files.Connection.matConn distillate(connNOC = NOC) annotation(
+      Simulator.Files.Connection.matConn distillate(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {100, 50}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 50}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      Files.Connection.matConn bottoms(connNOC = NOC) annotation(
+      Simulator.Files.Connection.matConn bottoms(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {100, -50}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -50}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       Simulator.Files.Connection.enConn condenser_duty annotation(
         Placement(visible = true, transformation(origin = {50, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       Simulator.Files.Connection.enConn reboiler_duty annotation(
         Placement(visible = true, transformation(origin = {50, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     equation
-// Connector equations
-      feed.P = shortP[1];
-      feed.T = shortT[1];
+    // Connector equations
+      feed.P = P;
+      feed.T = T;
       feed.mixMolFlo = mixMolFlo[1];
       feed.mixMolFrac[:] = mixMolFrac[1, :];
       feed.mixMolEnth = mixMolEnth[1];
       feed.mixMolEntr = mixMolEntr[1];
       feed.vapPhasMolFrac = vapPhasMolFrac[1];
-      bottoms.P = shortP[2];
-      bottoms.T = shortT[2];
+      bottoms.P = rebP;
+      bottoms.T = rebT;
       bottoms.mixMolFlo = mixMolFlo[2];
       bottoms.mixMolFrac[:] = mixMolFrac[2, :];
       bottoms.mixMolEnth = mixMolEnth[2];
       bottoms.mixMolEntr = mixMolEntr[2];
       bottoms.vapPhasMolFrac = vapPhasMolFrac[2];
-      distillate.P = shortP[3];
-      distillate.T = shortT[3];
+      distillate.P = condP;
+      distillate.T = condT;
       distillate.mixMolFlo = mixMolFlo[3];
       distillate.mixMolFrac[:] = mixMolFrac[3, :];
       distillate.mixMolEnth = mixMolEnth[3];
@@ -2367,56 +2469,39 @@ package Simulator
       distillate.vapPhasMolFrac = vapPhasMolFrac[3];
       reboiler_duty.enFlo = rebDuty;
       condenser_duty.enFlo = condDuty;
-// For thermodynamic model
-      shortP[1] = P;
-      shortT[1] = T;
-// Material Balance
-      mixMolFlo[1] = mixMolFlo[2] + mixMolFlo[3];
-      for i in 1:NOC - 1 loop
-        mixMolFlo[1] .* mixMolFrac[1, i] = mixMolFlo[2] .* mixMolFrac[2, i] + mixMolFlo[3] .* mixMolFrac[3, i];
+    equation
+      for i in 1:NOC loop
+        if mixMolFrac[1, i] == 0 then
+          mixMolFrac[3, i] = 0;
+        else
+          mixMolFlo[1] .* mixMolFrac[1, i] = mixMolFlo[2] .* mixMolFrac[2, i] + mixMolFlo[3] .* mixMolFrac[3, i];
+        end if;
       end for;
       sum(mixMolFrac[3, :]) = 1;
-//sum(mixMolFrac[2,:]) = 1;
-// VLE
-      if condType == "Partial" then
-        for i in 1:NOC loop
-          if i <> HKey then
+      sum(mixMolFrac[2, :]) = 1;
+      for i in 1:NOC loop
+        if i <> HKey then
+          if condType == "Total" then
+            mixMolFrac[3, i] / mixMolFrac[3, HKey] = alpha[i] ^ minN * (mixMolFrac[2, i] / mixMolFrac[2, HKey]);
+          elseif condType == "Partial" then
             mixMolFrac[3, i] / mixMolFrac[3, HKey] = alpha[i] ^ (minN + 1) * (mixMolFrac[2, i] / mixMolFrac[2, HKey]);
           end if;
-        end for;
-      elseif condType == "Total" then
-        for i in 1:NOC loop
-          if i <> HKey then
-            mixMolFrac[3, i] / mixMolFrac[3, HKey] = alpha[i] ^ minN * (mixMolFrac[2, i] / mixMolFrac[2, HKey]);
-          end if;
-        end for;
-      else
-        mixMolFrac[3, :] = mixMolFrac[2, :];
-      end if;
-// Vapor Pressure
-      for i in 1:NOC loop
-        vapPress[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, shortT[1]);
+        end if;
       end for;
-//minimum number of trays, Fenske equation and vapor phase mole fraction of distillate and bottom
-      vapPhasMolFrac[2] = 0;
-  if condType == "Partial" then
-        minN + 1 = log(mixMolFrac[3, LKey] / mixMolFrac[3, HKey] * (mixMolFrac[2, HKey] / mixMolFrac[2, LKey])) / log(K[LKey] / K[HKey]);
-        vapPhasMolFrac[3] = 1;
-      elseif condType == "Total" then
-//minN = 10.18;
-        minN = log(mixMolFrac[3, LKey] / mixMolFrac[3, HKey] * (mixMolFrac[2, HKey] / mixMolFrac[2, LKey])) / log(K[LKey] / K[HKey]);
-        vapPhasMolFrac[3] = 0;
-      else
-        minN = 0;
-        vapPhasMolFrac[3] = -1;
-      end if;
-//Calculation of relative volatility
       alpha[:] = K[:] / K[HKey];
-//Minimum Reflux, Underwoods method
+    //Calculation of temperature at distillate and bottoms
+      if condType == "Partial" then
+        1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+        rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+      elseif condType == "Total" then
+        condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+        rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+      end if;
+    //Minimum Reflux, Underwoods method
       1 - q = vapPhasMolFrac[1];
       1 - q = sum(alpha[:] .* mixMolFrac[1, :] ./ (alpha[:] .- theta));
       minR + 1 = sum(alpha[:] .* mixMolFrac[3, :] ./ (alpha[:] .- theta));
-//Actual number of trays,Gillilands method
+    //Actual number of trays,Gillilands method
       x = (actR - minR) / (actR + 1);
       y = (actN - minN) / (actN + 1);
       if x >= 0 then
@@ -2424,30 +2509,16 @@ package Simulator
       else
         y = -1;
       end if;
-// Feed location, Fenske equation
+    // Feed location, Fenske equation
       feedN = actN / minN * log(mixMolFrac[1, LKey] / mixMolFrac[1, HKey] * (mixMolFrac[2, HKey] / mixMolFrac[2, LKey])) / log(K[LKey] / K[HKey]);
-//rectifying and stripping flows
+    //rectifying and stripping flows
       rectLiq = actR * mixMolFlo[3];
       stripLiq = (1 - vapPhasMolFrac[1]) * mixMolFlo[1] + rectLiq;
       stripVap = stripLiq - mixMolFlo[2];
       rectVap = vapPhasMolFrac[1] * mixMolFlo[1] + stripVap;
-////Dew point calculation at condensor
-      1 / shortP[3] = sum(condVapMolFrac[:] ./ exp(comp[:].VP[2] + comp[:].VP[3] / condTdew + comp[:].VP[4] * log(condTdew) + comp[:].VP[5] .* condTdew .^ comp[:].VP[6]));
-// condensor mole balance, vle
-//condensor vapor is vapor entering condensor and condensor liq is liq leaving from condensor to column
-      rectVap .* condVapMolFrac[:] = rectLiq .* condLiqMolFrac[:] + mixMolFlo[3] .* mixMolFrac[3, :];
-      if condType == "Partial" then
-        mixMolFrac[3, :] = K[:] .* condLiqMolFrac[:];
-      elseif condType == "Total" then
-        mixMolFrac[3, :] = condLiqMolFrac[:];
-      end if;
-//Energy Balance
-      mixMolFlo[1] * mixMolEnth[1] + rebDuty - condDuty = mixMolFlo[2] * mixMolEnth[2] + mixMolFlo[3] * mixMolEnth[3];
-      rectVap * condVapMixMolEnth = condDuty + mixMolFlo[3] * mixMolEnth[3] + rectLiq * condLiqMixMolEnth;
-//// condensor liquid and vapor enthalpy
       for i in 1:NOC loop
-        condVapCompMolEnth[i] = Simulator.Files.Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, condTdew);
-        condLiqCompMolEnth[i] = Simulator.Files.Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, condTdew);
+        condVapCompMolEnth[i] = Simulator.Files.Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, condT);
+        condLiqCompMolEnth[i] = Simulator.Files.Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, condT);
       end for;
       if condType == "Total" then
         condLiqMixMolEnth = mixMolEnth[3];
@@ -2455,7 +2526,33 @@ package Simulator
         condLiqMixMolEnth = sum(condLiqMolFrac[:] .* condLiqCompMolEnth[:]);
       end if;
       condVapMixMolEnth = sum(condVapMolFrac[:] .* condVapCompMolEnth[:]);
+      rectVap .* condVapMolFrac[:] = rectLiq .* condLiqMolFrac[:] + mixMolFlo[3] .* mixMolFrac[3, :];
+      if condType == "Partial" then
+        mixMolFrac[3, :] = K[:] .* condLiqMolFrac[:];
+      elseif condType == "Total" then
+        mixMolFrac[3, :] = condLiqMolFrac[:];
+      end if;
+    //Energy Balance
+      mixMolFlo[1] * mixMolEnth[1] + rebDuty - condDuty = mixMolFlo[2] * mixMolEnth[2] + mixMolFlo[3] * mixMolEnth[3];
+      rectVap * condVapMixMolEnth = condDuty + mixMolFlo[3] * mixMolEnth[3] + rectLiq * condLiqMixMolEnth;
     end Shortcut_Column;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     model Compound_Separator
       parameter Integer NOC "Number of components", sepStrm "Specified Stream";
@@ -2554,10 +2651,10 @@ package Simulator
       totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
       compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
 //Bubble point calculation
-      P = sum(compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
+      P = sum(gamma[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
 //Dew point calculation
-      1 / P = sum(compMolFrac[1, :] ./ exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6]));
-  if T <= Tbubl then
+      1 / P = sum(compMolFrac[1, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6])));
+      if T <= Tbubl then
 //below bubble point region
         compMolFrac[3, :] = zeros(NOC);
         sum(compMolFrac[2, :]) = 1;
@@ -2597,6 +2694,7 @@ package Simulator
       liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
       vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
     end Flash;
+
 
     model Splitter
       parameter Integer NOC = 2 "number of Components", NO = 2 "number of outputs";
@@ -2648,9 +2746,9 @@ package Simulator
       parameter Real eff "efficiency";
       Files.Connection.matConn inlet(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
+      Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Files.Connection.enConn energy annotation(
+      Files.Connection.enConn energy annotation(
         Placement(visible = true, transformation(origin = {2, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {2, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     equation
 //Connector equation
@@ -2685,7 +2783,6 @@ package Simulator
       vapPress = sum(inMixMolFrac .* exp(comp[:].VP[2] + comp[:].VP[3] / outT + comp[:].VP[4] * log(outT) + comp[:].VP[5] .* outT .^ comp[:].VP[6]));
     end Centrifugal_Pump;
 
-    
     model Adiabatic_Compressor
       // This is generic Adibatic Compressor model. For using this model we need to extend this model and incorporte ouput material stream since this model is not doing any flash calculations. Refer adia_comp models in Test section for this.
       extends Simulator.Files.Models.Flash;
@@ -2693,16 +2790,16 @@ package Simulator
       Real inMolFlo "inlet mixture molar flow rate", outMolFlo "outlet mixture molar flow rate", reqPow "required Power", inP "Inlet pressure", outP "Outlet pressure", pressInc "Pressure Increase", inT "Inlet Temperature", outT "Outlet Temperature", tempInc "Temperature increase";
       Real inMixMolEnth "inlet mixture molar enthalpy", outMixMolEnth "outlet mixture molar enthalpy", inMixMolEntr "inlet mixture molar entropy", outMixMolEntr "outlet mixture molar entropy";
       Real inVapPhasMolFrac(min = 0, max = 1) "Inlet vapor mol fraction", outVapPhasMolFrac(min = 0, max = 1) "Outlet Vapor Mole fraction", mixMolFrac[NOC](each min = 0, each max = 1) "mixture mole fraction";
-      parameter Real  eff "Efficiency";
+      parameter Real eff "Efficiency";
       parameter Integer NOC "number of components";
       parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
       //========================================================================================
       Files.Connection.matConn inlet(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       Files.Connection.matConn outlet(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       Files.Connection.enConn energy annotation(
-      Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       //========================================================================================
     equation
 //connector equations
@@ -2738,14 +2835,14 @@ package Simulator
       inMixMolEntr = phasMolEntr[1];
       mixMolFrac[:] = compMolFrac[1, :];
     end Adiabatic_Compressor;
-  
-  model Adiabatic_Expander
+
+    model Adiabatic_Expander
       extends Simulator.Files.Models.Flash;
       //====================================================================================
       Real inMolFlo "inlet mixture molar flow rate", outMolFlo "outlet mixture molar flow rate", genPow "generated Power", inP "Inlet pressure", outP "Outlet pressure", pressDrop "Pressure Drop", inT "Inlet Temperature", outT "Outlet Temperature", tempDrop "Temperature increase";
       Real inMixMolEnth "inlet mixture molar enthalpy", outMixMolEnth "outlet mixture molar enthalpy", inMixMolEntr "inlet mixture molar entropy", outMixMolEntr "outlet mixture molar entropy";
       Real inVapPhasMolFrac(min = 0, max = 1) "Inlet vapor mol fraction", outVapPhasMolFrac(min = 0, max = 1) "Outlet Vapor Mole fraction", mixMolFrac[NOC](each min = 0, each max = 1) "mixture mole fraction";
-      parameter Real  eff "Efficiency";
+      parameter Real eff "Efficiency";
       parameter Integer NOC "number of components";
       parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
       //========================================================================================
@@ -2790,10 +2887,7 @@ package Simulator
       inMixMolEntr = phasMolEntr[1];
       mixMolFrac[:] = compMolFrac[1, :];
     end Adiabatic_Expander;
-  
   end Unit_Operations;
-
-
 
   package Test
     model msTP
@@ -2819,7 +2913,6 @@ package Simulator
       compMolFrac[1, :] = {0.33, 0.33, 0.34};
       totMolFlo[1] = 100;
     end msTP;
-
 
     model msTVF
       // database and components are instantiated, material stream and thermodynamic package extended
@@ -2852,7 +2945,6 @@ package Simulator
       totMolFlo[1] = 100;
     end msPVF;
 
-
     model msPH
       //we have to first instance components to give to material stream model.
       import data = Simulator.Files.Chemsep_Database;
@@ -2878,7 +2970,6 @@ package Simulator
       totMolFlo[1] = 31.346262;
 //1 stands for mixture
     end msPH;
-
 
     model msPS
       //we have to first instance components to give to material stream model.
@@ -2906,7 +2997,6 @@ package Simulator
 //1 stands for mixture
     end msPS;
 
-
     model msTPbbp "material stream below bubble point"
       //we have to first instance components to give to material stream model.
       import data = Simulator.Files.Chemsep_Database;
@@ -2932,14 +3022,12 @@ package Simulator
 //1 stands for mixture
     end msTPbbp;
 
-  
-    
     package cmpstms
       model ms
         extends Simulator.Streams.Material_Stream;
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
       end ms;
-  
+
       model main
         //instance of database
         import data = Simulator.Files.Chemsep_Database;
@@ -2949,8 +3037,9 @@ package Simulator
         //declaration of NOC and comp
         parameter Integer NOC = 2;
         parameter data.General_Properties comp[NOC] = {benz, tol};
-  //instance of composite material stream
-        Simulator.Test.cmpstms.ms ms1(NOC = NOC, comp = comp) annotation(Placement(visible = true, transformation(origin = {-50, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        //instance of composite material stream
+        Simulator.Test.cmpstms.ms ms1(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {-50, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         ms1.P = 101325;
         ms1.T = 368;
@@ -2958,7 +3047,7 @@ package Simulator
         ms1.compMolFrac[1, :] = {0.5, 0.5};
       end main;
     end cmpstms;
-    
+
     package heater1
       model ms
         extends Simulator.Streams.Material_Stream;
@@ -3008,20 +3097,17 @@ package Simulator
         heater1.heatAdd = 2000000;
 //heat added
       end heat;
-
-
-
-
     end heater1;
 
     package cooler1
       model ms
         //This model will be instantiated in maintest model as outlet stream of cooler. Dont run this model. Run maintest model for cooler test
-        extends Simulator.Streams.Material_Stream;
+        extends Simulator.Streams.Material_Stream(NOC = 2);
         //material stream extended
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
         //thermodynamic package Raoults law is extended
       end ms;
+
 
       model cool
         //use non linear solver hybrid to simulate this model
@@ -3104,9 +3190,6 @@ package Simulator
         inlet.totMolFlo[1] = 100;
 //input molar flow
       end valve;
-
-
-
     end valve1;
 
     package mix1
@@ -3182,8 +3265,6 @@ package Simulator
         ms5.compMolFrac[1, :] = {0.2, 0.4, 0.4};
         ms6.compMolFrac[1, :] = {0, 1, 0};
       end mix;
-
-
     end mix1;
 
     package comp_sep1
@@ -3224,10 +3305,11 @@ package Simulator
     end comp_sep1;
 
     package shortcut1
-       model ms
+      model ms
         extends Simulator.Streams.Material_Stream;
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
       end ms;
+
       model Shortcut
         extends Simulator.Unit_Operations.Shortcut_Column;
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
@@ -3267,15 +3349,20 @@ package Simulator
         feed.T = 370;
         feed.compMolFrac[1, :] = {0.5, 0.5};
         feed.totMolFlo[1] = 100;
-        shortcut.shortP[2] = 101325;
-        shortcut.shortP[3] = 101325;
+        shortcut.rebP = 101325;
+        shortcut.condP = 101325;
         shortcut.mixMolFrac[2, shortcut.LKey] = 0.01;
         shortcut.mixMolFrac[3, shortcut.HKey] = 0.01;
         shortcut.actR = 2;
       end main;
+
+
+
+
+
+
+
     end shortcut1;
-
-
 
     package flash
       model ms
@@ -3314,7 +3401,6 @@ package Simulator
         inlet.compMolFrac[1, :] = {0.5, 0.5};
         inlet.totMolFlo[1] = 100;
       end test;
-
     end flash;
 
     package split
@@ -3328,7 +3414,7 @@ package Simulator
         parameter data.Benzene benz;
         parameter data.Toluene tol;
         parameter Integer NOC = 2;
-        parameter data.General_Properties comp[NOC];
+        parameter data.General_Properties comp[NOC] = {benz, tol};
         ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-80, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         ms outlet1(NOC = NOC, comp = comp) annotation(
@@ -3349,9 +3435,6 @@ package Simulator
         split.specVal = {20, 80};
       end main;
 
-
-
-
     end split;
 
     package pump
@@ -3366,45 +3449,39 @@ package Simulator
         parameter data.Toluene tol;
         Simulator.Test.pump.ms inlet(NOC = 2, comp = {benz, tol}) annotation(
           Placement(visible = true, transformation(origin = {-68, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Unit_Operations.Centrifugal_Pump pump(comp = {benz, tol}, NOC = 2, eff = 0.75) annotation(
+        Unit_Operations.Centrifugal_Pump pump(comp = {benz, tol}, NOC = 2, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-2, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Test.pump.ms outlet(NOC = 2, comp = {benz, tol}, T(start = 300.089), compMolFrac(start = {{0.5, 0.5}, {0.5, 0.5}, {0, 0}}), totMolFlo(start = 100)) annotation(
+        Simulator.Test.pump.ms outlet(NOC = 2, comp = {benz, tol}, T(start = 300.089), compMolFrac(start = {{0.5, 0.5}, {0.5, 0.5}, {0, 0}}), totMolFlo(start = 100)) annotation(
           Placement(visible = true, transformation(origin = {68, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Streams.Energy_Stream energy annotation(
+        Streams.Energy_Stream energy annotation(
           Placement(visible = true, transformation(origin = {-38, -44}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
-    connect(pump.outlet, outlet.inlet) annotation(
+        connect(pump.outlet, outlet.inlet) annotation(
           Line(points = {{8, 2}, {58, 2}}));
-    connect(inlet.outlet, pump.inlet) annotation(
+        connect(inlet.outlet, pump.inlet) annotation(
           Line(points = {{-58, 2}, {-12, 2}}));
         connect(energy.outlet, pump.energy) annotation(
           Line(points = {{-28, -44}, {-2, -44}, {-2, -8}, {-2, -8}}));
-    inlet.totMolFlo[1] = 100;
+        inlet.totMolFlo[1] = 100;
         inlet.compMolFrac[1, :] = {0.5, 0.5};
         inlet.P = 101325;
         inlet.T = 300;
         pump.pressInc = 101325;
       end main;
-
-
-
-
-
     end pump;
-  
-    
+
     package adia_comp1
       model ms
         //This model will be instantiated in adia_comp model as outlet stream of heater. Dont run this model. Run adia_comp model for test
         extends Simulator.Streams.Material_Stream;
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
       end ms;
-    
+
       model compres
         extends Unit_Operations.Adiabatic_Compressor;
         extends Files.Thermodynamic_Packages.Raoults_Law;
       end compres;
-    
+
       model main
         import data = Simulator.Files.Chemsep_Database;
         //instantiation of chemsep database
@@ -3440,19 +3517,19 @@ package Simulator
         adiabatic_Compressor1.pressInc = 10000;
 //pressure increase
       end main;
-    
     end adia_comp1;
 
-    
     package adia_exp1
       model ms
         extends Simulator.Streams.Material_Stream;
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
       end ms;
+
       model exp
         extends Simulator.Unit_Operations.Adiabatic_Expander;
         extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
       end exp;
+
       model main
         import data = Simulator.Files.Chemsep_Database;
         //instantiation of chemsep database
@@ -3488,14 +3565,22 @@ package Simulator
         exp1.pressDrop = 10000;
 //pressure drop
       end main;
-
-  
     end adia_exp1;
-  
-  
+
+    model msTPNRTL
+      import data = Simulator.Files.Chemsep_Database;
+      parameter data.Onehexene ohex;
+      parameter data.Ethanol eth;
+      extends Simulator.Streams.Material_Stream(NOC = 2, comp = {ohex, eth}, Tbubl(start = 326), Tdew(start = 334.93), compMolFrac(each start = 0.33));
+      extends Simulator.Files.Thermodynamic_Packages.NRTL;
+      
+      equation
+        compMolFrac[1,:] = {0.5,0.5};
+        totMolFlo[1] = 100;
+        P = 101325;
+        T = 330;
+    end msTPNRTL;
+
+
   end Test;
-
-
-
-
 end Simulator;

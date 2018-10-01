@@ -2250,69 +2250,477 @@ equation
 end NRTL;
 
 
-
-
-
-
-
-
-
-
-
-
-      
-      model UNIQUAC  
-       
-      parameter Integer Z = 10"Compresseblity-Factor"; 
-      import Simulator.Files.*; 
-      //Interaction Parameters
-      parameter Real a[NOC,NOC] = (Thermodynamic_Functions.BIP_UNIQUAC(NOC, comp.name));
-      //UNIQUAC Parameters
-      parameter Real R[NOC] = comp.UniquacR;
-      parameter Real Q[NOC] = comp.UniquacQ; 
-     
-      //Variables
-      Real tow[NOC, NOC]; 
-      Real gammac[NOC](each start=1); Real gammar[NOC](each start=1);Real gamma[NOC](each start = 1);
-      Real r(start=1),q(start=1); Real teta[NOC](each start = 1.2);Real S[NOC];
-      Real sum[NOC](each start = 1.2);
-      Real resMolSpHeat[3],resMolEnth[3],resMolEntr[3];
-      Real K[NOC](each start = 1);
-    
+    model UNIQUAC
+        //Libraries
+        import Simulator.Files.*;
+        //Parameter Section
+        //Binary Interaction Parameters
+        //Function :BIP_UNIQUAC is used to obtain the interaction parameters
+        parameter Real a[NOC, NOC] = Thermodynamic_Functions.BIP_UNIQUAC(NOC, comp.name);
+        //Uniquac Parameters R and Q called from Chemsep Database
+        parameter Real R[NOC] = comp.UniquacR;
+        parameter Real Q[NOC] = comp.UniquacQ;
+        parameter Integer Z = 10 "Compresseblity-Factor";
+        //Variable Section
+        Real tow[NOC, NOC] "Energy interaction parameter";
+        //Intermediate variables to calculate the combinatorial and residual part of activity coefficient at the input conditions
+        Real r, q;
+        Real teta[NOC];
+        Real S[NOC](each start = 1);
+        Real sum[NOC];
+        //Activity Coefficients
+        Real gammac[NOC](each start = 1.2) "Combinatorial Part of activity coefficent at input conditions";
+        Real gammar[NOC](each start = 1) "Residual part of activity coefficient at input conditions";
+        Real gamma_new[NOC](each start = 2);
+        Real gamma[NOC](each start = 1.2) "Activity coefficient with Poynting correction";
+        //Fugacity coefficient
+        Real phil[NOC](each start = 0.5) "Fugacity coefficient at the input conditions";
+        //Dew Point Calculation Variables
+        Real dewLiqMolFrac[NOC];
+        //Intermediate variables to calculate the combinatorial and residual part of activity coefficient at dew point
+        Real r_dew, q_dew;
+        Real teta_dew[NOC];
+        Real S_dew[NOC](each start = 1);
+        Real sum_dew[NOC];
+        //Activity Coefficients
+        Real gammac_dew[NOC](each start = 1.2) "Combinatorial Part of activity coefficent at dew point";
+        Real gammar_dew[NOC](each start = 1) "Residual part of activity coefficient at dew point";
+        Real gammaDew_old[NOC](each start = 1.2) "Combinatorial Part of activity coefficent(without correction)";
+        Real gammaDew[NOC](each start = 1.2) "Activity coefficent at dew point";
+        //Fugacity coefficient
+        Real vapfugcoeff_dew[NOC] "Vapour Fugacity coefficient at dew point";
+        Real phil_dew[NOC](each start = 0.5);
+        Real PCF_dew[NOC] "Poynting Correction Factor";
+        //Bubble Point Calculation Variables
+        //Intermediate variables to calculate the combinatorial and residual part of activity coefficient at bubble point
+        Real r_bubl, q_bubl;
+        Real teta_bubl[NOC];
+        Real S_bubl[NOC];
+        Real sum_bubl[NOC];
+        //Activity Coefficients
+        Real gammac_bubl[NOC](each start = 1.2) "Combinatorial Part of activity coefficent at bubble point";
+        Real gammar_bubl[NOC](each start = 1) "Residual part of activity coefficent at bubble point";
+        Real gammaBubl_old[NOC](each start = 1.2) "Combinatorial Part of activity coefficent(without correction)";
+        Real gammaBubl[NOC](each start = 1.2) "Activity coefficent at bubble point";
+        //Fugacity coefficient
+        Real liqfugcoeff_bubl[NOC];
+        Real phil_bubl[NOC](each start = 0.5) "Liquid Phase Fugacity coefficient";
+        Real PCF_bubl[NOC] "Poynting Correction Factor";
+        //Phase Envelope
+        Real Psat[NOC](each unit = "Pa") "Saturated Vapour Pressure at the input temperature";
+        Real PCF[NOC] "Poynting correction factor";
+        Real K[NOC](each start = 0.7) "Distribution Coefficient";
+        //Residual Energy Parameters
+        Real resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
+        //Transport Properties at the input conditions
+        Real Density[NOC](each unit = "kmol/m^3");
+        //===========================================================================================================
+        //Equation Section
       equation
-     
-        r = sum(compMolFrac[2,:] .* R[:]);
-        q = sum(compMolFrac[2,:] .* Q[:]);
-       
+    //Fugacity coefficients set to 1 since the model type is Activity Coefficient
         for i in 1:NOC loop
-          teta[i] = compMolFrac[2,i] * Q[i] * (1/q);
+          liqfugcoeff_bubl[i] = 1;
+          vapfugcoeff_dew[i] = 1;
         end for;
-       
+    //Calculation of Intermediate parameters to evaluate combinatorial and residual part of the activity coefficient
+    //Note : compMolFrac is the referenced from "Material Stream" model
+        r = sum(compMolFrac[2, :] .* R[:]);
+        q = sum(compMolFrac[2, :] .* Q[:]);
         for i in 1:NOC loop
-          S[i]  =   sum(teta[:] .* tow[i,:]);
-          sum[i] =  sum(teta[:] .* (tow[i,:]./S[:]));
+          teta[i] = compMolFrac[2, i] * Q[i] * (1 / q);
         end for;
-       
-        tow  =    Simulator.Files.Thermodynamic_Functions.Tow_UNIQUAC(NOC,a,T);
         for i in 1:NOC loop
-          log(gammar[i]) =  Q[i] *( ((-log(S[i])) - sum[i] + 1));
-          log(gammac[i]) = (1 - (R[i]/r) + log((R[i]/r)) - Z/2 * Q[i] * (1 - ((R[i]/r)/(Q[i]/q)) + log((R[i]/r)/(Q[i]/q)))); 
-          log(gamma[i])  = (log(gammac[i]) + log(gammar[i]));
+          S[i] = sum(teta[:] .* tow[i, :]);
+          sum[i] = sum(teta[:] .* tow[i, :] ./ S[:]);
         end for;
-       
+    //Calculation of Energy interaction parameter at the input tempetraure
+    //Function :Tow_UNIQUAC is used to instantiated
+        tow = Simulator.Files.Thermodynamic_Functions.Tow_UNIQUAC(NOC, a, T);
+    //Calculation of Combinatorial and Residual Activity coefficient
+        for i in 1:NOC loop
+          log(gammar[i]) = Q[i] * (1 - log(S[i]) - sum[i]);
+          log(gammac[i]) = 1 - R[i] / r + log(R[i] / r) + (-Z / 2 * Q[i] * (1 - R[i] / r / (Q[i] / q) + log(R[i] / r / (Q[i] / q))));
+          log(gamma[i]) = log(gammac[i]) + log(gammar[i]);
+        end for;
+    //Excess Energy parameters are set to 0 since the calculation mode is Ideal
         resMolSpHeat[:] = zeros(3);
-        resMolEnth[:] =   zeros(3);
-        resMolEntr[:] =   zeros(3);
-       
-        for i in 1:NOC loop   
-          K[i] = gamma[i] * (Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T)/P);
+        resMolEnth[:] = zeros(3);
+        resMolEntr[:] = zeros(3);
+    //Calculation of Saturated vapour pressure and Density at the given input condition
+        for i in 1:NOC loop
+          Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+          Density[i] = Simulator.Files.Thermodynamic_Functions.Dens(comp[i].LiqDen, comp[i].Tc, T, P) * 1E-3;
         end for;
-       
+    //Calculation of Poynting correction Factor at input conditions,Bubble Point and Dew Point
+    //Function :Poynting_CF is called from the Simulator Package
+        PCF[:] = Thermodynamic_Functions.PoyntingCF(NOC, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, T, P, gamma[:], Psat[:], Density[:]);
+        PCF_bubl[:] = Thermodynamic_Functions.PoyntingCF(NOC, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, T, Pbubl, gamma[:], Psat[:], Density[:]);
+        PCF_dew[:] = Thermodynamic_Functions.PoyntingCF(NOC, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, T, Pdew, gamma[:], Psat[:], Density[:]);
+    //Calculation of Fugacity coefficient with Poynting correction
+        phil[:] = gamma[:] .* Psat[:] ./ P .* PCF[:];
+        phil[:] = gamma_new[:] .* Psat[:] ./ P;
+    //Calculation of Distribution coefficient
+        K[:] = gamma_new[:] .* Psat[:] ./ P;
+    //Binary Phase Envelope
+    //The same calculation routine is followed at the DewPoint
+    //Dew Point
+        r_dew = sum(dewLiqMolFrac[:] .* R[:]);
+        q_dew = sum(dewLiqMolFrac[:] .* Q[:]);
+        for i in 1:NOC loop
+          dewLiqMolFrac[i] = compMolFrac[1, i] * Pdew / (gammaDew[i] * Psat[i]);
+          teta_dew[i] = dewLiqMolFrac[i] * Q[i] * (1 / q_dew);
+          S_dew[i] = sum(teta_dew[:] .* tow[i, :]);
+          sum_dew[i] = sum(teta_dew[:] .* tow[i, :] ./ S_dew[:]);
+          log(gammar_dew[i]) = Q[i] * (1 - log(S_dew[i]) - sum_dew[i]);
+          log(gammac_dew[i]) = 1 - R[i] / r_dew + log(R[i] / r_dew) + (-Z / 2 * Q[i] * (1 - R[i] / r_dew / (Q[i] / q_dew) + log(R[i] / r_dew / (Q[i] / q_dew))));
+          log(gammaDew_old[i]) = log(gammac_dew[i]) + log(gammar_dew[i]);
+        end for;
+        phil_dew[:] = gammaDew_old[:] .* Psat[:] ./ Pdew .* PCF_dew[:];
+        phil_dew[:] = gammaDew[:] .* Psat[:] ./ Pdew;
+    //The same calculation routine is followed at the Bubble Point
+    //Bubble Point
+        r_bubl = sum(compMolFrac[1, :] .* R[:]);
+        q_bubl = sum(compMolFrac[1, :] .* Q[:]);
+        for i in 1:NOC loop
+          teta_bubl[i] = compMolFrac[1, i] * Q[i] * (1 / q_bubl);
+          S_bubl[i] = sum(teta_bubl[:] .* tow[i, :]);
+          sum_bubl[i] = sum(teta_bubl[:] .* tow[i, :] ./ S_bubl[:]);
+          log(gammar_bubl[i]) = Q[i] * (1 - log(S_bubl[i]) - sum_bubl[i]);
+          log(gammac_bubl[i]) = 1 - R[i] / r_bubl + log(R[i] / r_bubl) + (-Z / 2 * Q[i] * (1 - R[i] / r_bubl / (Q[i] / q_bubl) + log(R[i] / r_bubl / (Q[i] / q_bubl))));
+          log(gammaBubl_old[i]) = log(gammac_bubl[i]) + log(gammar_bubl[i]);
+        end for;
+        phil_bubl[:] = gammaBubl_old[:] .* Psat[:] ./ Pbubl .* PCF_bubl[:];
+        phil_bubl[:] = gammaBubl[:] .* Psat[:] ./ Pbubl;
+        annotation(
+          Documentation(info = "<html>
+       <p>
+      UNIQUAC-Universal Quasi Coefficient Model
+      </p>
+      <b>Description</b>:<br>
+      </p>
+      UNIQUAC(Univeral Quasi Coefficient) model is an activity coefficient based thermodynamic model used to predict phase equilibria in Chemical Engineering. 
+      The activity coefficent comprises of two major contibutions named as combinatorial and residual contribution
+      Combinatorial contribution focusses on the deviation from ideality as a result of molecular shape while the residual contribution quantifies the enthalpic correction caused by the change in interactive forces between different molecules.<br>
+      </p>
+      <b>Equations and References</b>:<br>
+      </p>https://wikimedia.org/api/rest_v1/media/math/render/svg/21b673ea8edb013fc1675d11b7e40263bef90ffa
+      </p>
+      </tr>
+      </html>"),
+          experiment(StopTime = 1.0, Interval = 0.001));
       end UNIQUAC;
+    
+      //=======================================================================================================
+    
+      model UNIFAC
+        //Libraries
+        import Simulator.Files.*;
+        extends Simulator.Files.Thermodynamic_Functions;
+        //Parameter Section
+        parameter Integer m = 4 "substitue of number of different group";
+        parameter Integer k = 4 "number of different group in component i";
+        //Van de wal surface area and volume constant's
+        parameter Real V[NOC, k] = {{1,1,1,0},{1,0,1,0}} "number of group of kind k in molecule ";
+        parameter Real R[NOC, k] = {{0.9011,0.6744,1.6724,0},{0.9011,0,1.6724,0}} "group volume of group k ";
+        parameter Real Q[NOC, k] = {{0.848,0.540,1.448,0},{0.848,0,1.448,0}} "group surface area of group k";
+        //Intreraction parameter
+        parameter Real a[m, k]={{0,0,476.4,1318},{0,0,476.4,1318},{26.76,26.76,0,472.5},{300,300,-195.4,0}} "Binary  intraction parameter";
+        Real Psat[NOC] "Saturated Vapour Pressure at the input temperature";
+        //Intermediate values used to compute UNIFAC R and Q values
+        Real q[NOC] "Van der walls molecular surface area";
+        Real r[NOC] "Van der walls molecular volume";
+        Real e[k, NOC] "Group Surface area fraction of comp i";
+        Real tau[m, k] "Boltzmann factors";
+        Real B[NOC, k] "UNIFAC parameter ";
+        Real theta[k] "UNIFAC parameter";
+        Real sum[NOC];
+        Real S[k] "Unifac parameter ";
+        Real J[NOC] "Surface area fraction of comp i";
+        Real L[NOC] "Molecular volume fraction of comp i";
+        //Activity Coefficients
+        Real gammac[NOC] "Combinatorial activity coefficient of comp i";
+        Real gammar[NOC] "Residual activity coefficient of comp i";
+        Real gamma[NOC] " Activity coefficient";
+        Real K[NOC] "Equlibrium constant of compound i";
+        //Fugacity coefficient  at the Bubble and Dew Points
+        Real liqfugcoeff_bubl[NOC], vapfugcoeff_dew[NOC];
+        //Activity Coefficient at the Bubble and Dew Points
+        Real gammaBubl[NOC], gammaDew[NOC](each start = 1.5);
+        //Excess Energy Properties
+        Real resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
+        //===============================================================================
+        //Bubble Point Calculation Variables
+        Real theta_bubl[k] "UNIFAC parameter";
+        Real S_bubl[k] "Unifac parameter ";
+        Real J_bubl[NOC] "Surface area fraction of comp i";
+        Real L_bubl[NOC] "Molecular volume fraction of comp i";
+        Real gammac_bubl[NOC] "Combinatorial activity coefficient of components at bubble point";
+        Real gammar_bubl[NOC] "Residual activity coefficient of components at bubble point";
+        Real sum_bubl[NOC];
+        //===============================================================================
+        //Dew Point Calculation Routine
+        Real theta_dew[k] "UNIFAC parameter";
+        Real S_dew[k] "Unifac parameter ";
+        Real J_dew[NOC] "Surface area fraction of comp i";
+        Real L_dew[NOC] "Molecular volume fraction of comp i";
+        Real gammac_dew[NOC] "combinatorial activity coefficient of components at dew point";
+        Real gammar_dew[NOC] "residual activity coefficient of components at dew point";
+        Real sum_dew[NOC];
+        Real dewLiqMolFrac[NOC](each start = 0.5);
+        //==============================================================================
+      equation
+        resMolSpHeat[:] = zeros(3);
+        resMolEnth[:] = zeros(3);
+        resMolEntr[:] = zeros(3);
+        for i in 1:NOC loop
+          Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP[:], T);
+        end for;
+        for i in 1:NOC loop
+          liqfugcoeff_bubl[i] = 1;
+          vapfugcoeff_dew[i] = 1;
+        end for;
+        for i in 1:m loop
+    //tau_m_k=exp((-a_m_k)/t)
+          tau[i, :] = exp((-a[i, :]) / T);
+        end for;
+    // Equlibrium constant
+        for i in 1:NOC loop
+          K[i] = gamma[i] * Psat[i] / P;
+        end for;
+    //surface area constant
+        for i in 1:NOC loop
+          q[i] = sum(V[i, :] .* Q[i, :]);
+    //surface volume constant
+          r[i] = sum(V[i, :] .* R[i, :]);
+          e[:, i] = V[i, :] .* Q[i, :] / q[i];
+        end for;
+        for i in 1:NOC loop
+          J[i] = r[i] / sum(r[:] .* compMolFrac[2, :]);
+          L[i] = q[i] / sum(q[:] .* compMolFrac[2, :]);
+          gammac[i] = exp(1 - J[i] + log(J[i]) + (-5 * q[i] * (1 - J[i] / L[i] + log(J[i] / L[i]))));
+        end for;
+    //=======================================================================================
+        for j in 1:k loop
+          theta[j] = sum(compMolFrac[2, :] .* q[:] .* e[j, :]) / sum(compMolFrac[2, :] .* q[:]);
+        end for;
+        for i in 1:k loop
+          S[i] = sum(theta[:] .* tau[:, i]);
+        end for;
+      algorithm
+        for i in 1:NOC loop
+          for j in 1:k loop
+            for l in 1:m loop
+              B[i, j] := sum(e[:, i] .* tau[:, j]);
+            end for;
+          end for;
+        end for;
+        sum[:] := fill(0, NOC);
+        for j in 1:k loop
+          for i in 1:NOC loop
+            sum[i] := sum[i] + theta[j] * B[i, j] / S[j] - e[j, i] * log(B[i, j] / S[j]);
+            gammar[i] := exp(q[i] * (1 - sum[i]));
+          end for;
+        end for;
+      equation
+    // activity coefficient:
+        for i in 1:NOC loop
+          gamma[i] = exp(log(gammar[i]) + log(gammac[i]));
+        end for;
+    //===============================================================================================
+    //Bubble Point Calculation Routine
+        for i in 1:NOC loop
+          J_bubl[i] = r[i] / sum(r[:] .* compMolFrac[1, :]);
+          L_bubl[i] = q[i] / sum(q[:] .* compMolFrac[1, :]);
+          gammac_bubl[i] = exp(1 - J_bubl[i] + log(J_bubl[i]) + (-5 * q[i] * (1 - J_bubl[i] / L_bubl[i] + log(J_bubl[i] / L_bubl[i]))));
+        end for;
+        for j in 1:k loop
+          theta_bubl[j] = sum(compMolFrac[1, :] .* q[:] .* e[j, :]) / sum(compMolFrac[1, :] .* q[:]);
+        end for;
+        for i in 1:k loop
+          S_bubl[i] = sum(theta_bubl[:] .* tau[:, i]);
+        end for;
+      algorithm
+        sum_bubl[:] := fill(0, NOC);
+        for j in 1:k loop
+          for i in 1:NOC loop
+            sum_bubl[i] := sum_bubl[i] + theta_bubl[j] * B[i, j] / S_bubl[j] - e[j, i] * log(B[i, j] / S_bubl[j]);
+            gammar_bubl[i] := exp(q[i] * (1 - sum_bubl[i]));
+          end for;
+        end for;
+      equation
+        for i in 1:NOC loop
+          gammaBubl[i] = exp(log(gammar_bubl[i]) + log(gammac_bubl[i]));
+        end for;
+    //=======================================================================================================
+    //Dew Point Calculation Routine
+        for i in 1:NOC loop
+          dewLiqMolFrac[i] = compMolFrac[1, i] * Pdew / (gammaDew[i] * Psat[i]);
+        end for;
+        for i in 1:NOC loop
+          J_dew[i] = r[i] / sum(r[:] .* dewLiqMolFrac[:]);
+          L_dew[i] = q[i] / sum(q[:] .* dewLiqMolFrac[:]);
+          gammac_dew[i] = exp(1 - J_dew[i] + log(J_dew[i]) + (-5 * q[i] * (1 - J_dew[i] / L_dew[i] + log(J_dew[i] / L_dew[i]))));
+        end for;
+        for j in 1:k loop
+          theta_dew[j] = sum(dewLiqMolFrac[:] .* q[:] .* e[j, :]) / sum(dewLiqMolFrac[:] .* q[:]);
+        end for;
+        for i in 1:k loop
+          S_dew[i] = sum(theta_dew[:] .* tau[:, i]);
+        end for;
+      algorithm
+        sum_dew[:] := fill(0, NOC);
+        for j in 1:k loop
+          for i in 1:NOC loop
+            sum_dew[i] := sum_dew[i] + theta_dew[j] * B[i, j] / S_dew[j] - e[j, i] * log(B[i, j] / S_dew[j]);
+            gammar_dew[i] := exp(q[i] * (1 - sum_dew[i]));
+          end for;
+        end for;
+      equation
+        for i in 1:NOC loop
+          gammaDew[i] = exp(log(gammar_dew[i]) + log(gammac_dew[i]));
+        end for;
+    //=================================================================================================s
+        annotation(
+          Documentation(info = "<html>
+       <p>
+      UNIFAC-Universal Functional group Model
+      </p>
+      <b>Description</b>:<br>
+      </p>
+      UNIFAC(Univeral functional group) model is a semi empherical system to determine the activity coefficient in non ideal mixtures. It makes use of the functional group present in the chemical molecule to predict the phase equlibria of the system. 
+      The activity coefficent comprises of two major contibutions named as combinatorial and residual contribution
+      Combinatorial contribution focusses on the deviation from ideality as a result of molecular shape while the residual contribution quantifies the interaction between different groups in the system.<br>
+      </p>
+      <b>Equations and References</b>:<br>
+      </p>https://wikimedia.org/api/rest_v1/media/math/render/svg/b6eb40a653fe590b5bfa137fe76342eef6a502d2
+      </p>
+      </tr>
+      </html>"),
+          experiment(StopTime = 1.0, Interval = 0.001));
+      end UNIFAC;
+
+
+    
+      model Peng_Robinson
+        import Simulator.Files.*;
+        parameter Real R = 8.314;
+        // feed composition
+        Real Tr[NOC](each start = 100) "reduced temperature";
+        Real b[NOC];
+        Real a[NOC](each start = 0.5);
+        Real m[NOC];
+        Real q[NOC];
+        parameter Real kij[NOC, NOC](each start = 1) = Simulator.Files.Thermodynamic_Functions.BIP_PR(NOC, comp.name);
+        Real aij[NOC, NOC];
+        Real K[NOC](each start = 0.2);
+        Real Psat[NOC];
+        Real liqfugcoeff[NOC](each start = 5);
+        Real vapfugcoeff[NOC](each start = 5);
+        Real gammaBubl[NOC], gammaDew[NOC];
+        Real liqfugcoeff_bubl[NOC], vapfugcoeff_dew[NOC];
+        Real resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
+        //Liquid Fugacity Coefficient
+        Real aML, bML;
+        Real AL, BL;
+        Real CL[4];
+        Real Z_RL[3, 2];
+        Real ZL[3], ZLL;
+        Real sum_xaL[NOC];
+    
+        //Vapour Fugacity Coefficient
+        Real aMV, bMV;
+        Real AV, BV;
+        Real CV[4];
+        Real Z_RV[3, 2];
+        Real ZV[3], ZvV;
+        Real sum_yaV[NOC];
+      equation
+        for i in 1:NOC loop
+          Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+          gammaDew[i] = 1;
+          gammaBubl[i] = 1;
+          liqfugcoeff_bubl[i] = 1;
+          vapfugcoeff_dew[i] = 1;
+        end for;
+        resMolSpHeat[:] = zeros(3);
+        resMolEnth[:] = zeros(3);
+        resMolEntr[:] = zeros(3);
+        Tr = T ./ comp.Tc;
+        b = 0.0778 * R * comp.Tc ./ comp.Pc;
+        m = 0.37464 .+ 1.54226 * comp.AF .- 0.26992 * comp.AF .^ 2;
+        q = 0.45724 * R ^ 2 * comp.Tc .^ 2 ./ comp.Pc;
+        a = q .* (1 .+ m .* (1 .- sqrt(Tr))) .^ 2;
+        aij = {{(1 - kij[i, j]) * sqrt(a[i] * a[j]) for i in 1:NOC} for j in 1:NOC};
+    //Liquid_Fugacity Coefficient Calculation Routine
+        aML = sum({{compMolFrac[2, i] * compMolFrac[2, j] * aij[i, j] for i in 1:NOC} for j in 1:NOC});
+        bML = sum(b .* compMolFrac[2, :]);
+        AL = aML * P / (R * T) ^ 2;
+        BL = bML * P / (R * T);
+        CL[1] = 1;
+        CL[2] = BL - 1;
+        CL[3] = AL - 3 * BL ^ 2 - 2 * BL;
+        CL[4] = BL ^ 3 + BL ^ 2 - AL * BL;
+        Z_RL = Modelica.Math.Vectors.Utilities.roots(CL);
+        ZL = {Z_RL[i, 1] for i in 1:3};
+        ZLL = min({ZL});
+        sum_xaL = {sum({compMolFrac[2, j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
+        liqfugcoeff = exp(AL / (BL * sqrt(8)) * log((ZLL + 2.4142135 * BL) / (ZLL - 0.414213 * BL)) .* (b / bML .- 2 * sum_xaL / aML) .+ (ZLL - 1) * (b / bML) .- log(ZLL - BL));
+    //Vapour Fugacity Calculation Routine
+        aMV = sum({{compMolFrac[3, i] * compMolFrac[3, j] * aij[i, j] for i in 1:NOC} for j in 1:NOC});
+        bMV = sum(b .* compMolFrac[3, :]);
+        AV = aMV * P / (R * T) ^ 2;
+        BV = bMV * P / (R * T);
+        CV[1] = 1;
+        CV[2] = BV - 1;
+        CV[3] = AV - 3 * BV ^ 2 - 2 * BV;
+        CV[4] = BV ^ 3 + BV ^ 2 - AV * BV;
+        Z_RV = Modelica.Math.Vectors.Utilities.roots(CV);
+        ZV = {Z_RV[i, 1] for i in 1:3};
+        ZvV = max({ZV});
+        sum_yaV = {sum({compMolFrac[3, j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
+        vapfugcoeff = exp(AV / (BV * sqrt(8)) * log((ZvV + 2.4142135 * BV) / (ZvV - 0.414213 * BV)) .* (b / bMV .- 2 * sum_yaV / aMV) .+ (ZvV - 1) * (b / bMV) .- log(ZvV - BV));
+        K = liqfugcoeff ./ vapfugcoeff;
+    
+      end Peng_Robinson;
     //=============================================================================================================
     
     end Thermodynamic_Packages;
 
+  package Transport_Properties
+    function LiqVis
+      //This function calculates the liquid viscocity of the stream
+      input Real LiqVis[6];
+      input Real T;
+      output Real Liqvisc;
+    algorithm
+      Liqvisc := exp(LiqVis[2] + LiqVis[3] / T + LiqVis[4] * log(T) + LiqVis[5] * T ^ LiqVis[6]);
+    end LiqVis;
+  
+    function LiqK
+      input Real LiqK[6] "from chemsep database";
+      input Real T(unit = "K") "Temperature";
+      output Real k_liq;
+    algorithm
+      k_liq := LiqK[2] + exp(LiqK[3] / T + LiqK[4] + LiqK[5] * T + LiqK[6] * T ^ 2);
+    end LiqK;
+  
+    function VapK
+      input Real VapK[6] "from chemsep database";
+      input Real T(unit = "K") "Temperature";
+      output Real k_vap;
+    algorithm
+      k_vap := VapK[6] + VapK[2] * T ^ VapK[3] / (1 + VapK[4] / T + VapK[5] / T ^ 2);
+    end VapK;
+  
+    function VapVisc
+      input Real VapVis[6] "from chemsep database";
+      input Real T(unit = "K") "Temperature";
+      output Real vapvisc;
+    algorithm
+      vapvisc := VapVis[6] + VapVis[2] * T ^ VapVis[3] / (1 + VapVis[4] / T + VapVis[5] / T ^ 2);
+    end VapVisc;
+  end Transport_Properties;
+  
 
 
     package Thermodynamic_Functions
@@ -2580,7 +2988,133 @@ end BIPNRTL;
           end for;
         end for;
       end BIP_UNIQUAC;
+      
+      function BIP_PR
+        input Integer Nc;
+        input String comp[Nc];
+        output Real kij[Nc, Nc];
+      protected
+        String name;
+        String nameRev;
+        constant String Comp1_Comp2[179] = {"Heliumfour_Carbonmonoxide", "Hydrogen_Nitrogen", "Hydrogen_Carbonmonoxide", "Hydrogen_Methane", "Hydrogen_Ethylene", "Hydrogen_Ethane", "Hydrogen_Carbondioxide", "Hydrogen_Propylene", "Hydrogen_Propane", "Hydrogen_Nbutane", "Hydrogen_Nhexane", "Hydrogen_Nheptane", "Hydrogen_Toluene", "Hydrogen_Quinoline", "Hydrogen_Bicyclohexyl", "Hydrogen_Onemethylnaphthalene", "Nitrogen_Carbonmonoxide", "Nitrogen_Argon", "Nitrogen_Oxygen", "Nitrogen_Methane", "Nitrogen_Ethylene", "Nitrogen_Ethane", "Nitrogen_Nitrousoxide", "Nitrogen_Carbondioxide", "Nitrogen_Hydrogensulfide", "Nitrogen_Propylene", "Nitrogen_Propane", "Nitrogen_Ammonia", "Nitrogen_Dichlorodiflouromethane", "Nitrogen_Isobutane", "Nitrogen_Sulfurdioxide", "Nitrogen_Nbutane", "Nitrogen_Isoc5", "Nitrogen_Npentane", "Nitrogen_Methanol", "Nitrogen_Nhexane", "Nitrogen_Benzene", "Nitrogen_Nheptane", "Nitrogen_Noctane", "Nitrogen_Ndecane", "Carbonmonoxide_Methane", "Carbonmonoxide_Ethane", "Carbonmonoxide_Hydrogensulfide", "Carbonmonoxide_Propane", "Argon_Oxygen", "Argon_Methane", "Argon_Ammonia", "Oxygen_Krypton", "Oxygen_Nitrousoxide", "Methane_Ethylene", "Methane_Ethane", "Methane_Nitrousoxide", "Methane_Carbondioxide", "Methane_Carbonylsulfide", "Methane_Propylene", "Methane_Propane", "Methane_Isobutane", "Methane_Sulfurdioxide", "Methane_Nbutane", "Methane_Isoc5", "Methane_Npentane", "Methane_Nhexane", "Methane_Benzene", "Methane_Cyclohexane", "Methane_Nheptane", "Methane_Toluene", "Methane_Noctane", "Methane_Mxylene", "Methane_Nnonane", "Methane_Ndecane", "Methane_Mcresol", "Methane_Tetralin", "Methane_Onemethylnaphthalene", "Methane_Diphenylmethane", "Ethylene_Ethane", "Ethylene_Acetylene", "Ethylene_Carbondioxide", "Ethylene_Nbutane", "Ethylene_Benzene", "Ethylene_Nheptane", "Ethylene_Ndecane", "Carbondioxide_Ethane", "Ethane_Hydrogensulfide", "Ethane_Propylene", "Ethane_Propane", "Ethane_Isobutane", "Ethane_Nbutane", "Ethane_Ethylether", "Ethane_Npentane", "Ethane_Acetone", "Ethane_Methylacetate", "Ethane_Methanol", "Ethane_Nhexane", "Ethane_Benzene", "Ethane_Cyclohexane", "Ethane_Nheptane", "Ethane_Noctane", "Ethane_Ndecane", "Carbondioxide_Nitrousoxidedioxide", "Acetylene_Propylene", "Trifluoromethane_Triflourochloromethane", "Trifluorochloromethane_Dichlorodifluoromethane", "Carbondioxide_Hydrogensulfide", "Carbondioxide_Difluoromethane", "Carbondioxide_Propylene", "Carbondioxide_Propane", "Carbondioxide_Isobutane", "Carbondioxide_Onebutene", "Carbondioxide_Nbutane", "Carbondioxide_Isoc5", "Carbondioxide_Ethylether", "Carbondioxide_Npentane", "Carbondioxide_Methylacetate", "Carbondioxide_Methanol", "Carbondioxide_Nhexane", "Carbondioxide_Benzene", "Carbondioxide_Cyclohexane", "Carbondioxide_Nheptane", "Carbondioxide_Water", "Carbondioxide_Toluene", "Carbondioxide_Ndecane", "Carbondioxide_Nbutylbenzene", "Hydrogensulfide_Propane", "Hydrogensulfide_Isobutane", "Hydrogensulfide_Npentane", "Hydrogensulfide_Water", "Hydrogensulfide_Ndecane", "Propylene_Propane", "Propylene_Isobutane", "Propylene_Onecfour", "Propane_Isobutane", "Propane_Nbutane", "Propane_Isopentane", "Propane_Npentane", "Propane_Nhexane", "Propane_Ethanol", "Propane_Benzene", "Propane_Nheptane", "Propane_Noctane", "Propane_Ndecane", "Pentaflourohloroethane_Difluorochloromethane", "Difluorochloromethane_Dichlorodifluoromethane", "Ammonia_Water", "Ammonia_Watert=two7three.one5k", "Isobutane_Nbutane", "Sulfurdioxide_Benzene", "Onebutene_One", "Onebutene_Nbutane", "One_Threebutadiene", "Nbutane_Npentane", "Nbutane_Nhexane", "Nbutane_Nheptane", "Nbutane_Noctane", "Nbutane_Ndecane", "Npentane_Benzene", "Npentane_Cyclohexane", "Npentane_Nheptane", "Npentane_Noctane", "Two_Twodimethylbutane", "Two_Threedimethylbutane", "Twomethylpentane_Onepentanol", "Onepentanol_Threemethylpentane", "Methanol_Water", "Nhexane_Benzene", "Nhexane_Cyclohexane", "Nhexane_Twopropanol", "Nhexane_Nheptane", "Nhexane_Isopentanol", "Nhexane_Onepentanol", "Cyclohexane_Benzene", "Benzene_Nheptane", "Benzene_Isooctane", "Benzene_Noctane", "Cyclohexene_Cyclohexane", "Cyclohexane_One", "Cyclohexane_Cyclohexanone", "One_Twodichloroethane", "Nheptane_Isooctane", "Nheptane_Twopentanone"};
+        constant Real BI_Val[size(Comp1_Comp2, 1)] = {1, 7.1100E-02, 9.1900E-02, 2.6300E-02, 6.3300E-02, -7.5600E-02, 0, 0, 0, 0, -3.00E-02, 0, -1, -1, -1, 0, 3.300E-02, -2.6000E-03, -1.5900E-02, 2.8900E-02, 8.5600E-02, 3.4400E-02, 4.4000E-03, -2.2200E-02, 0, 9.00E-02, 8.7800E-02, 0, 1.0700E-02, 0, 8.00E-02, 7.1100E-02, 9.2200E-02, 0, 0, 0, 0, 0, 0, 0, 3.00E-02, -2.2600E-02, 5.4400E-02, 2.5900E-02, 1.0700E-02, 2.300E-02, 0, 2.5600E-02, 4.7800E-02, 3.7800E-02, -3.3000E-03, 2.5600E-02, 7.9300E-02, 2.8900E-02, 3.300E-02, 1.1900E-02, 2.5600E-02, 0, 2.4400E-02, -5.6000E-03, 2.300E-02, 4.00E-02, 8.0700E-02, 3.8900E-02, 4.0100E-02, 9.700E-02, 4.9600E-02, 8.4400E-02, 4.7400E-02, 4.8900E-02, 0, 0, 0, 8.7400E-02, 1.1900E-02, 6.5200E-02, 5.7800E-02, 9.2200E-02, 3.1100E-02, 1.4400E-02, 2.5300E-02, 0, 8.2200E-02, 8.9000E-03, 1.1000E-03, -6.7000E-03, 8.9000E-03, 1.8100E-02, 7.8000E-03, 0, 0, 2.700E-02, -4.00E-02, 3.2200E-02, 1.7800E-02, 7.4000E-03, 1.8500E-02, 1.4400E-02, 4.8000E-03, 0, 0, 3.3700E-02, 9.7800E-02, 1.700E-02, 9.3300E-02, 0, 0, 5.9300E-02, 0, 0, 4.700E-02, -1.00E-02, -4.9300E-02, 2.200E-02, 0, 7.7400E-02, 0, 0, 6.3000E-03, 0, 0, 0, 6.00E-02, 4.7400E-02, 6.300E-02, 3.9400E-02, 3.3300E-02, 9.6000E-03, -1.4400E-02, 4.0000E-04, -7.8000E-03, 3.3000E-03, 1.1100E-02, 2.6700E-02, 7.0000E-04, 3.1500E-02, 2.3300E-02, 5.6000E-03, 0, 0, 8.7400E-02, 5.2200E-02, 0, 0, -4.0000E-04, 1.5000E-03, 2.2000E-03, 7.0000E-04, 1.4100E-02, 1.7400E-02, -5.6000E-03, 3.3000E-03, 7.4000E-03, 7.8000E-03, 1.8900E-02, 3.7000E-03, 7.4000E-03, 0, 4.5200E-02, 4.6700E-02, 4.6700E-02, 4.7800E-02, -7.7800E-02, 8.9000E-03, -3.000E-03, 8.4400E-02, -7.8000E-03, 4.8500E-02, 4.5600E-02, 1.2600E-02, 1.1000E-03, 4.0000E-04, 3.000E-03, 1.1000E-03, 7.300E-02, 6.5900E-02, 4.300E-02, 4.0000E-04, 6.9300E-02};
+      algorithm
+        for i in 1:Nc loop
+          for j in 1:Nc loop
+            name := comp[i] + "_" + comp[j];
+            nameRev := comp[j] + "_" + comp[i];
+            if i == j then
+              kij[i, j] := 0;
+            elseif FindString(Comp1_Comp2, name) == (-1) then
+              kij[i, j] := BI_Val[index(Comp1_Comp2, nameRev)];
+            else
+              kij[i, j] := BI_Val[index(Comp1_Comp2, name)];
+            end if;
+          end for;
+        end for;
+      end BIP_PR;
+    
+      function FindString
+        input String compound_array[:];
+        input String compound;
+        output Integer int;
+      protected
+        Integer i, len = size(compound_array, 1);
+      algorithm
+        int := -1;
+        i := 1;
+        while int == (-1) and i <= len loop
+          if compound_array[i] == compound then
+            int := i;
+          end if;
+          i := i + 1;
+        end while;
+      end FindString;
+    
+      function index
+        input String[:] comps;
+        input String comp;
+        output Integer i;
+      algorithm
+        i := Modelica.Math.BooleanVectors.firstTrueIndex({k == comp for k in comps});
+      end index; 
+      
+      function Density_Racket
+      input Integer NOC;
+      input Real T;
+      input Real P;
+      input Real Pc[NOC];
+      input Real Tc[NOC];
+      input Real Racketparam[NOC];
+      input Real AF[NOC];
+      input Real MW[NOC];
+      input Real Psat[NOC];
+      output Real Density[NOC];
+      parameter Real R = 83.14;
+    protected
+      Real Tr[NOC], Pcm[NOC], temp[NOC], tempcor[NOC], a, b, c[NOC], d, e[NOC], Beta[NOC], f, g, h, j, k, Racketparam_new[NOC];
+    algorithm
+      for i in 1:NOC loop
+        Pcm[i] := Pc[i] / 100000;
+        Tr[i] := T / Tc[i];
+        if Tr[i] > 0.99 then
+          Tr[i] := 0.5;
+        end if;
+        if Racketparam[i] == 0 then
+          Racketparam_new[i] := 0.29056 - 0.08775 * AF[i];
+        else
+          Racketparam_new[i] := Racketparam[i];
+        end if;
+        temp[i] := R * (Tc[i] / Pcm[i]) * Racketparam_new[i] ^ (1 + (1 - Tr[i]) ^ (2 / 7));
+        if T < Tc[i] then
+          a := -9.070217;
+          b := 62.45326;
+          d := -135.1102;
+          f := 4.79594;
+          g := 0.250047;
+          h := 1.14188;
+          j := 0.0861488;
+          k := 0.0344483;
+          e[NOC] := exp(f + g * AF[i] + h * AF[i] * AF[i]);
+          c[NOC] := j + k * AF[i];
+          Beta[i] := Pc[i] * ((-1) + a * (1 - Tr[i]) ^ (1 / 3) + b * (1 - Tr[i]) ^ (2 / 3) + d * (1 - Tr[i]) + e[i] * (1 - Tr[i]) ^ (4 / 3));
+          tempcor[i] := temp[i] * (1 - c[i] * log((Beta[i] + P) / (Beta[i] + Psat[i])));
+          Density[i] := 0.001 * MW[i] / (tempcor[i] * 0.000001);
+        else
+          Density[i] := 0.001 * MW[i] / (temp[i] * 0.000001);
+        end if;
+      end for;
+    end Density_Racket;
+    
+    function PoyntingCF
+      import Simulator.Files.Thermodynamic_Functions.*;
+      input Integer NOC;
+      input Real Pc[NOC], Tc[NOC], Racketparam[NOC], AF[NOC], MW[NOC];
+      input Real T, P;
+      input Real gamma[NOC], Psat[NOC], Density[NOC];
+      parameter Integer Choice = 2;
+      output Real PCF[NOC];
+    protected
+      Real vl[NOC];
+    algorithm
+      for i in 1:NOC loop
+        if T < 0.98 * Tc[i] then
+          vl[i] := 1 / Density[i];
+        end if;
+      end for;
+      for i in 1:NOC loop
+        if Choice == 1 then
+          PCF[i] := exp(vl[i] * abs(P - Psat[i]) / (8314.47 * T));
+        else
+          PCF[i] := 1;
+        end if;
+      end for;
+    end PoyntingCF;
+    
     end Thermodynamic_Functions;
+
+
+
 
 
     package Connection
@@ -2691,6 +3225,7 @@ end BIPNRTL;
 
     end Models;
   end Files;
+
 
   model Streams
     extends Modelica.Icons.VariantsPackage;
@@ -4673,12 +5208,692 @@ end Material_Stream;
         bottoms.totMolFlo[1] = 70;
       end Test4;
 
-
-
-    
     end rigDist;
 
   end Test;
+
+package Binary_Phase_Envelope
+  package Binary_Phase_Envelope_UNIQUAC
+    //==============================================================================================================
+
+    function Gamma_UNIQUAC
+      input Integer Choice "Enter if choice of VLE curve is Pxy or Txy";
+      //Note : Choice = 1 = P-x-y-Envelope
+      //       Choice = 2 = T-x-y-Envelope
+      input Integer N "Number of data points", NOC "Total number of components";
+      input Real z1[N + 1], z2[N + 1];
+      input Real R[NOC], Q[NOC];
+      input Real tow[NOC, NOC];
+      input Real towk[N + 1, NOC, NOC];
+      parameter Real Z = 10 "Compresseblity Factor";
+      parameter Real R_gas = 1.98721 "Gas Constant";
+      //Activity coefficients
+      output Real gammaBubl1[N + 1], gammaBubl2[N + 1];
+    protected
+      //Intermediate parameters used to calculate the Combinatorial and Residual contribution"
+      Real r_bubl[N + 1], q_bubl[N + 1];
+      Real teta1_bubl[N + 1], teta2_bubl[N + 1];
+      Real S1_bubl[N + 1], S2_bubl[N + 1];
+      Real sum1_bubl[N + 1], sum2_bubl[N + 1];
+      //Residual contribution term of Activity coefficient
+      Real gammar1_bubl[N + 1], gammar2_bubl[N + 1];
+      //Cobinatorial contribution term of Activity coefficient
+      Real gammac1_bubl[N + 1], gammac2_bubl[N + 1];
+      //Empherical Parameter at different temperatures
+      Real toww[N, NOC, NOC];
+      //=========================================================================================
+    algorithm
+      for i in 1:N + 1 loop
+        r_bubl[i] := z1[i] * R[1] + z2[i] * R[2];
+        q_bubl[i] := z1[i] * Q[1] + z2[i] * Q[2];
+      end for;
+      if Choice == 1 then
+        for i in 1:N + 1 loop
+          teta1_bubl[i] := z1[i] * Q[1] * (1 / q_bubl[i]);
+          teta2_bubl[i] := z2[i] * Q[2] * (1 / q_bubl[i]);
+          S1_bubl[i] := teta1_bubl[i] * tow[1, 1] + teta2_bubl[i] * tow[1, 2];
+          S2_bubl[i] := teta1_bubl[i] * tow[2, 1] + teta2_bubl[i] * tow[2, 2];
+          sum1_bubl[i] := teta1_bubl[i] * (tow[1, 1] / S1_bubl[i]) + teta2_bubl[i] * (tow[1, 2] / S2_bubl[i]);
+          sum2_bubl[i] := teta1_bubl[i] * (tow[2, 1] / S1_bubl[i]) + teta2_bubl[i] * (tow[2, 2] / S2_bubl[i]);
+          gammar1_bubl[i] := exp(Q[1] * (1 - log(S1_bubl[i]) - sum1_bubl[i]));
+          gammar2_bubl[i] := exp(Q[2] * (1 - log(S2_bubl[i]) - sum2_bubl[i]));
+          gammac1_bubl[i] := exp(1 - R[1] / r_bubl[i] + log(R[1] / r_bubl[i]) + (-Z / 2 * Q[1] * (1 - R[1] / r_bubl[i] / (Q[1] / q_bubl[i]) + log(R[1] / r_bubl[i] / (Q[1] / q_bubl[i])))));
+          gammac2_bubl[i] := exp(1 - R[2] / r_bubl[i] + log(R[2] / r_bubl[i]) + (-Z / 2 * Q[2] * (1 - R[2] / r_bubl[i] / (Q[2] / q_bubl[i]) + log(R[2] / r_bubl[i] / (Q[2] / q_bubl[i])))));
+          gammaBubl1[i] := exp(log(gammac1_bubl[i]) + log(gammar1_bubl[i]));
+          gammaBubl2[i] := exp(log(gammac2_bubl[i]) + log(gammar2_bubl[i]));
+        end for;
+      else
+        for i in 1:N + 1 loop
+          teta1_bubl[i] := z1[i] * Q[1] * (1 / q_bubl[i]);
+          teta2_bubl[i] := z2[i] * Q[2] * (1 / q_bubl[i]);
+          S1_bubl[i] := teta1_bubl[i] * towk[i, 1, 1] + teta2_bubl[i] * towk[i, 1, 2];
+          S2_bubl[i] := teta1_bubl[i] * towk[i, 2, 1] + teta2_bubl[i] * towk[i, 2, 2];
+          sum1_bubl[i] := teta1_bubl[i] * (towk[i, 1, 1] / S1_bubl[i]) + teta2_bubl[i] * (towk[i, 1, 2] / S2_bubl[i]);
+          sum2_bubl[i] := teta1_bubl[i] * (towk[i, 2, 1] / S1_bubl[i]) + teta2_bubl[i] * (towk[i, 2, 2] / S2_bubl[i]);
+          gammar1_bubl[i] := exp(Q[1] * (1 - log(S1_bubl[i]) - sum1_bubl[i]));
+          gammar2_bubl[i] := exp(Q[2] * (1 - log(S2_bubl[i]) - sum2_bubl[i]));
+          gammac1_bubl[i] := exp(1 - R[1] / r_bubl[i] + log(R[1] / r_bubl[i]) + (-Z / 2 * Q[1] * (1 - R[1] / r_bubl[i] / (Q[1] / q_bubl[i]) + log(R[1] / r_bubl[i] / (Q[1] / q_bubl[i])))));
+          gammac2_bubl[i] := exp(1 - R[2] / r_bubl[i] + log(R[2] / r_bubl[i]) + (-Z / 2 * Q[2] * (1 - R[2] / r_bubl[i] / (Q[2] / q_bubl[i]) + log(R[2] / r_bubl[i] / (Q[2] / q_bubl[i])))));
+          gammaBubl1[i] := exp(log(gammac1_bubl[i]) + log(gammar1_bubl[i]));
+          gammaBubl2[i] := exp(log(gammac2_bubl[i]) + log(gammar2_bubl[i]));
+        end for;
+      end if;
+//Calculation of Activity coefficients at different pressures( P-x-y calculation routine)
+//Calculation of residual contribution term of activity coefficient
+//Calculation of combinatorial term of activity coefficient
+//Calculation of activity coefficients at different temperatures (T-x-y calculation routine)
+//Calculation of residual contribution term of activity coefficient
+//Calculation of combinatorial term of activity coefficient
+    end Gamma_UNIQUAC;
+
+    //================================================================================================
+    //Binary Phase Envelope
+    //Envelope Type : P-x-y
+    //Thermodynamic-Model : UNIQUAC
+    //Nature of System    : Azeotropic System
+    //========================================================================================
+
+    model P_x_y_UNIQUAC
+      //Libraries
+      import Simulator.*;
+      //Extension of Chemsep Database
+      Simulator.Files.Chemsep_Database data;
+      //Parameter Section
+      //Selection of compounds
+      parameter data.Water wat;
+      parameter data.Ethanol eth;
+      //Instantiation of selected compounds
+      parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {wat, eth};
+      parameter Integer NOC = 2 "Number of components";
+      parameter Integer Choice = 1 "System choice of Txy or Pxy";
+      parameter Real T(unit = "K") = 315 "System Temperature";
+      //Empherical parameter (towk) at different temperatures
+      //Note : The below value will be active only in the T-x-y phase envelope routine
+      Real towk[N + 1, NOC, NOC];
+      parameter Integer N = 40 "Number of points of data generation";
+      Real delta "Increment step";
+      parameter Real a[NOC, NOC] = Simulator.Files.Thermodynamic_Functions.BIP_UNIQUAC(NOC, comp.name) "Interaction Parameters";
+      //UNIQUAC parameters instantiated from Chemsep Database
+      parameter Real R[NOC] = comp.UniquacR;
+      parameter Real Q[NOC] = comp.UniquacQ;
+      //Variable Section
+      //Empherical Parameter (tow) at the system temperature
+      Real tow[NOC, NOC];
+      //Mole Fractions (x-axis) of the P-x-y plot
+      Real z1[N + 1], z2[N + 1];
+      //Activity coefficients at different Pressures
+      Real gammaBubl1[N + 1], gammaBubl2[N + 1];
+      //Bubble Pressure
+      Real P[N + 1](each unit = "Pa", each start = 776454);
+      //Distribution coefficient
+      Real K1[N + 1];
+      //Vapour Phase Mole Fraction
+      Real y1[N + 1](each start = 0.5), y2[N + 1](each start = 0.5);
+      //Vapour Pressure at the chosen temperature
+      Real Psat[NOC](unit = "Pa") "Vapour Pressure";
+      //=========================================================================================
+      //Equation Section
+    equation
+//Calculation of Vapour Pressure at the input temperature
+//Thermodynamic Function Psat is instantiated from Simulator Package
+      for i in 1:NOC loop
+        Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+      end for;
+//Calculation of increment step for the total number of points
+      delta = 1 / N;
+//Empherical parameter (towk) is assigned to 1 for P-x-y mode of operation
+      for k in 1:N + 1 loop
+        for i in 1:NOC loop
+          for j in 1:NOC loop
+            towk[k, i, j] = 1;
+          end for;
+        end for;
+      end for;
+//Calculation of Empherical parameter (tow) at the system temperature
+      tow = Simulator.Files.Thermodynamic_Functions.Tow_UNIQUAC(NOC, a, T);
+//Generation of mole fraction from 0 to 1 in steps of "delta"
+      z1[1] = 0;
+      for i in 2:N + 1 loop
+        z1[i] = z1[i - 1] + delta;
+      end for;
+      for i in 1:N + 1 loop
+        z2[i] = 1 - z1[i];
+      end for;
+//Calculation of Activity coefficients at different conditions using the function "Gamma_UNIQUAC"
+      (gammaBubl1, gammaBubl2) = Binary_Phase_Envelope_UNIQUAC.Gamma_UNIQUAC(Choice, N, NOC, z1, z2, R, Q, tow, towk);
+//Bubble point calculation
+      for i in 1:N + 1 loop
+        P[i] = gammaBubl1[i] * z1[i] * exp(comp[1].VP[2] + comp[1].VP[3] / T + comp[1].VP[4] * log(T) + comp[1].VP[5] * T ^ comp[1].VP[6]) + gammaBubl2[i] * z2[i] * exp(comp[2].VP[2] + comp[2].VP[3] / T + comp[2].VP[4] * log(T) + comp[2].VP[5] * T ^ comp[2].VP[6]);
+      end for;
+//Phase Equlibria
+      for i in 1:N + 1 loop
+        K1[i] = gammaBubl1[i] * (Psat[1] / P[i]);
+        y1[i] = K1[i] * z1[i];
+        y2[i] = 1 - y1[i];
+      end for;
+    end P_x_y_UNIQUAC;
+
+    //=====================================================================================================
+
+    model T_x_y_UNIQUAC
+      //Libraries
+      import Simulator.*;
+      //Extension of Chemsep database
+      Simulator.Files.Chemsep_Database data;
+      //Parameter Section
+      //Selection of compounds
+      parameter data.Water wat;
+      parameter data.Ethanol eth;
+      //Instantiation of selected compounds
+      parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {wat, eth};
+      parameter Integer Choice = 2 "System choice of Txy or Pxy";
+      parameter Integer NOC = 2 "Number of components";
+      parameter Real P(unit = "Pa") = 101325 "System Pressure";
+      parameter Integer N = 40 "Number of points of data generation";
+      //UNIQUAC Parameters
+      parameter Real R[NOC] = comp.UniquacR;
+      parameter Real Q[NOC] = comp.UniquacQ;
+      parameter Real a[NOC, NOC] = Simulator.Files.Thermodynamic_Functions.BIP_UNIQUAC(NOC, comp.name) "Interaction temperatures";
+      //Variable Section
+      Real delta "Increment step";
+      //Empherical parameter (towk) at different temperatures
+      //Note : The below value will be active only in the T-x-y phase envelope routine
+      Real towk[N + 1, NOC, NOC];
+      //Empherical Parameter (tow) at the system temperature
+      //Note : The below value will be active only in the P-x-y phase envelope routine
+      Real tow[NOC, NOC];
+      //Mole Fractions (x-axis) of the T-x-y plot
+      Real z1[N + 1], z2[N + 1];
+      //Bubble Temperature
+      Real T[N + 1](each unit = "K", each start = 300);
+      //Distribution coefficient
+      Real K1[N + 1];
+      //Vapour Phase Mole Fraction
+      Real y1[N + 1](each start = 0.5), y2[N + 1](each start = 0.5);
+      //Vapour Pressure at the chosen temperature range
+      Real Psat[N + 1, 1](each unit = "Pa");
+      //Activity coefficients at different Temperatures
+      Real gammaBubl1[N + 1], gammaBubl2[N + 1];
+      //Gas constant
+      parameter Real R_gas = 1.98721;
+      //=======================================================================================================
+      //Equation Section
+    equation
+//Calculation of increment step for the total number of points
+      delta = 1 / N;
+//Empherical parameter (towk) is calculated at different temperatures in the T-x-y mode of operation
+      for k in 1:N + 1 loop
+        for i in 1:NOC loop
+          for j in 1:NOC loop
+            towk[k, i, j] = exp(-a[i, j] / (R_gas * T[k]));
+          end for;
+        end for;
+      end for;
+//Empherical parameter (tow) is assigned to 1 for T-x-y mode of operation
+      for i in 1:NOC loop
+        for j in 1:NOC loop
+          tow[i, j] = 1;
+        end for;
+      end for;
+//Generation of mole fraction from 0 to 1 in steps of "delta"
+      z1[1] = 0;
+      for i in 2:N + 1 loop
+        z1[i] = z1[i - 1] + delta;
+      end for;
+      for i in 1:N + 1 loop
+        z2[i] = 1 - z1[i];
+      end for;
+//Calculation of Activity coefficients at different conditions using the function "Gamma_UNIQUAC"
+      (gammaBubl1, gammaBubl2) = Binary_Phase_Envelope_UNIQUAC.Gamma_UNIQUAC(Choice, N, NOC, z1, z2, R, Q, tow, towk);
+//Bubble point calculation
+      for i in 1:N + 1 loop
+        P = gammaBubl1[i] * z1[i] * exp(comp[1].VP[2] + comp[1].VP[3] / T[i] + comp[1].VP[4] * log(T[i]) + comp[1].VP[5] * T[i] ^ comp[1].VP[6]) + gammaBubl2[i] * z2[i] * exp(comp[2].VP[2] + comp[2].VP[3] / T[i] + comp[2].VP[4] * log(T[i]) + comp[2].VP[5] * T[i] ^ comp[2].VP[6]);
+      end for;
+//Phase Equilibria
+      for i in 1:N + 1 loop
+        K1[i] = gammaBubl1[i] * (Psat[i, 1] / P);
+        y1[i] = K1[i] * z1[i];
+        y2[i] = 1 - y1[i];
+      end for;
+//Calculation of vapour pressures at different temperatures
+      for i in 1:N + 1 loop
+        Psat[i, 1] = Simulator.Files.Thermodynamic_Functions.Psat(comp[1].VP, T[i]);
+      end for;
+    end T_x_y_UNIQUAC;
+
+    //================================================================================================
+    //==============================================================================================================
+    //================================================================================================================
+  end Binary_Phase_Envelope_UNIQUAC;
+
+  package Binary_Phase_Envelope_UNIFAC
+    model P_x_y_UNIFAC
+      //Libraries
+      import Simulator.*;
+      //Extension of Chemsep Database
+      Simulator.Files.Chemsep_Database data;
+      //Parameter Section
+      //Selection of compounds
+      parameter data.Methylethylketone meth;
+      parameter data.Aceticacid eth;
+      //Instantiation of selected compounds
+      parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {meth, eth};
+      parameter Integer NOC = 2 "Number of components";
+      parameter Integer Choice = 1 "System choice of Txy or Pxy";
+      parameter Real T(unit = "K") = 375 "System Temperature";
+      parameter Integer N = 40 "Number of points of data generation";
+      parameter Integer m = 4 "Interaction parameter index";
+      parameter Integer k = 4 "Number of Functional groups present in the compound";
+      parameter Real a[m, k] = {{0, 0, 476.4, 663.5}, {0, 0, 476.4, 663.5}, {26.76, 26.76, 0, 669.4}, {315.3, 315.3, -297.8, 0}} "Binary  intraction parameter";
+      parameter Real V[NOC, k] = {{1, 1, 1, 0}, {1, 0, 0, 1}} "Number of group of kind k in molecule ";
+      parameter Real R[NOC, k] = {{0.9011, 0.6744, 1.6724, 0.0}, {0.9011, 0, 0, 1.3013}} "Group volume of group k ";
+      parameter Real Q[NOC, k] = {{0.848, 0.540, 1.448, 0}, {0.848, 0, 0, 1.224}} "Group surface area of group k";
+      //Gas constant
+      parameter Real R_gas = 1.98721;
+      //Variable Section
+      Real delta "Increment step";
+      Real e[k, NOC];
+      Real B[NOC, k];
+      Real q[NOC] "Van der waal molecular surface area";
+      Real r[NOC] "Van der waal molecular volume";
+      Real tow[m, k] "Empherical Parameter (tow) at the system temperature";
+      //Mole Fractions (x-axis) of the P-x-y plot
+      Real z1[N + 1], z2[N + 1];
+      //Intermediate parameters used to calculate the Combinatorial contribution"
+      Real J1_bubl[N + 1], J2_bubl[N + 1];
+      Real L1_bubl[N + 1], L2_bubl[N + 1];
+      Real gammac1_bubl[N + 1], gammac2_bubl[N + 1];
+      //Intermediate parameters used to calculate the Residual contribution"
+      Real teta1_bubl[N + 1, k];
+      Real S1_bubl[N + 1, k];
+      Real sum1_bubl[N + 1, k], sum2_bubl[N + 1, k];
+      Real sum_bubl[N + 1], summ_bubl[N + 1];
+      Real gammar1_bubl[N + 1], gammar2_bubl[N + 1];
+      //Activity coefficients at different Pressures
+      Real gammaBubl1[N + 1](each start = 0.5), gammaBubl2[N + 1];
+      //Bubble Pressure
+      Real P[N + 1](each unit = "Pa", each start = 117018);
+      //Distribution coefficient
+      Real K1[N + 1];
+      //Vapour Phase Mole Fraction
+      Real y1[N + 1](each start = 0.5), y2[N + 1](each start = 0.5);
+      //Vapour Pressure at the chosen temperature
+      Real Psat[NOC](each unit = "Pa") "Vapour Pressure";
+      //===========================================================================================
+      //Equation Section
+    equation
+//Calculation of Vapour Pressure at the input temperature
+//Thermodynamic Function Psat is instantiated from Simulator Package
+      for i in 1:NOC loop
+        Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+      end for;
+//Calculation of increment step for the total number of points
+      delta = 1 / N;
+//Calculation of Unifac parameter R and Q for the induvidual compounds
+      for i in 1:NOC loop
+        for j in 1:k loop
+          B[i, j] = sum(e[:, i] .* tow[:, j]);
+        end for;
+      end for;
+      for i in 1:NOC loop
+        r[i] = sum(V[i, :] .* R[i, :]);
+        q[i] = sum(V[i, :] .* Q[i, :]);
+        e[:, i] = V[i, :] .* Q[i, :] / q[i];
+      end for;
+//Calculation of Empherical parameter (tow) at the system temperature
+      for i in 1:m loop
+        tow[i, :] = exp((-a[i, :]) / T);
+      end for;
+//Generation of mole fraction from 0 to 1 in steps of "delta"
+      z1[1] = 0;
+      for i in 2:N + 1 loop
+        z1[i] = z1[i - 1] + delta;
+      end for;
+      for i in 1:N + 1 loop
+        z2[i] = 1 - z1[i];
+      end for;
+//Calculation of combinatorial contribution parameter used to compute activity coefficient at the corresponding compositions
+      for i in 1:N + 1 loop
+        J1_bubl[i] = r[1] / (r[1] * z1[i] + r[2] * z2[i]);
+        J2_bubl[i] = r[2] / (r[1] * z1[i] + r[2] * z2[i]);
+        L1_bubl[i] = q[1] / (q[1] * z1[i] + q[2] * z2[i]);
+        L2_bubl[i] = q[2] / (q[1] * z1[i] + q[2] * z2[i]);
+        gammac1_bubl[i] = exp(1 - J1_bubl[i] + log(J1_bubl[i]) + (-5 * q[1] * (1 - J1_bubl[i] / L1_bubl[i] + log(J1_bubl[i] / L1_bubl[i]))));
+        gammac2_bubl[i] = exp(1 - J2_bubl[i] + log(J2_bubl[i]) + (-5 * q[2] * (1 - J2_bubl[i] / L2_bubl[i] + log(J2_bubl[i] / L2_bubl[i]))));
+      end for;
+//Calculation of residual contribution parameter used to compute activity coefficient at the corresponding compositions
+      for i in 1:N + 1 loop
+        teta1_bubl[i, :] = (z1[i] * q[1] .* e[:, 1] + z2[i] * q[2] .* e[:, 2]) / (z1[i] * q[1] + z2[i] * q[2]);
+      end for;
+      for i in 1:N + 1 loop
+        for j in 1:k loop
+          S1_bubl[i, j] = sum(teta1_bubl[i, :] .* tow[:, j]);
+          sum1_bubl[i, j] = teta1_bubl[i, j] * B[1, j] / S1_bubl[i, j] - e[j, 1] * log(B[1, j] / S1_bubl[i, j]);
+          sum2_bubl[i, j] = teta1_bubl[i, j] * B[2, j] / S1_bubl[i, j] - e[j, 2] * log(B[2, j] / S1_bubl[i, j]);
+        end for;
+      end for;
+      for i in 1:N + 1 loop
+        gammar1_bubl[i] = exp(q[1] * (1 - sum_bubl[i]));
+        gammar2_bubl[i] = exp(q[2] * (1 - summ_bubl[i]));
+        sum_bubl[i] = sum(sum1_bubl[i, :]);
+        summ_bubl[i] = sum(sum2_bubl[i, :]);
+        gammaBubl1[i] = exp(log(gammac1_bubl[i]) + log(gammar1_bubl[i]));
+        gammaBubl2[i] = exp(log(gammac2_bubl[i]) + log(gammar2_bubl[i]));
+      end for;
+//Bubble point calculation
+      for i in 1:N + 1 loop
+        P[i] = gammaBubl1[i] * z1[i] * exp(comp[1].VP[2] + comp[1].VP[3] / T + comp[1].VP[4] * log(T) + comp[1].VP[5] * T ^ comp[1].VP[6]) + gammaBubl2[i] * z2[i] * exp(comp[2].VP[2] + comp[2].VP[3] / T + comp[2].VP[4] * log(T) + comp[2].VP[5] * T ^ comp[2].VP[6]);
+      end for;
+//Phase Equilibria
+      for i in 1:N + 1 loop
+        K1[i] = gammaBubl1[i] * (Psat[1] / P[i]);
+        y1[i] = K1[i] * z1[i];
+        y2[i] = 1 - y1[i];
+      end for;
+    end P_x_y_UNIFAC;
+
+    //====================================================================================================
+
+    model T_x_y_UNIFAC
+      //Libraries
+      import Simulator.*;
+      //Extension of Chemsep Database
+      Simulator.Files.Chemsep_Database data;
+      //Parameter Section
+      //Selection of compounds
+      parameter data.Methylethylketone meth;
+      parameter data.Aceticacid eth;
+      //Instantiation of selected compounds
+      parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {meth, eth};
+      parameter Real Z = 10 "Compressiblity Factor";
+      parameter Integer Choice = 2 "System choice of Txy or Pxy";
+      parameter Integer NOC = 2 "Number of components";
+      parameter Real P(unit = "Pa") = 101325 "System Pressure";
+      parameter Integer N = 40 "Number of points of data generation";
+      parameter Integer m = 4 "Interaction parameter index", k = 4 "Number of Functional groups present in the compound";
+      parameter Real a[m, k] = {{0, 0, 476.4, 663.5}, {0, 0, 476.4, 663.5}, {26.76, 26.76, 0, 669.4}, {315.3, 315.3, -297.8, 0}} "Binary  intraction parameter";
+      parameter Real V[NOC, k] = {{1, 1, 1, 0}, {1, 0, 0, 1}} "number of group of kind k in molecule ";
+      parameter Real R[NOC, k] = {{0.9011, 0.6744, 1.6724, 0.0}, {0.9011, 0, 0, 1.3013}} "group volume of group k ";
+      parameter Real Q[NOC, k] = {{0.848, 0.540, 1.448, 0}, {0.848, 0, 0, 1.224}} "group surface area of group k";
+      //Gas constant
+      parameter Real R_gas = 1.98721;
+      //Variable Section
+      Real delta "Increment step";
+      Real e[k, NOC];
+      Real B[N + 1, NOC, k];
+      Real q[NOC] "van der walls molecular surface area";
+      Real r[NOC] "van der walls molecular volume";
+      //Empherical parameter (tow) at different temperatures
+      Real tow[N + 1, m, k];
+      //Intermediate parameters used to calculate the Combinatorial contribution"
+      Real J1_bubl[N + 1], J2_bubl[N + 1];
+      Real L1_bubl[N + 1], L2_bubl[N + 1];
+      Real gammac1_bubl[N + 1], gammac2_bubl[N + 1];
+      //Intermediate parameters used to calculate the Residual contribution"
+      Real teta1_bubl[N + 1, k];
+      Real S1_bubl[N + 1, k];
+      Real sum1_bubl[N + 1, k], sum2_bubl[N + 1, k];
+      Real sum_bubl[N + 1], summ_bubl[N + 1];
+      Real gammar1_bubl[N + 1], gammar2_bubl[N + 1];
+      //Activity coefficients at different Temperatures
+      Real gammaBubl1[N + 1](each start = 0.5), gammaBubl2[N + 1];
+      //Mole Fractions (x-axis) of the T-x-y plot
+      Real z1[N + 1], z2[N + 1];
+      //Bubble Temperature
+      Real T[N + 1](unit = "K", each start = 300);
+      //Distribution coefficient
+      Real K1[N + 1];
+      //Vapour Phase Mole Fraction
+      Real y1[N + 1](each start = 0.5), y2[N + 1](each start = 0.5);
+      //Vapour Pressure at the chosen temperature range
+      Real Psat[N + 1, 1];
+      //======================================================================================================
+    equation
+//Calculation of increment step for the total number of points
+      delta = 1 / N;
+//Calculation of vapour pressures at different temperatures
+      for i in 1:N + 1 loop
+        Psat[i, 1] = Simulator.Files.Thermodynamic_Functions.Psat(comp[1].VP, T[i]);
+      end for;
+//Generation of mole fraction from 0 to 1 in steps of "delta"
+      z1[1] = 0;
+      for i in 2:N + 1 loop
+        z1[i] = z1[i - 1] + delta;
+      end for;
+      for i in 1:N + 1 loop
+        z2[i] = 1 - z1[i];
+      end for;
+//Calculation of r and q for compounds
+      for l in 1:N + 1 loop
+        for i in 1:NOC loop
+          for j in 1:k loop
+            B[l, i, j] = sum(e[:, i] .* tow[l, :, j]);
+          end for;
+        end for;
+      end for;
+      for i in 1:NOC loop
+        r[i] = sum(V[i, :] .* R[i, :]);
+        q[i] = sum(V[i, :] .* Q[i, :]);
+        e[:, i] = V[i, :] .* Q[i, :] / q[i];
+      end for;
+//Empherical parameter (towk) is calculated at different temperatures in the T-x-y mode of operation
+      for j in 1:N + 1 loop
+        for i in 1:m loop
+          tow[j, i, :] = exp((-a[i, :]) / T[j]);
+        end for;
+      end for;
+//Calculation of combinatorial contribution parameter used to compute activity coefficient at the corresponding compositions
+      for i in 1:N + 1 loop
+        J1_bubl[i] = r[1] / (r[1] * z1[i] + r[2] * z2[i]);
+        J2_bubl[i] = r[2] / (r[1] * z1[i] + r[2] * z2[i]);
+        L1_bubl[i] = q[1] / (q[1] * z1[i] + q[2] * z2[i]);
+        L2_bubl[i] = q[2] / (q[1] * z1[i] + q[2] * z2[i]);
+        gammac1_bubl[i] = exp(1 - J1_bubl[i] + log(J1_bubl[i]) + (-5 * q[1] * (1 - J1_bubl[i] / L1_bubl[i] + log(J1_bubl[i] / L1_bubl[i]))));
+        gammac2_bubl[i] = exp(1 - J2_bubl[i] + log(J2_bubl[i]) + (-5 * q[2] * (1 - J2_bubl[i] / L2_bubl[i] + log(J2_bubl[i] / L2_bubl[i]))));
+      end for;
+//Calculation of residual contribution parameter used to compute activity coefficient at the corresponding compositions
+      for i in 1:N + 1 loop
+        teta1_bubl[i, :] = (z1[i] * q[1] .* e[:, 1] + z2[i] * q[2] .* e[:, 2]) / (z1[i] * q[1] + z2[i] * q[2]);
+      end for;
+      for i in 1:N + 1 loop
+        for j in 1:k loop
+          S1_bubl[i, j] = sum(teta1_bubl[i, :] .* tow[i, :, j]);
+        end for;
+      end for;
+      for i in 1:N + 1 loop
+        for j in 1:k loop
+          sum1_bubl[i, j] = teta1_bubl[i, j] * B[i, 1, j] / S1_bubl[i, j] - e[j, 1] * log(B[i, 1, j] / S1_bubl[i, j]);
+          sum2_bubl[i, j] = teta1_bubl[i, j] * B[i, 2, j] / S1_bubl[i, j] - e[j, 2] * log(B[i, 2, j] / S1_bubl[i, j]);
+        end for;
+      end for;
+      for i in 1:N + 1 loop
+        gammar1_bubl[i] = exp(q[1] * (1 - sum_bubl[i]));
+        gammar2_bubl[i] = exp(q[2] * (1 - summ_bubl[i]));
+        sum_bubl[i] = sum(sum1_bubl[i, :]);
+        summ_bubl[i] = sum(sum2_bubl[i, :]);
+        gammaBubl1[i] = exp(log(gammac1_bubl[i]) + log(gammar1_bubl[i]));
+        gammaBubl2[i] = exp(log(gammac2_bubl[i]) + log(gammar2_bubl[i]));
+      end for;
+//Bubble point calculation
+      for i in 1:N + 1 loop
+        P = gammaBubl1[i] * z1[i] * exp(comp[1].VP[2] + comp[1].VP[3] / T[i] + comp[1].VP[4] * log(T[i]) + comp[1].VP[5] * T[i] ^ comp[1].VP[6]) + gammaBubl2[i] * z2[i] * exp(comp[2].VP[2] + comp[2].VP[3] / T[i] + comp[2].VP[4] * log(T[i]) + comp[2].VP[5] * T[i] ^ comp[2].VP[6]);
+      end for;
+//Phase Equlibria
+      for i in 1:N + 1 loop
+        K1[i] = gammaBubl1[i] * (Psat[i, 1] / P);
+        y1[i] = K1[i] * z1[i];
+        y2[i] = 1 - y1[i];
+      end for;
+    end T_x_y_UNIFAC;
+
+    //================================================================================================================
+  end Binary_Phase_Envelope_UNIFAC;
+
+  package Binary_Phase_Envelope_PR
+    function Compresseblity_Factor
+      input Real b[NOC];
+      input Real aij[NOC, NOC];
+      input Real P;
+      input Real T;
+      input Integer NOC;
+      input Real m[NOC];
+      output Real am;
+      output Real bm;
+      output Real A;
+      output Real B;
+      output Real Z[3];
+    protected
+      Real R = 8.314;
+      Real C[4];
+      Real ZR[3, 2];
+    algorithm
+      am := sum({{m[i] * m[j] * aij[i, j] for i in 1:NOC} for j in 1:NOC});
+      bm := sum(b .* m);
+      A := am * P / (R * T) ^ 2;
+      B := bm * P / (R * T);
+      C[1] := 1;
+      C[2] := B - 1;
+      C[3] := A - 3 * B ^ 2 - 2 * B;
+      C[4] := B ^ 3 + B ^ 2 - A * B;
+      ZR := Modelica.Math.Vectors.Utilities.roots(C);
+      Z := {ZR[i, 1] for i in 1:3};
+    end Compresseblity_Factor;
+
+    model PR
+      parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
+      parameter Integer NOC;
+      parameter Real R = 8.314;
+      parameter Real kij[NOC, NOC] = Simulator.Files.Thermodynamic_Functions.BIP_PR(NOC, comp.name);
+      Real Tr[NOC];
+      Real b[NOC];
+      Real m[NOC];
+      Real q[NOC];
+      Real a[NOC];
+      Real aij[NOC, NOC];
+      Real amL, bmL;
+      Real AL, BL, Z_L[3];
+      Real ZL;
+      Real sum_xa[NOC];
+      Real liqfugcoeff[NOC];
+      Real amV, bmV;
+      Real AV, BV, Z_V[3];
+      Real ZV;
+      Real sum_ya[NOC];
+      Real vapfugcoeff[NOC];
+      Real P;
+      Real T(start = 273);
+      Real Psat[NOC];
+      //Bubble and Dew Point Calculation
+      Real Tr_bubl[NOC];
+      Real a_bubl[NOC];
+      Real aij_bubl[NOC, NOC];
+      Real Psat_bubl[NOC];
+      Real amL_bubl, bmL_bubl;
+      Real AL_bubl, BL_bubl, Z_L_bubl[3];
+      Real ZL_bubl;
+      Real sum_xa_bubl[NOC];
+      Real liqfugcoeff_bubl[NOC];
+      Real gammaBubl[NOC];
+      Real Tbubl(start = 273);
+    equation
+      for i in 1:NOC loop
+        Psat_bubl[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, Tbubl);
+        Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+      end for;
+//Bubble Point and Dew Point Calculation Routine
+      Tr_bubl = Tbubl ./ comp.Tc;
+      a_bubl = q .* (1 .+ m .* (1 .- sqrt(Tr_bubl))) .^ 2;
+      aij_bubl = {{(1 - kij[i, j]) * sqrt(a_bubl[i] * a_bubl[j]) for i in 1:NOC} for j in 1:NOC};
+      (amL_bubl, bmL_bubl, AL_bubl, BL_bubl, Z_L_bubl) = Compresseblity_Factor(b, aij_bubl, P, Tbubl, NOC, x[:]);
+      ZL_bubl = min({Z_L_bubl});
+      sum_xa_bubl = {sum({x[j] * aij_bubl[i, j] for j in 1:NOC}) for i in 1:NOC};
+      liqfugcoeff_bubl = exp(AL_bubl / (BL_bubl * sqrt(8)) * log((ZL_bubl + 2.4142135 * BL_bubl) / (ZL_bubl - 0.414213 * BL_bubl)) .* (b / bmL_bubl .- 2 * sum_xa_bubl / amL_bubl) .+ (ZL_bubl - 1) * (b / bmL_bubl) .- log(ZL_bubl - BL_bubl));
+      liqfugcoeff_bubl[:] = gammaBubl[:] .* P ./ Psat_bubl[:];
+      P = sum(gammaBubl[:] .* x[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+//Calculation of Temperatures at different compositions
+      Tr = T ./ comp.Tc;
+      b = 0.0778 * R * comp.Tc ./ comp.Pc;
+      m = 0.37464 .+ 1.54226 * comp.AF .- 0.26992 * comp.AF .^ 2;
+      q = 0.45724 * R ^ 2 * comp.Tc .^ 2 ./ comp.Pc;
+      a = q .* (1 .+ m .* (1 .- sqrt(Tr))) .^ 2;
+      aij = {{(1 - kij[i, j]) * sqrt(a[i] * a[j]) for i in 1:NOC} for j in 1:NOC};
+//Liquid Phase Calculation Routine
+      (amL, bmL, AL, BL, Z_L) = Compresseblity_Factor(b, aij, P, T, NOC, x[:]);
+      ZL = min({Z_L});
+      sum_xa = {sum({x[j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
+      liqfugcoeff = exp(AL / (BL * sqrt(8)) * log((ZL + 2.4142135 * BL) / (ZL - 0.414213 * BL)) .* (b / bmL .- 2 * sum_xa / amL) .+ (ZL - 1) * (b / bmL) .- log(ZL - BL));
+//Vapour Phase Calculation Routine
+      (amV, bmV, AV, BV, Z_V) = Compresseblity_Factor(b, aij, P, T, NOC, y[:]);
+      ZV = max({Z_V});
+      sum_ya = {sum({y[j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
+      vapfugcoeff = exp(AV / (BV * sqrt(8)) * log((ZV + 2.4142135 * BV) / (ZV - 0.414213 * BV)) .* (b / bmV .- 2 * sum_ya / amV) .+ (ZV - 1) * (b / bmV) .- log(ZV - BV));
+    end PR;
+
+    model Phase_Equilibria
+      import data = Simulator.Files.Chemsep_Database;
+      parameter data.Ethane eth;
+      parameter data.Propane prop;
+      extends PR(NOC = 2, comp = {eth, prop});
+      Real P, T(start = 273), K[NOC], x[NOC](each start = 0.5), y[NOC], Tbubl(start = 273);
+    equation
+      K[:] = liqfugcoeff[:] ./ vapfugcoeff[:];
+      y[:] = K[:] .* x[:];
+      sum(x[:]) = 1;
+      sum(y[:]) = 1;
+    end Phase_Equilibria;
+
+    model Peng_Robinson_Pxy
+      import data = Simulator.Files.Chemsep_Database;
+      parameter data.Ethane eth;
+      parameter data.Propane prop;
+      parameter Integer NOC = 2;
+      parameter Integer N = 2;
+      parameter data.General_Properties comp[NOC] = {eth, prop};
+      Phase_Equilibria points[N](each T = 210, each NOC = NOC, each comp = comp, each T(start = 273), each Tbubl(start = 273), each x(each start = 0.5), each y(each start = 0.5));
+      Real x1[N], y1[N], x2[N], y2[N], P[N](each start = 101325), Tbubl[N], Temp[N];
+    equation
+//Generation of Points to compute Bubble Temperature
+      points[:].x[1] = x1[:];
+      points[:].y[1] = y1[:];
+      points[:].x[2] = x2[:];
+      points[:].y[2] = y2[:];
+      points[:].P = P;
+      points[:].Tbubl = Tbubl;
+      Temp[1] = Tbubl[1];
+      Temp[N] = Tbubl[N];
+      for i in 2:N - 1 loop
+        Temp[i] = points[i].T;
+      end for;
+      for i in 1:N loop
+        x1[i] = 0.5 + (i - 1) * 0.025;
+      end for;
+    end Peng_Robinson_Pxy;
+
+    model Peng_Robinson_Txy
+      import data = Simulator.Files.Chemsep_Database;
+      parameter data.Ethane eth;
+      parameter data.Propane prop;
+      parameter Integer NOC = 2;
+      parameter Integer N = 1;
+      parameter data.General_Properties comp[NOC] = {eth, prop};
+      Phase_Equilibria points[N](each P = 101325, each NOC = NOC, each comp = comp, each T(start = 273), each Tbubl(start = 273), each x(each start = 0.5), each y(each start = 0.5));
+      Real x[N, NOC], y[N, NOC], T[N], Tbubl[N], T_PR[N];
+    equation
+      points[:].x = x;
+      points[:].y = y;
+      points[:].T = T;
+      points[:].Tbubl = Tbubl;
+      T_PR[1] = Tbubl[1];
+      T_PR[N] = Tbubl[N];
+      for i in 2:N - 1 loop
+        T_PR[i] = T[i];
+      end for;
+      for i in 1:N loop
+        x[i, 1] = 0 + (i - 1) * 0.025;
+      end for;
+    end Peng_Robinson_Txy;
+  end Binary_Phase_Envelope_PR;
+end Binary_Phase_Envelope;
 
 
 end Simulator;

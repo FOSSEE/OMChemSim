@@ -2211,10 +2211,11 @@ end Chemsep_Database;
 model Raoults_Law
  import Simulator.Files.Thermodynamic_Functions.*;
  Real K[NOC](each min = 0), resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
- Real gammaBubl[NOC], gammaDew[NOC];
+ Real gamma[NOC], gammaBubl[NOC], gammaDew[NOC];
  Real liqfugcoeff_bubl[NOC], vapfugcoeff_dew[NOC],Psat[NOC];
 equation
  for i in 1:NOC loop
+   gamma[i] = 1;
    gammaBubl[i] = 1;
    gammaDew[i] = 1;
    liqfugcoeff_bubl[i] = 1;
@@ -2231,6 +2232,7 @@ end for;
  resMolEnth[:] = zeros(3);
  resMolEntr[:] = zeros(3);
 end Raoults_Law;
+
 
 
 
@@ -3438,23 +3440,28 @@ equation
 //below bubble point region
     compMolFrac[3, :] = zeros(NOC);
     sum(compMolFrac[2, :]) = 1;
-  elseif P <= Pdew then
-//above dew point region
-    compMolFrac[2, :] = zeros(NOC);
-    sum(compMolFrac[3, :]) = 1;
-  else
+//  elseif P <= Pdew then
+////above dew point region
+//    compMolFrac[2, :] = zeros(NOC);
+//    sum(compMolFrac[3, :]) = 1;
+  elseif P >= Pdew then
 //VLE region
     for i in 1:NOC loop
       compMolFrac[3, i] = K[i] * compMolFrac[2, i];
     end for;
     sum(compMolFrac[3, :]) = 1;
 //sum y = 1
+  else
+//above dew point region
+    compMolFrac[2, :] = zeros(NOC);
+    sum(compMolFrac[3, :]) = 1;
   end if;
 algorithm
   for i in 1:NOC loop
     MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
   end for;
 end Material_Stream;
+
 
 
 
@@ -3486,9 +3493,11 @@ end Material_Stream;
       Real inTotMolEnth[NI] "Inlet molar enthalpy of each stream", outTotMolEnth "Outlet molar enthalpy";
       Real inT[NI] "Temperature of each stream", outT "Temperature of outlet stream", inTotMolEntr[NI] "Inlet molar enthalpy of each stream", outTotMolEntr "Outlet molar entropy", inVapPhasMolFrac[NI](each min = 0, each max = 1) "Inlet vapor phase mol fraction", outVapPhasMolFrac(min = 0, max = 1) "Outlet vapor phase mol fraction";
       //================================================================================
-      Files.Connection.matConn inlet[NI](each connNOC = NOC);
-      Files.Connection.matConn outlet(connNOC = NOC) annotation(
-        Placement(visible = true, transformation(origin = {98, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {98, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    //  Files.Connection.matConn inlet[NI](each connNOC = NOC);
+      Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
+        Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  Files.Connection.matConn inlet[NI](each connNOC = NOC) annotation(
+        Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     equation
 //Connector equation
       for i in 1:NI loop
@@ -3524,6 +3533,8 @@ end Material_Stream;
 //Energy balance
       outTotMolEnth = sum(inTotMolEnth[:] .* inMolFlo[:] / outMolFlo);
     end Mixer;
+
+
 
     model Heater
       // This is generic heater model. For using this model we need to extend this model and incorporte ouput material stream since this model is not doing any flash calculations. Refer heater models in Test section for this.
@@ -3915,14 +3926,17 @@ end Material_Stream;
       vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
     end Flash;
 
+
     model Splitter
       parameter Integer NOC = 2 "number of Components", NO = 2 "number of outputs";
       parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
       Real inP "inlet pressure", inT "Inlet Temperature", outP[NO] "Outlet Pressure", outT[NO] "Outlet Temperature", inMixMolFrac[NOC](each min = 0, each max = 1) "inlet Mixture Mole Fraction", outMixMolFrac[NO, NOC](each min = 0, each max = 1) "Outlet Mixture Molar Fraction", splRat[NO](each min = 0, each max = 1) "Split ratio", MW(each min = 0) "Stream molecular weight", inMixMolFlo(each min = 0) "inlet Mixture Molar Flow", outMixMolFlo[NO](each min = 0) "Outlet Mixture Molar Flow", outMixMasFlo[NO](each min = 0) "Outlet Mixture Mass Flow", specVal[NO] "Specification value";
       parameter String calcType "Split_Ratio, Mass_Flow or Molar_Flow";
-      Simulator.Files.Connection.matConn outlet[NO](each connNOC = NOC);
+    //  Simulator.Files.Connection.matConn outlet[NO](each connNOC = NOC);
       Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
-        Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-116, -20}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn outlet[NO](each connNOC = NOC) annotation(
+        Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     equation
 //Connector equations
       inlet.P = inP;
@@ -3957,6 +3971,11 @@ end Material_Stream;
         MW := MW + comp[i].MW * inMixMolFrac[i];
       end for;
     end Splitter;
+
+
+
+
+
 
     model Centrifugal_Pump
       parameter Integer NOC = 2 "Number of Components";
@@ -4107,6 +4126,75 @@ end Material_Stream;
       mixMolFrac[:] = compMolFrac[1, :];
     end Adiabatic_Expander;
     
+    
+    model Conversion_Reactor
+      //This is generic conversion reactor model. we need to extend reaction manager model with this model for using this model.
+      parameter Real X[Nr] = fill(0.4, Nr) "Conversion of base component";
+      parameter Integer NOC "Number of components";
+      parameter Real pressDrop = 0 "pressure drop";
+      parameter Real Tdef = 300 "Defined outlet temperature, only applicable if define outlet temperature mode is chosen";
+      parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
+      parameter String calcMode = "Isothermal" "Isothermal, Define_Outlet_Temperature, Adiabatic; choose the required operation";
+      Real inMolFlo"Inlet Molar Flowrate";
+      Real outMolFlo"Outlet Molar Flowrate";
+      Real inCompMolFrac[NOC](each min = 0, max = 1) "Inlet component Mole Fraction";
+      Real outCompMolFrac[NOC](each min = 0, max = 1) "Outlet component Mole Fraction";
+      Real inMixMolEnth "Inlet Molar Enthalpy";
+      Real outMixMolEnth "Outlet Molar Enthalpy";
+      Real inP "Inlet pressure";
+      Real outP "Outlet pressure";
+      Real inT "Inlet Temperature";
+      Real outT "Outlet Temperature";
+      Real N[NOC, Nr]"Number of moles of components after reactions";
+      Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
+        Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
+        Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Simulator.Files.Connection.enConn energy annotation(
+        Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    equation
+      inlet.P = inP;
+      inlet.T = inT;
+      inlet.mixMolFlo = inMolFlo;
+      inlet.mixMolEnth = inMixMolEnth;
+      inlet.mixMolFrac[:] = inCompMolFrac[:];
+      outlet.P = outP;
+      outlet.T = outT;
+      outlet.mixMolFlo = outMolFlo;
+      outlet.mixMolEnth = outMixMolEnth;
+      outlet.mixMolFrac[:] = outCompMolFrac[:];
+      
+      //Reactor equations
+      for i in 1:NOC loop
+        N[i, 1] = inMolFlo * inCompMolFrac[i] - Sc[i, 1] / Sc[Bc[1], 1] * inMolFlo * inCompMolFrac[Bc[1]] * X[1];
+      end for;
+      if Nr > 1 then
+        for j in 2:Nr loop
+          for i in 1:NOC loop
+            N[i, j] = N[i, j - 1] - Sc[i, j] / Sc[Bc[j], j] * inMolFlo * inCompMolFrac[Bc[j]] * X[j];
+          end for;
+        end for;
+      end if;
+      outMolFlo = sum(N[:, Nr]);
+      for i in 1:NOC loop
+        outCompMolFrac[i] = N[i, Nr] / outMolFlo;
+      end for;
+      
+      inP - pressDrop = outP;
+      if calcMode == "Isothermal" then
+        inT = outT;
+        energy.enFlo = outMixMolEnth * outMolFlo - inMixMolEnth * inMolFlo;
+      elseif calcMode == "Adiabatic" then
+        outMixMolEnth * outMolFlo = inMixMolEnth * inMolFlo;
+        energy.enFlo = 0;
+      elseif calcMode == "Define_Outlet_Temperature" then
+        outT = Tdef;
+        energy.enFlo = outMixMolEnth * outMolFlo - inMixMolEnth * inMolFlo;
+      end if;
+    
+    end Conversion_Reactor;
+
+
     
   
   package PF_Reactor
@@ -5405,16 +5493,22 @@ end Material_Stream;
         Simulator.Unit_Operations.Splitter split(NOC = NOC, comp = comp, NO = 2, calcType = "Molar_Flow") annotation(
           Placement(visible = true, transformation(origin = {-12, 12}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
+        connect(outlet2.inlet, split.outlet[2]) annotation(
+          Line(points = {{28, -58}, {16, -58}, {16, 12}, {-2, 12}, {-2, 12}}));
+        connect(outlet1.inlet, split.outlet[1]) annotation(
+          Line(points = {{28, 56}, {12, 56}, {12, 12}, {-2, 12}, {-2, 12}}));
         connect(inlet.outlet, split.inlet) annotation(
           Line(points = {{-70, 10}, {-24, 10}, {-24, 10}, {-24, 10}}));
-        connect(split.outlet[1], outlet1.inlet);
-        connect(split.outlet[2], outlet2.inlet);
+      //  connect(split.outlet[1], outlet1.inlet);
+      //  connect(split.outlet[2], outlet2.inlet);
         inlet.P = 101325;
         inlet.T = 300;
         inlet.compMolFrac[1, :] = {0.5, 0.5};
         inlet.totMolFlo[1] = 100;
         split.specVal = {20, 80};
       end main;
+
+
     end split;
 
     package pump
@@ -5810,6 +5904,45 @@ package PFR_Test
   end PFR_Test_II;
   
   end PFR_Test;
+
+    package CR_test
+      model ms
+        extends Simulator.Streams.Material_Stream;
+        extends Simulator.Files.Thermodynamic_Packages.NRTL;
+      end ms;
+
+      model test
+        import data = Simulator.Files.Chemsep_Database;
+        parameter Integer NOC = 4;
+        parameter data.Ethylacetate etac;
+        parameter data.Water wat;
+        parameter data.Aceticacid aa;
+        parameter data.Ethanol eth;
+        parameter data.General_Properties comp[NOC] = {etac, wat, aa, eth};
+        conv_react cr(NOC = NOC, comp = comp, Nr = 1, Bc = {3}, Sc = {{1}, {1}, {-1}, {-1}}, X = {0.3}, calcMode = "Define_Outlet_Temperature", Tdef = 300) annotation(
+          Placement(visible = true, transformation(origin = {11, -7}, extent = {{-29, -29}, {29, 29}}, rotation = 0)));
+        CR_test.ms feed(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {-83, -5}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
+        CR_test.ms product(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {88, -6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      equation
+        connect(cr.outlet, product.inlet) annotation(
+          Line(points = {{32, -6}, {78, -6}}));
+        connect(feed.outlet, cr.inlet) annotation(
+          Line(points = {{-70, -6}, {-8, -6}, {-8, -6}, {-10, -6}}));
+        feed.P = 101325;
+        feed.T = 300;
+        feed.compMolFrac[1, :] = {0, 0, 0.4, 0.6};
+        feed.totMolFlo[1] = 100;
+      end test;
+
+
+      model conv_react
+        extends Simulator.Unit_Operations.Conversion_Reactor;
+        extends Simulator.Files.Models.ReactionManager.Reaction_Manager;
+      end conv_react;
+
+    end CR_test;
   
   
   end Test;

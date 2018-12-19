@@ -3387,19 +3387,19 @@ equation
     compMolFlo[:, i] = compMolFrac[:, i] .* totMolFlo[:];
   end for;
   if P >= Pbubl then
-//below bubble point region
+  //below bubble point region
     compMasFrac[3, :] = zeros(NOC);
     compMasFlo[1, :] = compMasFrac[1, :] .* totMasFlo[1];
     compMasFrac[2, :] = compMasFrac[1, :];
-  elseif P <= Pdew then
-//above dew point region
-    compMasFrac[2, :] = zeros(NOC);
-    compMasFlo[1, :] = compMasFrac[1, :] .* totMasFlo[1];
-    compMasFrac[3, :] = compMasFrac[1, :];
-  else
+  elseif P >= Pdew then
     for i in 1:NOC loop
       compMasFlo[:, i] = compMasFrac[:, i] .* totMasFlo[:];
     end for;
+  else
+    //above dew point region
+    compMasFrac[2, :] = zeros(NOC);
+    compMasFlo[1, :] = compMasFrac[1, :] .* totMasFlo[1];
+    compMasFrac[3, :] = compMasFrac[1, :];
   end if;
 //phase molar and mass fractions
   liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
@@ -3461,6 +3461,8 @@ algorithm
     MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
   end for;
 end Material_Stream;
+
+
 
 
 
@@ -4944,6 +4946,104 @@ end Material_Stream;
 
 
     end Distillation_Column;
+
+    package Absorption_Column
+      model AbsTray
+        import Simulator.Files.*;
+        parameter Integer NOC;
+        parameter Chemsep_Database.General_Properties comp[NOC];
+        Real P, T(start = sum(comp[:].Tb) / NOC);
+        Real vapMolFlo[2](each min = 0), liqMolFlo[2](each min = 0), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / NOC), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / NOC), vapMolEnth[2], liqMolEnth[2], outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
+        Simulator.Files.Connection.trayConn liquid_inlet(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Files.Connection.trayConn liquid_outlet(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Files.Connection.trayConn vapor_outlet(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Files.Connection.trayConn vapor_inlet(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      equation
+//connector equation
+        liquid_inlet.mixMolFlo = liqMolFlo[1];
+        liquid_inlet.mixMolEnth = liqMolEnth[1];
+        liquid_inlet.mixMolFrac[:] = liqCompMolFrac[1, :];
+        liquid_outlet.mixMolFlo = liqMolFlo[2];
+        liquid_outlet.mixMolEnth = liqMolEnth[2];
+        liquid_outlet.mixMolFrac[:] = liqCompMolFrac[2, :];
+        vapor_inlet.mixMolFlo = vapMolFlo[1];
+        vapor_inlet.mixMolEnth = vapMolEnth[1];
+        vapor_inlet.mixMolFrac[:] = vapCompMolFrac[1, :];
+        vapor_outlet.mixMolFlo = vapMolFlo[2];
+        vapor_outlet.mixMolEnth = vapMolEnth[2];
+        vapor_outlet.mixMolFrac[:] = vapCompMolFrac[2, :];
+//molar balance
+        vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
+//equillibrium
+        vapCompMolFrac[2, :] = K[:] .* liqCompMolFrac[2, :];
+//  for i in 1:NOC loop
+//    vapCompMolFrac[2,i] = ((K[i]/(K[1])) * liqCompMolFrac[2,i]) / (1 + (K[i] / (K[1])) * liqCompMolFrac[2,i]);
+//  end for;
+//summation equation
+        sum(liqCompMolFrac[2, :]) = 1;
+        sum(vapCompMolFrac[2, :]) = 1;
+// Enthalpy balance
+        vapMolFlo[1] * vapMolEnth[1] + liqMolFlo[1] * liqMolEnth[1] = vapMolFlo[2] * vapMolEnth[2] + liqMolFlo[2] * liqMolEnth[2];
+//enthalpy calculation
+        for i in 1:NOC loop
+          outLiqCompMolEnth[i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
+          outVapCompMolEnth[i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
+        end for;
+        liqMolEnth[2] = sum(liqCompMolFrac[2, :] .* outLiqCompMolEnth[:]) + resMolEnth[2];
+        vapMolEnth[2] = sum(vapCompMolFrac[2, :] .* outVapCompMolEnth[:]) + resMolEnth[3];
+        annotation(
+          Diagram(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
+          Icon(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
+          __OpenModelica_commandLineOptions = "");
+      end AbsTray;
+
+      model AbsCol
+        import data = Simulator.Files.Chemsep_Database;
+        parameter Integer NOC "Number of Components";
+        parameter Integer noOfStages;
+        parameter data.General_Properties comp[NOC];
+        Simulator.Files.Connection.matConn top_feed(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Files.Connection.matConn bottom_feed(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Files.Connection.matConn top_product(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Files.Connection.matConn bottom_product(connNOC = NOC) annotation(
+          Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      equation
+//connector equation
+        tray[1].liqMolFlo[1] = top_feed.mixMolFlo;
+        tray[1].liqCompMolFrac[1, :] = top_feed.mixMolFrac[:];
+        tray[1].liqMolEnth[1] = top_feed.mixMolEnth;
+        tray[1].vapMolFlo[2] = top_product.mixMolFlo;
+        tray[1].vapCompMolFrac[2, :] = top_product.mixMolFrac[:];
+//  tray[1].vapMolEnth[2] = top_product.mixMolEnth;
+        tray[1].T = top_product.T;
+        tray[noOfStages].liqMolFlo[2] = bottom_product.mixMolFlo;
+        tray[noOfStages].liqCompMolFrac[2, :] = bottom_product.mixMolFrac[:];
+//  tray[noOfStages].liqMolEnth[2] = bottom_product.mixMolEnth;
+        tray[noOfStages].T = bottom_product.T;
+        tray[noOfStages].vapMolFlo[1] = bottom_feed.mixMolFlo;
+        tray[noOfStages].vapCompMolFrac[1, :] = bottom_feed.mixMolFrac[:];
+        tray[noOfStages].vapMolEnth[1] = bottom_feed.mixMolEnth;
+        for i in 1:noOfStages - 1 loop
+          connect(tray[i].liquid_outlet, tray[i + 1].liquid_inlet);
+          connect(tray[i].vapor_inlet, tray[i + 1].vapor_outlet);
+        end for;
+//tray pressures
+        for i in 2:noOfStages - 1 loop
+          tray[i].P = tray[1].P + i * (tray[noOfStages].P - tray[1].P) / (noOfStages - 1);
+        end for;
+        tray[1].P = top_feed.P;
+        tray[noOfStages].P = bottom_feed.P;
+        tray[1].P = top_product.P;
+        tray[noOfStages].P = bottom_product.P;
+      end AbsCol;
+    end Absorption_Column;
   end Unit_Operations;
 
 
@@ -5943,6 +6043,63 @@ package PFR_Test
       end conv_react;
 
     end CR_test;
+
+    package rigAbs
+      model ms
+        extends Simulator.Streams.Material_Stream;
+        extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+      end ms;
+
+      model Tray
+        extends Simulator.Unit_Operations.Absorption_Column.AbsTray;
+        extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+      end Tray;
+
+
+      model AbsColumn
+        extends Simulator.Unit_Operations.Absorption_Column.AbsCol;
+        Tray tray[noOfStages](each NOC = NOC, each comp = comp, each liqMolFlo(each start = 30), each vapMolFlo(each start = 30), each T(start = 300));
+      end AbsColumn;
+
+
+      model Test
+        import data = Simulator.Files.Chemsep_Database;
+        parameter Integer NOC = 3;
+        parameter data.Acetone acet;
+        parameter data.Air air;
+        parameter data.Water wat;
+        parameter data.General_Properties comp[NOC] = {acet, air, wat};
+        rigAbs.ms water(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {-70, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        ms air_acetone(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {-70, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        rigAbs.AbsColumn abs(NOC = NOC, comp = comp, noOfStages = 10) annotation(
+          Placement(visible = true, transformation(origin = {-3, 11}, extent = {{-33, -33}, {33, 33}}, rotation = 0)));
+        ms top(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {62, 60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        ms bottom(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {66, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      equation
+        connect(abs.bottom_product, bottom.inlet) annotation(
+          Line(points = {{30, -16}, {42, -16}, {42, -50}, {56, -50}, {56, -52}}));
+        connect(abs.top_product, top.inlet) annotation(
+          Line(points = {{30, 38}, {40, 38}, {40, 60}, {52, 60}, {52, 60}}));
+        connect(air_acetone.outlet, abs.bottom_feed) annotation(
+          Line(points = {{-60, -56}, {-52, -56}, {-52, -14}, {-36, -14}, {-36, -16}}));
+        connect(water.outlet, abs.top_feed) annotation(
+          Line(points = {{-60, 62}, {-48, 62}, {-48, 38}, {-36, 38}, {-36, 38}}));
+        water.P = 101325;
+        water.T = 325;
+        water.totMolFlo[1] = 30;
+        water.compMolFrac[1, :] = {0, 0, 1};
+        air_acetone.P = 101325;
+        air_acetone.T = 335;
+        air_acetone.totMolFlo[1] = 30;
+        air_acetone.compMolFrac[1, :] = {0.5, 0.5, 0};
+      end Test;
+
+
+    end rigAbs;
   
   
   end Test;

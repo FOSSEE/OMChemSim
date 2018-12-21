@@ -3165,32 +3165,33 @@ end BIPNRTL;
       model Flash
         //this is basic flash model.  comp and NOC has to be defined in model. thermodyanamic model must also be extended along with this model for K value.
         import Simulator.Files.*;
-        Real totMolFlo[3], compMolFrac[3, NOC], Tdew(start = sum(comp[:].Tb) / NOC), Tbubl(start = sum(comp[:].Tb) / NOC), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac, vapPhasMolFrac, P, T;
+        Real totMolFlo[3], compMolFrac[3, NOC], compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac, vapPhasMolFrac, P(start = 101325), T(start = 298.15);
+        Real Pbubl(start = 101325, min = 0)"Bubble point pressure", Pdew(start = 101325, min = 0)"dew point pressure";
       equation
 //Mole Balance
         totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
         compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
-//Bubble point calculation
-        P = sum(gamma[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
-//Dew point calculation
-        1 / P = sum(compMolFrac[1, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6])));
-        if T <= Tbubl then
-//below bubble point region
+  
+      //Bubble point calculation
+        Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+      //Dew point calculation
+        Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+        if P >= Pbubl then
           compMolFrac[3, :] = zeros(NOC);
           sum(compMolFrac[2, :]) = 1;
-        elseif T >= Tdew then
-//above dew point region
-          compMolFrac[2, :] = zeros(NOC);
-          sum(compMolFrac[3, :]) = 1;
-        else
-//VLE region
+        elseif P >= Pdew then
+        //VLE region
           for i in 1:NOC loop
             compMolFrac[3, i] = K[i] * compMolFrac[2, i];
           end for;
           sum(compMolFrac[3, :]) = 1;
-//sum y = 1
+        //sum y = 1
+        else
+        //above dew point region
+          compMolFrac[2, :] = zeros(NOC);
+          sum(compMolFrac[3, :]) = 1;
         end if;
-//Energy Balance
+      //Energy Balance
         for i in 1:NOC loop
 //Specific Heat and Enthalpy calculation
           compMolSpHeat[2, i] = Thermodynamic_Functions.LiqCpId(comp[i].LiqCp, T);
@@ -3214,6 +3215,10 @@ end BIPNRTL;
         liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
         vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
       end Flash;
+
+
+
+
 
       model gammaNRTL
         //  input Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
@@ -3858,8 +3863,11 @@ end Material_Stream;
       import Simulator.Files.*;
       parameter Integer NOC;
       parameter Chemsep_Database.General_Properties comp[NOC];
-      Real T, P;
-      Real totMolFlo[3], compMolFrac[3, NOC], Tdew(start = max(comp[:].Tb)), Tbubl(start = min(comp[:].Tb)), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac, vapPhasMolFrac;
+      parameter Boolean overSepTemp = false, overSepPress = false;
+      parameter Real Tdef = 298.15, Pdef = 101325;
+      Real T(start = 298.15, min = 0), P(start = 101325, min = 0);
+      Real Pbubl(start = 101325, min = 0)"Bubble point pressure", Pdew(start = 101325, min = 0)"dew point pressure";
+      Real totMolFlo[3](each min = 0), compMolFrac[3, NOC](each min = 0 , each max = 1, each start = 1/(NOC + 1)), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac(min = 0, max = 1), vapPhasMolFrac(min = 0, max = 1);
       Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       Simulator.Files.Connection.matConn vapor(connNOC = NOC) annotation(
@@ -3868,40 +3876,51 @@ end Material_Stream;
         Placement(visible = true, transformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     equation
 //Connector equation
-      feed.T = T;
-      feed.P = P;
+      if overSepTemp then
+        Tdef = T;
+      else
+        feed.T = T;
+      end if;
+      if overSepPress then
+        Pdef = P;
+      else
+        feed.P = P;
+      end if;
       feed.mixMolFlo = totMolFlo[1];
       feed.mixMolFrac[:] = compMolFrac[1, :];
-      liquid.T = Tbubl;
+      liquid.T = T;
+    //  liquid.mixMolEnth = phasMolEnth[2];
       liquid.P = P;
       liquid.mixMolFlo = totMolFlo[2];
       liquid.mixMolFrac[:] = compMolFrac[2, :];
-      vapor.T = Tdew;
+      vapor.T = T;
+    //  vapor.mixMolEnth= phasMolEnth[3];
       vapor.P = P;
       vapor.mixMolFlo = totMolFlo[3];
       vapor.mixMolFrac[:] = compMolFrac[3, :];
 //Mole Balance
       totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
       compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
-//Bubble point calculation
-      P = sum(gamma[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tbubl + comp[:].VP[4] * log(Tbubl) + comp[:].VP[5] .* Tbubl .^ comp[:].VP[6]));
-//Dew point calculation
-      1 / P = sum(compMolFrac[1, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / Tdew + comp[:].VP[4] * log(Tdew) + comp[:].VP[5] .* Tdew .^ comp[:].VP[6])));
-      if T <= Tbubl then
-//below bubble point region
+      
+      
+    //Bubble point calculation
+      Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+    //Dew point calculation
+      Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+      if P >= Pbubl then
         compMolFrac[3, :] = zeros(NOC);
         sum(compMolFrac[2, :]) = 1;
-      elseif T >= Tdew then
-//above dew point region
-        compMolFrac[2, :] = zeros(NOC);
-        sum(compMolFrac[3, :]) = 1;
-      else
-//VLE region
+      elseif P >= Pdew then
+      //VLE region
         for i in 1:NOC loop
           compMolFrac[3, i] = K[i] * compMolFrac[2, i];
         end for;
         sum(compMolFrac[3, :]) = 1;
-//sum y = 1
+      //sum y = 1
+      else
+      //above dew point region
+        compMolFrac[2, :] = zeros(NOC);
+        sum(compMolFrac[3, :]) = 1;
       end if;
 //Energy Balance
       for i in 1:NOC loop
@@ -3927,6 +3946,22 @@ end Material_Stream;
       liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
       vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
     end Flash;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     model Splitter
@@ -5712,7 +5747,7 @@ end Material_Stream;
         parameter data.Toluene tol;
         //instantiation of ethanol
         parameter Integer NOC = 2;
-        parameter data.General_Properties comp[NOC];
+        parameter data.General_Properties comp[NOC] = {ben, tol};
         exp exp1(NOC = NOC, comp = comp, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-9, 7}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
         Simulator.Test.adia_comp1.ms inlet(NOC = NOC, comp = comp) annotation(
@@ -5739,6 +5774,7 @@ end Material_Stream;
         exp1.pressDrop = 10000;
 //pressure drop
       end main;
+
     end adia_exp1;
 
     model msTPNRTL

@@ -4876,7 +4876,7 @@ end Material_Stream;
         //Total or Partial
         Boolean boolFeed[noOfStages](each start = false);
         Real refluxRatio;
-        Simulator.Files.Connection.matConn feed[1](each connNOC = NOC) annotation(
+        Simulator.Files.Connection.matConn feed[noOfFeeds](each connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.matConn distillate(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {98, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

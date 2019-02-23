@@ -2638,7 +2638,7 @@ end NRTL;
         Real Psat[NOC];
         Real liqfugcoeff[NOC](each start = 5);
         Real vapfugcoeff[NOC](each start = 5);
-        Real gammaBubl[NOC], gammaDew[NOC];
+        Real gammaBubl[NOC], gammaDew[NOC], gamma[NOC];
         Real liqfugcoeff_bubl[NOC], vapfugcoeff_dew[NOC];
         Real resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
         //Liquid Fugacity Coefficient
@@ -2650,7 +2650,7 @@ end NRTL;
         Real sum_xaL[NOC];
     
         //Vapour Fugacity Coefficient
-        Real aMV, bMV;
+        Real aMV(start = 10), bMV(start = 10);
         Real AV, BV;
         Real CV[4];
         Real Z_RV[3, 2];
@@ -2659,6 +2659,7 @@ end NRTL;
       equation
         for i in 1:NOC loop
           Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+          gamma[i] = 1;
           gammaDew[i] = 1;
           gammaBubl[i] = 1;
           liqfugcoeff_bubl[i] = 1;
@@ -2704,6 +2705,11 @@ end NRTL;
         K = liqfugcoeff ./ vapfugcoeff;
     
       end Peng_Robinson;
+
+
+
+
+
     //=============================================================================================================
     
     end Thermodynamic_Packages;
@@ -3141,11 +3147,12 @@ end BIPNRTL;
 
     package Connection
       connector matConn
-        Real P, T, mixMolFlo, mixMolEnth, mixMolEntr, mixMolFrac[connNOC](each min = 0, each max = 1), vapPhasMolFrac(min = 0, max = 1);
+        Real P(start = 101325), T(start = 298.15, min = 0), mixMolFlo(start = 100, min = 0), mixMolEnth, mixMolEntr, mixMolFrac[connNOC](each min = 0, each max = 1, each start = 1/(connNOC + 1)), vapPhasMolFrac(min = 0, max = 1, start = 0.5);
         parameter Integer connNOC;
         annotation(
           Icon(coordinateSystem(initialScale = 0.1), graphics = {Rectangle(fillColor = {175, 175, 175}, fillPattern = FillPattern.Solid, extent = {{-100, 100}, {100, -100}})}));
       end matConn;
+
 
       connector enConn
         Real enFlo;
@@ -3224,10 +3231,10 @@ end BIPNRTL;
         //  input Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
         parameter Integer NOC;
         parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-        Real molFrac[NOC], T;
-        Real gamma[NOC];
+        Real molFrac[NOC](each start = 1/(NOC + 1)), T(start = 298.15);
+        Real gamma[NOC](each start  = 1);
         Real tau[NOC, NOC], G[NOC, NOC], alpha[NOC, NOC], A[NOC, NOC], BIPS[NOC, NOC, 2];
-        Real sum1[NOC], sum2[NOC];
+        Real sum1[NOC](each start = 1), sum2[NOC](each start = 1);
         constant Real R = 1.98721;
       equation
         BIPS = Simulator.Files.Thermodynamic_Functions.BIPNRTL(NOC, comp.CAS);
@@ -3249,6 +3256,9 @@ end BIPNRTL;
           log(gamma[i]) = sum(molFrac[:] .* tau[:, i] .* G[:, i]) / sum(molFrac[:] .* G[:, i]) + sum(molFrac[:] .* G[i, :] ./ sum1[:] .* (tau[i, :] .- sum2[:] ./ sum1[:]));
         end for;
       end gammaNRTL;
+
+
+
 
     package ReactionManager
         
@@ -3355,11 +3365,11 @@ model Material_Stream
   import Simulator.Files.*;
   parameter Integer NOC;
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-  Real P "Pressure", T(start = 273) "Temperature";
+  Real P(start = 101325) "Pressure", T(min = 10, start = 298.15) "Temperature";
   Real Pbubl"Bubble point pressure", Pdew"dew point pressure";
   Real liqPhasMolFrac(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction", vapPhasMolFrac(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction", liqPhasMasFrac(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction", vapPhasMasFrac(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
-  Real totMolFlo[3](each min = 0) "Total molar flow", totMasFlo[3](each min = 0) "Total Mass Flow", MW[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
-  Real compMolFrac[3, NOC](each min = 0, each max = 1) "Component mole fraction", compMasFrac[3, NOC](each start = 0.5, each min = 0, each max = 1) "Component Mass fraction", compMolFlo[3, NOC](each start = 0.5, each min = 0, each max = 1) "Component Molar flow", compMasFlo[3, NOC](each min = 0) "Component Mass Fraction";
+  Real totMolFlo[3](each min = 0) "Total molar flow", totMasFlo[3](each min = 0, each start = 100) "Total Mass Flow", MW[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
+  Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Component mole fraction", compMasFrac[3, NOC](each start = 1 / (NOC + 1), each min = 0, each max = 1) "Component Mass fraction", compMolFlo[3, NOC](each start = 100, each min = 0) "Component Molar flow", compMasFlo[3, NOC](each min = 0, each start = 100) "Component Mass Fraction";
   Real phasMolSpHeat[3] "phase Molar Specific Heat", compMolSpHeat[3, NOC] "Component Molar Specific Heat";
   Real phasMolEnth[3] "Phase Molar Enthalpy", compMolEnth[3, NOC] "Component Molar Enthalpy";
   Real phasMolEntr[3] "Phase Molar Entropy", compMolEntr[3, NOC] "Component Molar Entropy";
@@ -3386,8 +3396,7 @@ equation
 //=====================================================================================
 //Mole Balance
   totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
-  compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
-//component molar and mass flows
+//  compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
   for i in 1:NOC loop
     compMolFlo[:, i] = compMolFrac[:, i] .* totMolFlo[:];
   end for;
@@ -3406,8 +3415,12 @@ equation
     compMasFlo[1, :] = compMasFrac[1, :] .* totMasFlo[1];
     compMasFrac[3, :] = compMasFrac[1, :];
   end if;
+//  for i in 1:NOC loop
+//    compMasFlo[:, i] = compMasFrac[:, i] .* totMasFlo[:];
+//  end for;
 //phase molar and mass fractions
-  liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
+//  liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
+  liqPhasMolFrac = 1 - vapPhasMolFrac;
   vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
   liqPhasMasFrac = totMasFlo[2] / totMasFlo[1];
   vapPhasMasFrac = totMasFlo[3] / totMasFlo[1];
@@ -3443,21 +3456,28 @@ equation
   Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
   if P >= Pbubl then
 //below bubble point region
+    compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2];
     compMolFrac[3, :] = zeros(NOC);
     sum(compMolFrac[2, :]) = 1;
+    
 //  elseif P <= Pdew then
 ////above dew point region
 //    compMolFrac[2, :] = zeros(NOC);
 //    sum(compMolFrac[3, :]) = 1;
+
   elseif P >= Pdew then
 //VLE region
+    compMolFrac[2, :] = compMolFrac[1, :] ./ (1 .+ vapPhasMolFrac .* K[:]);
+//component molar and mass flows
     for i in 1:NOC loop
       compMolFrac[3, i] = K[i] * compMolFrac[2, i];
     end for;
-    sum(compMolFrac[3, :]) = 1;
+//    sum(compMolFrac[3, :]) = 1;
 //sum y = 1
-  else
+    sum(compMolFrac[1,:] .* (K[:] .- 1) ./ (1 .+ vapPhasMolFrac .* (K[:] .- 1))) = 0;
+      else
 //above dew point region
+    compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[3, :] .* totMolFlo[3];
     compMolFrac[2, :] = zeros(NOC);
     sum(compMolFrac[3, :]) = 1;
   end if;
@@ -3466,6 +3486,27 @@ algorithm
     MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
   end for;
 end Material_Stream;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3494,11 +3535,11 @@ end Material_Stream;
       parameter Integer NOC "Number of Components", NI = 6 "Number of Input streams";
       parameter Chemsep_Database.General_Properties comp[NOC];
       parameter String outPress;
-      Real outP, inP[NI];
+      Real outP(min = 0, start = 101325), inP[NI];
       Real inCompMolFrac[NI, NOC] "Input stream component mol fraction", inMolFlo[NI] "Input stream Molar Flow";
-      Real outCompMolFrac[NOC] "Output Stream component mol fraction", outMolFlo "Output stream Molar Flow";
+      Real outCompMolFrac[NOC](each start = 1/(NOC + 1), each min = 0, each max = 1) "Output Stream component mol fraction", outMolFlo(start = 100, min = 0) "Output stream Molar Flow";
       Real inTotMolEnth[NI] "Inlet molar enthalpy of each stream", outTotMolEnth "Outlet molar enthalpy";
-      Real inT[NI] "Temperature of each stream", outT "Temperature of outlet stream", inTotMolEntr[NI] "Inlet molar enthalpy of each stream", outTotMolEntr "Outlet molar entropy", inVapPhasMolFrac[NI](each min = 0, each max = 1) "Inlet vapor phase mol fraction", outVapPhasMolFrac(min = 0, max = 1) "Outlet vapor phase mol fraction";
+      Real inT[NI] "Temperature of each stream", outT(start = 298.15, min = 0) "Temperature of outlet stream", inTotMolEntr[NI] "Inlet molar enthalpy of each stream", outTotMolEntr "Outlet molar entropy", inVapPhasMolFrac[NI](each min = 0, each max = 1) "Inlet vapor phase mol fraction", outVapPhasMolFrac(min = 0, max = 1, start = 0.5) "Outlet vapor phase mol fraction";
       //================================================================================
     //  Files.Connection.matConn inlet[NI](each connNOC = NOC);
       Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
@@ -3540,6 +3581,7 @@ end Material_Stream;
 //Energy balance
       outTotMolEnth = sum(inTotMolEnth[:] .* inMolFlo[:] / outMolFlo);
     end Mixer;
+
 
 
 
@@ -3680,7 +3722,8 @@ end Material_Stream;
       parameter data.General_Properties comp[NOC];
       parameter Integer NOC;
       Real mixMolFlo[3](each min = 0), mixMolFrac[3, NOC](each start = 1 / NOC, each min = 0, each max = 1), mixMolEnth[3], mixMolEntr[3];
-      Real minN(min = 0, start = 1), minR, q;
+      Real compMolFrac[3, NOC], Pdew, Pbubl;
+      Real minN(min = 0, start = 1), minR, qShort;
       Real alpha[NOC], theta;
       Real P, T;
       Real condT(start = max(comp[:].Tb)), condP, rebP, rebT(start = min(comp[:].Tb));
@@ -3724,6 +3767,18 @@ end Material_Stream;
       distillate.vapPhasMolFrac = vapPhasMolFrac[3];
       reboiler_duty.enFlo = rebDuty;
       condenser_duty.enFlo = condDuty;
+      
+      //adjustment for thermodynamic packages
+      compMolFrac[1,:] = mixMolFrac[1,:];
+      compMolFrac[2, :] = compMolFrac[1, :] ./ (1 .+ vapPhasMolFrac[1] .* K[:]);
+      for i in 1:NOC loop
+          compMolFrac[3, i] = K[i] * compMolFrac[2, i];
+      end for;
+    //  sum(compMolFrac[1,:] .* (K[:] .- 1) ./ (1 .+ vapPhasMolFrac[1] .* (K[:] .- 1))) = 0;
+      //Bubble point calculation
+      Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+      //Dew point calculation
+      Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
     equation
       for i in 1:NOC loop
         if mixMolFrac[1, i] == 0 then
@@ -3753,8 +3808,8 @@ end Material_Stream;
         rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
       end if;
 //Minimum Reflux, Underwoods method
-      1 - q = vapPhasMolFrac[1];
-      1 - q = sum(alpha[:] .* mixMolFrac[1, :] ./ (alpha[:] .- theta));
+      1 - qShort = vapPhasMolFrac[1];
+      1 - qShort = sum(alpha[:] .* mixMolFrac[1, :] ./ (alpha[:] .- theta));
       minR + 1 = sum(alpha[:] .* mixMolFrac[3, :] ./ (alpha[:] .- theta));
 //Actual number of trays,Gillilands method
       x = (actR - minR) / (actR + 1);
@@ -3791,6 +3846,21 @@ end Material_Stream;
       mixMolFlo[1] * mixMolEnth[1] + rebDuty - condDuty = mixMolFlo[2] * mixMolEnth[2] + mixMolFlo[3] * mixMolEnth[3];
       rectVap * condVapMixMolEnth = condDuty + mixMolFlo[3] * mixMolEnth[3] + rectLiq * condLiqMixMolEnth;
     end Shortcut_Column;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     model Compound_Separator
       parameter Integer NOC "Number of components", sepStrm "Specified Stream";
@@ -3867,7 +3937,7 @@ end Material_Stream;
       parameter Real Tdef = 298.15, Pdef = 101325;
       Real T(start = 298.15, min = 0), P(start = 101325, min = 0);
       Real Pbubl(start = 101325, min = 0)"Bubble point pressure", Pdew(start = 101325, min = 0)"dew point pressure";
-      Real totMolFlo[3](each min = 0), compMolFrac[3, NOC](each min = 0 , each max = 1, each start = 1/(NOC + 1)), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac(min = 0, max = 1), vapPhasMolFrac(min = 0, max = 1);
+      Real totMolFlo[3](each min = 0, each start = 100), compMolFrac[3, NOC](each min = 0 , each max = 1, each start = 1/(NOC + 1)), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac(min = 0, max = 1), vapPhasMolFrac(min = 0, max = 1, each start = 0.5);
       Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
         Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       Simulator.Files.Connection.matConn vapor(connNOC = NOC) annotation(
@@ -3900,8 +3970,8 @@ end Material_Stream;
       vapor.mixMolFrac[:] = compMolFrac[3, :];
 //Mole Balance
       totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
-      compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
-      
+    //  compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
+        compMolFrac[2, :] = compMolFrac[1, :] ./ (1 .+ vapPhasMolFrac .* K[:]);
       
     //Bubble point calculation
       Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
@@ -3943,9 +4013,15 @@ end Material_Stream;
       phasMolEntr[1] = liqPhasMolFrac * phasMolEntr[2] + vapPhasMolFrac * phasMolEntr[3];
       compMolEntr[1, :] = compMolFrac[1, :] * phasMolEntr[1];
 //phase molar fractions
-      liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
+    //  liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
+      liqPhasMolFrac = 1 - vapPhasMolFrac;
       vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
     end Flash;
+
+
+
+
+
 
 
 
@@ -4661,14 +4737,12 @@ end Material_Stream;
    
     package Distillation_Column
       model Cond
-        //    extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
         import Simulator.Files.*;
-        parameter Integer NOC = 2;
+        parameter Integer NOC;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P, T(start = 300);
         Real feedMolFlo(min = 0), sideDrawMolFlo(min = 0), inVapMolFlo(min = 0), outLiqMolFlo(min = 0), feedMolFrac[NOC](each min = 0, each max = 1), sideDrawMolFrac[NOC](each min = 0, each max = 1), inVapCompMolFrac[NOC](each min = 0, each max = 1), outLiqCompMolFrac[NOC](each min = 0, each max = 1), feedMolEnth, inVapMolEnth, outLiqMolEnth, heatLoad, sideDrawMolEnth, outLiqCompMolEnth[NOC];
-        //String sideDrawType(start = "Null");
-        //L or V
+        Real compMolFrac[3, NOC], Pdew, Pbubl;
         parameter String condType "Partial or Total";
         Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -4697,6 +4771,17 @@ end Material_Stream;
         vapor_inlet.mixMolEnth = inVapMolEnth;
         vapor_inlet.mixMolFrac[:] = inVapCompMolFrac[:];
         heat_load.enFlo = heatLoad;
+      //Adjustment for thermodynamic packages  
+        compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:])./(sideDrawMolFlo + outLiqMolFlo);
+        compMolFrac[2, :] = outLiqCompMolFrac[:];
+        compMolFrac[3, :] = K[:] .* compMolFrac[2, :];
+        //Bubble point calculation
+        Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+        //Dew point calculation
+        Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+        
+        
+        
 //molar balance
 //feedMolFlo + inVapMolFlo = sideDrawMolFlo + outLiqMolFlo;
         feedMolFlo .* feedMolFrac[:] + inVapMolFlo .* inVapCompMolFrac[:] = sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:];
@@ -4728,12 +4813,26 @@ end Material_Stream;
           __OpenModelica_commandLineOptions = "");
       end Cond;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
       model DistTray
         import Simulator.Files.*;
         parameter Integer NOC = 2;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P, T(start = (min(comp[:].Tb) + max(comp[:].Tb)) / NOC);
         Real feedMolFlo(min = 0), sideDrawMolFlo(min = 0), vapMolFlo[2](each min = 0), liqMolFlo[2](each min = 0), feedMolFrac[NOC](each min = 0, each max = 1), sideDrawMolFrac[NOC](each min = 0, each max = 1), vapCompMolFrac[2, NOC](each min = 0, each max = 1), liqCompMolFrac[2, NOC](each min = 0, each max = 1), feedMolEnth, vapMolEnth[2], liqMolEnth[2], heatLoad, sideDrawMolEnth, feedVapPhasMolFrac, outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
+        Real compMolFrac[3, NOC], Pdew, Pbubl;
         String sideDrawType(start = "Null");
         //L or V
         Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
@@ -4774,6 +4873,16 @@ end Material_Stream;
         vapor_outlet.mixMolEnth = vapMolEnth[2];
         vapor_outlet.mixMolFrac[:] = vapCompMolFrac[2, :];
         heat_load.enFlo = heatLoad;
+      //Adjustment for thermodynamic packages  
+        compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :]) / (liqMolFlo[2] + vapMolFlo[2] + sideDrawMolFlo);
+        compMolFrac[2, :] = liqCompMolFrac[2,:];
+        compMolFrac[3, :] = vapCompMolFrac[2,:];  
+        //Bubble point calculation
+        Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+        //Dew point calculation
+        Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+        
+        
 //molar balance
 //feedMolFlo + vapMolFlo[1] + liqMolFlo[1] = sideDrawMolFlo + vapMolFlo[2] + liqMolFlo[2];
         feedMolFlo .* feedMolFrac[:] + vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
@@ -4809,12 +4918,19 @@ end Material_Stream;
       end DistTray;
 
 
+
+
+
+
+
+
       model Reb
         import Simulator.Files.*;
         parameter Integer NOC = 2;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P, T(start = 300);
         Real feedMolFlo(min = 0), sideDrawMolFlo(min = 0), outVapMolFlo(min = 0), inLiqMolFlo(min = 0), feedMolFrac[NOC](each min = 0, each max = 1), sideDrawMolFrac[NOC](each min = 0, each max = 1), outVapCompMolFrac[NOC](each min = 0, each max = 1), inLiqCompMolFrac[NOC](each min = 0, each max = 1), feedMolEnth, outVapMolEnth, inLiqMolEnth, outVapCompMolEnth[NOC], heatLoad, sideDrawMolEnth;
+        Real compMolFrac[3, NOC], Pdew, Pbubl;
         Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.matConn side_draw(connNOC = NOC) annotation(
@@ -4842,6 +4958,16 @@ end Material_Stream;
         vapor_outlet.mixMolEnth = outVapMolEnth;
         vapor_outlet.mixMolFrac[:] = outVapCompMolFrac[:];
         heat_load.enFlo = heatLoad;
+      //Adjustment for thermodynamic packages  
+        compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outVapMolFlo .* outVapCompMolFrac[:])./(sideDrawMolFlo + outVapMolFlo);
+        compMolFrac[2, :] = sideDrawMolFrac[:];//This equation is temporarily valid since this is only "partial" reboiler. Rewrite equation when "total" reboiler functionality is added
+        compMolFrac[3, :] = outVapCompMolFrac[:];
+        //Bubble point calculation
+        Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+        //Dew point calculation
+        Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+        
+        
 //molar balance
 //  feedMolFlo + inLiqMolFlo = sideDrawMolFlo + outVapMolFlo;
         for i in 1:NOC loop
@@ -4865,6 +4991,16 @@ end Material_Stream;
           Icon(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
           __OpenModelica_commandLineOptions = "");
       end Reb;
+
+
+
+
+
+
+
+
+
+
 
 
       model DistCol
@@ -4989,6 +5125,8 @@ end Material_Stream;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P, T(start = sum(comp[:].Tb) / NOC);
         Real vapMolFlo[2](each min = 0), liqMolFlo[2](each min = 0), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / NOC), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / NOC), vapMolEnth[2], liqMolEnth[2], outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
+        Real compMolFrac[3, NOC], Pdew, Pbubl;
+      
         Simulator.Files.Connection.trayConn liquid_inlet(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.trayConn liquid_outlet(connNOC = NOC) annotation(
@@ -5011,6 +5149,17 @@ end Material_Stream;
         vapor_outlet.mixMolFlo = vapMolFlo[2];
         vapor_outlet.mixMolEnth = vapMolEnth[2];
         vapor_outlet.mixMolFrac[:] = vapCompMolFrac[2, :];
+        //Adjustment for thermodynamic packages  
+        compMolFrac[1, :] = (vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :]) / (liqMolFlo[2] + vapMolFlo[2]);
+        compMolFrac[2, :] = liqCompMolFrac[2,:];
+        compMolFrac[3, :] = vapCompMolFrac[2,:];  
+        //Bubble point calculation
+        Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+        //Dew point calculation
+        Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+        
+        
+        
 //molar balance
         vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
 //equillibrium
@@ -5035,6 +5184,8 @@ end Material_Stream;
           Icon(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
           __OpenModelica_commandLineOptions = "");
       end AbsTray;
+
+
 
       model AbsCol
         import data = Simulator.Files.Chemsep_Database;
@@ -5098,7 +5249,7 @@ end Material_Stream;
       //material stream model is extended and values of parameters NOC and comp are given. These parameters are declared in Material stream model. We are only giving them values here.
       //NOC - number of components, comp -  component array.
       //start values are given for convergence
-      extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+      extends Simulator.Files.Thermodynamic_Packages.NRTL;
       //Thermodynamic package is extended. We can use other thermodynamics also(not yet added) after little modification and inclusion of residual properties equations.
     equation
 //These are the values to be specified by user. In this P, T, mixture mole fraction and mixture molar flow is specified. These variables are declared in Material stream model, only values are given here.
@@ -5107,6 +5258,7 @@ end Material_Stream;
       compMolFrac[1, :] = {0.33, 0.33, 0.34};
       totMolFlo[1] = 100;
     end msTP;
+
 
     model msTVF
       // database and components are instantiated, material stream and thermodynamic package extended
@@ -5175,7 +5327,7 @@ end Material_Stream;
       //instantiation of ethanol
       parameter data.Water wat;
       //instantiation of water
-      extends Streams.Material_Stream(NOC = 3, comp = {meth, eth, wat}, totMolFlo(each start = 1), compMolFrac(each start = 0.33), T(start = sum(comp.Tb) / NOC));
+      extends Streams.Material_Stream(NOC = 3, comp = {meth, eth, wat}, T(start = 400));
       //material stream model is extended and values of parameters NOC and comp are given. These parameters are declred in Material stream model. We are only giving them values here.
       //we need to give proper initialization values for converging, Initialization values are provided for totMolFlo, compMolFrac and T while extending.
       //NOC - number of components, comp -  component array.
@@ -5184,12 +5336,22 @@ end Material_Stream;
     equation
 //These are the values to be specified by user. In this P, mixture molar enthalpy, mixture mole fraction and mixture molar flow is specified. These variables are declared in Material stream model, only values are given here.
       P = 101325;
-      phasMolEntr[1] = 235851;
+      phasMolEntr[1] = 85.0532;
+    //  T = 351;
       compMolFrac[1, :] = {0.33, 0.33, 0.34};
 //1 stands for mixture
-      totMolFlo[1] = 31.346262;
+      totMolFlo[1] = 100;
 //1 stands for mixture
     end msPS;
+
+
+
+
+
+
+
+
+
 
     model msTPbbp "material stream below bubble point"
       //we have to first instance components to give to material stream model.
@@ -5283,9 +5445,9 @@ end Material_Stream;
         Simulator.Unit_Operations.Heater heater1(pressDrop = 101325, eff = 1, NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-28, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         //instances of composite material stream
-        heater1.ms inlet(NOC = NOC, comp = comp) annotation(
+        Simulator.Test.heater1.ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-74, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        heater1.ms outlet(NOC = NOC, comp = comp, T(start = 353), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.24, 0.31, 0.43}, {0.44, 0.34, 0.31}}), P(start = 101325)) annotation(
+        Simulator.Test.heater1.ms outlet(NOC = NOC, comp = comp, T(start = 353), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.24, 0.31, 0.43}, {0.44, 0.34, 0.31}}), P(start = 101325)) annotation(
           Placement(visible = true, transformation(origin = {18, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         //instance of energy stream
         Simulator.Streams.Energy_Stream energy annotation(
@@ -5309,6 +5471,8 @@ end Material_Stream;
         heater1.heatAdd = 2000000;
 //heat added
       end heat;
+
+
     end heater1;
 
     package cooler1
@@ -5381,9 +5545,9 @@ end Material_Stream;
         parameter data.General_Properties comp[NOC] = {meth, eth, wat};
         Unit_Operations.Valve valve1(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {0, 4}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
-        valve1.ms inlet(NOC = NOC, comp = comp) annotation(
+        Simulator.Test.valve1.ms inlet(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-74, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        valve1.ms outlet(NOC = NOC, comp = comp, T(start = 352), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.26, 0.32, 0.40}, {0.47, 0.34, 0.18}})) annotation(
+        Simulator.Test.valve1.ms outlet(NOC = NOC, comp = comp, T(start = 352), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.26, 0.32, 0.40}, {0.47, 0.34, 0.18}})) annotation(
           Placement(visible = true, transformation(origin = {66, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
         connect(inlet.outlet, valve1.inlet) annotation(
@@ -5401,6 +5565,7 @@ end Material_Stream;
         inlet.totMolFlo[1] = 100;
 //input molar flow
       end valve;
+
     end valve1;
 
     package mix1
@@ -5698,7 +5863,7 @@ end Material_Stream;
         //instantiation of methanol
         parameter data.Toluene tol;
         //instantiation of ethanol
-        parameter Integer NOC;
+        parameter Integer NOC = 2;
         parameter data.General_Properties comp[NOC] = {ben, tol};
         compres adiabatic_Compressor1(NOC = NOC, comp = comp, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-9, 7}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
@@ -5726,6 +5891,7 @@ end Material_Stream;
         adiabatic_Compressor1.pressInc = 10000;
 //pressure increase
       end main;
+
     end adia_comp1;
 
     package adia_exp1

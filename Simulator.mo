@@ -2625,88 +2625,430 @@ end NRTL;
     
       model Peng_Robinson
         import Simulator.Files.*;
-        parameter Real R = 8.314;
-        // feed composition
-        Real Tr[NOC](each start = 100) "reduced temperature";
-        Real b[NOC];
-        Real a[NOC](each start = 0.5);
-        Real m[NOC];
-        Real q[NOC];
-        parameter Real kij[NOC, NOC](each start = 1) = Simulator.Files.Thermodynamic_Functions.BIP_PR(NOC, comp.name);
-        Real aij[NOC, NOC];
-        Real K[NOC](each start = 0.2);
-        Real Psat[NOC];
-        Real liqfugcoeff[NOC](each start = 5);
-        Real vapfugcoeff[NOC](each start = 5);
-        Real gammaBubl[NOC], gammaDew[NOC];
-        Real liqfugcoeff_bubl[NOC], vapfugcoeff_dew[NOC];
-        Real resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
-        //Liquid Fugacity Coefficient
-        Real aML, bML;
-        Real AL, BL;
-        Real CL[4];
-        Real Z_RL[3, 2];
-        Real ZL[3], ZLL;
-        Real sum_xaL[NOC];
-    
-        //Vapour Fugacity Coefficient
-        Real aMV, bMV;
-        Real AV, BV;
-        Real CV[4];
-        Real Z_RV[3, 2];
-        Real ZV[3], ZvV;
-        Real sum_yaV[NOC];
-      equation
-        for i in 1:NOC loop
-          Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
-          gammaDew[i] = 1;
-          gammaBubl[i] = 1;
-          liqfugcoeff_bubl[i] = 1;
-          vapfugcoeff_dew[i] = 1;
-        end for;
-        resMolSpHeat[:] = zeros(3);
-        resMolEnth[:] = zeros(3);
-        resMolEntr[:] = zeros(3);
-        Tr = T ./ comp.Tc;
-        b = 0.0778 * R * comp.Tc ./ comp.Pc;
-        m = 0.37464 .+ 1.54226 * comp.AF .- 0.26992 * comp.AF .^ 2;
-        q = 0.45724 * R ^ 2 * comp.Tc .^ 2 ./ comp.Pc;
-        a = q .* (1 .+ m .* (1 .- sqrt(Tr))) .^ 2;
-        aij = {{(1 - kij[i, j]) * sqrt(a[i] * a[j]) for i in 1:NOC} for j in 1:NOC};
-    //Liquid_Fugacity Coefficient Calculation Routine
-        aML = sum({{compMolFrac[2, i] * compMolFrac[2, j] * aij[i, j] for i in 1:NOC} for j in 1:NOC});
-        bML = sum(b .* compMolFrac[2, :]);
-        AL = aML * P / (R * T) ^ 2;
-        BL = bML * P / (R * T);
-        CL[1] = 1;
-        CL[2] = BL - 1;
-        CL[3] = AL - 3 * BL ^ 2 - 2 * BL;
-        CL[4] = BL ^ 3 + BL ^ 2 - AL * BL;
-        Z_RL = Modelica.Math.Vectors.Utilities.roots(CL);
-        ZL = {Z_RL[i, 1] for i in 1:3};
-        ZLL = min({ZL});
-        sum_xaL = {sum({compMolFrac[2, j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
-        liqfugcoeff = exp(AL / (BL * sqrt(8)) * log((ZLL + 2.4142135 * BL) / (ZLL - 0.414213 * BL)) .* (b / bML .- 2 * sum_xaL / aML) .+ (ZLL - 1) * (b / bML) .- log(ZLL - BL));
-    //Vapour Fugacity Calculation Routine
-        aMV = sum({{compMolFrac[3, i] * compMolFrac[3, j] * aij[i, j] for i in 1:NOC} for j in 1:NOC});
-        bMV = sum(b .* compMolFrac[3, :]);
-        AV = aMV * P / (R * T) ^ 2;
-        BV = bMV * P / (R * T);
-        CV[1] = 1;
-        CV[2] = BV - 1;
-        CV[3] = AV - 3 * BV ^ 2 - 2 * BV;
-        CV[4] = BV ^ 3 + BV ^ 2 - AV * BV;
-        Z_RV = Modelica.Math.Vectors.Utilities.roots(CV);
-        ZV = {Z_RV[i, 1] for i in 1:3};
-        ZvV = max({ZV});
-        sum_yaV = {sum({compMolFrac[3, j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
-        vapfugcoeff = exp(AV / (BV * sqrt(8)) * log((ZvV + 2.4142135 * BV) / (ZvV - 0.414213 * BV)) .* (b / bMV .- 2 * sum_yaV / aMV) .+ (ZvV - 1) * (b / bMV) .- log(ZvV - BV));
-        K = liqfugcoeff ./ vapfugcoeff;
-    
+              parameter Real R = 8.314;
+              // feed composition
+              Real Tr[NOC](each start = 100) "reduced temperature";
+              Real b[NOC];
+              Real a[NOC](each start = 0.5);
+              Real m[NOC];
+              Real q[NOC];
+              parameter Real kij[NOC, NOC](each start = 1) = Simulator.Files.Thermodynamic_Functions.BIP_PR(NOC, comp.name);
+              Real aij[NOC, NOC];
+              Real K[NOC](each start = 0.2);
+              Real Psat[NOC];
+              Real liqfugcoeff[NOC](each start = 5);
+              Real vapfugcoeff[NOC](each start = 5);
+              Real gammaBubl[NOC], gammaDew[NOC];
+              Real liqfugcoeff_bubl[NOC], vapfugcoeff_dew[NOC];
+              Real resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
+              //Liquid Fugacity Coefficient
+              Real aML, bML;
+              Real AL, BL;
+              Real CL[4];
+              Real Z_RL[3, 2];
+              Real ZL[3], ZLL;
+              Real sum_xaL[NOC];
+              //Vapour Fugacity Coefficient
+              Real aMV, bMV;
+              Real AV, BV;
+              Real CV[4];
+              Real Z_RV[3, 2];
+              Real ZV[3], ZvV;
+              Real sum_yaV[NOC];
+              
+              Real A,B,C,D[NOC],E,F,G,H[NOC],I[NOC],J[NOC];
+              Real gamma[NOC];
+            equation
+              for i in 1:NOC loop
+                Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+                gammaDew[i] = 1;
+                gammaBubl[i] = 1;
+                liqfugcoeff_bubl[i] = 1;
+                vapfugcoeff_dew[i] = 1;
+                gamma[i]=1;
+              end for;
+              resMolSpHeat[:] = zeros(3);
+              resMolEnth[:] = zeros(3);
+              resMolEntr[:] = zeros(3);
+              Tr = T ./ comp.Tc;
+              b = 0.0778 * R * comp.Tc ./ comp.Pc;
+              m = 0.37464 .+ 1.54226 * comp.AF .- 0.26992 * comp.AF .^ 2;
+              q = 0.45724 * R ^ 2 * comp.Tc .^ 2 ./ comp.Pc;
+              a = q .* (1 .+ m .* (1 .- sqrt(Tr))) .^ 2;
+              aij = {{(1 - kij[i, j]) * sqrt(a[i] * a[j]) for i in 1:NOC} for j in 1:NOC};
+            
+            //Liquid_Fugacity Coefficient Calculation Routine
+              aML = sum({{compMolFrac[2, i] * compMolFrac[2, j] * aij[i, j] for i in 1:NOC} for j in 1:NOC});
+              bML = sum(b .* compMolFrac[2, :]);
+              AL = aML * P / (R * T) ^ 2;
+              BL = bML * P / (R * T);
+              CL[1] = 1;
+              CL[2] = BL - 1;
+              CL[3] = AL - 3 * BL ^ 2 - 2 * BL;
+              CL[4] = BL ^ 3 + BL ^ 2 - AL * BL;
+              Z_RL = Modelica.Math.Vectors.Utilities.roots(CL);
+              ZL = {Z_RL[i, 1] for i in 1:3};
+              ZLL = min({ZL});
+              
+              sum_xaL = {sum({compMolFrac[2, j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
+               
+               if((ZLL + 2.4142135 * BL)<=0) then
+               A=1;  
+               else
+               A=(ZLL + 2.4142135 * BL);  
+               end if;
+               
+               if((ZLL - 0.414213 * BL)<=0) then
+               B=1;
+               else
+               B=(ZLL - 0.414213 * BL);   
+               end if;
+                
+               if((ZLL - BL)<=0) then 
+               C=0;
+               else
+               C= log(ZLL - BL);
+               end if;
+               
+               for i in 1:NOC loop
+               if(bML ==0) then
+               D[i] = 0;
+               else
+               D[i] = b[i]/bML;
+               end if;
+               end for;
+               
+               for i in 1:NOC loop
+               if(aML==0) then
+               J[i] = 0;
+               else
+               J[i] = sum_xaL[i]/aML;
+               end if;
+               end for;
+                
+               liqfugcoeff = exp(AL / (BL * sqrt(8)) * log(A /B) .* (D .- 2 * J) .+ (ZLL - 1) * (D) .- (C));
+            
+            //Vapour Fugacity Calculation Routine
+              aMV = sum({{compMolFrac[3, i] * compMolFrac[3, j] * aij[i, j] for i in 1:NOC} for j in 1:NOC});
+              bMV = sum(b .* compMolFrac[3, :]);
+              AV = aMV * P / (R * T) ^ 2;
+              BV = bMV * P / (R * T);
+             
+              CV[1] = 1;
+              CV[2] = BV - 1;
+              CV[3] = AV - 3 * BV ^ 2 - 2 * BV;
+              CV[4] = BV ^ 3 + BV ^ 2 - AV * BV;
+             
+              Z_RV = Modelica.Math.Vectors.Utilities.roots(CV);
+              ZV = {Z_RV[i, 1] for i in 1:3};
+              ZvV = max({ZV});
+              sum_yaV = {sum({compMolFrac[3, j] * aij[i, j] for j in 1:NOC}) for i in 1:NOC};
+              
+               if((ZvV + 2.4142135 * BV)<=0) then
+               E=1;  
+               else
+               E=(ZvV + 2.4142135 * BV);  
+               end if;
+               
+               if((ZvV - 0.414213 * BV)<=0) then
+               F=1;
+               else
+               F=(ZvV - 0.414213 * BV);   
+               end if;
+                
+               if((ZvV - BV)<=0) then 
+               G=0;
+               else
+               G= log(ZvV - BV);
+               end if;
+              
+              for i in 1:NOC loop
+               if(bMV ==0) then
+               H[i] = 0;
+               else
+               H[i] = b[i]/bMV;
+               end if;
+               end for;
+               
+               for i in 1:NOC loop
+               if(aMV==0) then
+               I[i] = 0;
+               else
+               I[i] = sum_yaV[i]/aMV;
+               end if;
+               end for;
+              
+               vapfugcoeff = exp(AV / (BV * sqrt(8)) * log((E) /(F)) .* (H .- 2 * I) .+ (ZvV - 1) * (H) .- G);
+               
+              for i in 1:NOC loop
+              if(liqfugcoeff[i]==0 or vapfugcoeff[i]==0) then
+              K[i] = 0;
+              else
+              K[i] = liqfugcoeff[i]/vapfugcoeff[i];
+              end if;
+              end for;
       end Peng_Robinson;
+
     //=============================================================================================================
     
+     model Grayson_Streed
+       
+        import Simulator.Files.Thermodynamic_Functions.*; 
+          parameter Real R_gas = 8.314;
+          parameter Real u = 1;
+          import Simulator.Files.*;
+          
+      //w=Acentric Factor
+      //Sp = Solublity Parameter
+      //V = Molar Volume 
+      //All the above three parameters have to be mentioned as arguments while extending the thermodynamic Package Grayson Streed  
+      
+         parameter Real   w[NOC] ;
+          parameter Real  Sp[NOC](each unit = "(cal/mL)^0.5") ;
+          parameter Real  V[NOC] (each unit = "mL/mol") ;
+                 
+          parameter Real Tc[NOC] = comp.Tc;
+          parameter Real Pc[NOC] = comp.Pc;
+          parameter Real R= 8314470;
+         
+          Real resMolSpHeat[3],resMolEnth[3],resMolEntr[3];
+          Real K[NOC] ;
+          Real S(start=3),gamma[NOC];
+          Real liqfugcoeff[NOC](each start=2),vapfugcoeff[NOC](each start = 0.99),vapfugcoeff_dew[NOC](each start = 1.2);
+          
+          Real S_bubl,liqfugcoeff_bubl[NOC](each start=1.5),gamma_bubl[NOC];
+          
+          //Vapour Phase Fugacity coefficient
+          Real a[NOC],b[NOC];
+          Real a_ij[NOC,NOC];
+          Real amv,amv_dew , bmv,bmv_dew;
+          Real AG ,AG_dew, BG(start=3),BG_dew;
+          Real Zv(start=3),Zv_dew;
+          Real t1[NOC], t3[NOC],t4,t2(start=10);
+          Real t1_dew[NOC], t3_dew[NOC],t4_dew,t2_dew(start=10);
+          Real CV[4],Z_RV[3,2],ZV[3];
+          Real CV_dew[4],Z_RV_dew[3,2],ZV_dew[3];
+          Real gammaBubl[NOC](each start = 0.5),gammaDew[NOC](each start= 2.06221);
+          Real gamma_liq[NOC],Psat[NOC];
+          Real A[NOC],B[NOC],C[NOC],D[NOC],E,G,H[NOC],I,J;
+          
+          Real dewLiqMolFrac[NOC];
+          Real Tr[NOC];
+          Real Pr_bubl[NOC](each start=2);
+          Real v0[NOC](each start=2),v1[NOC](each start=2),v[NOC];
+          Real Vs,Vtot;
+        
+        equation
+          
+        //======================================================================================================  
+          //Calculation Routine for Liquid Phase Fugacity Coefficient
+          S = Solublity_Parameter(NOC,V,Sp,compMolFrac[2,:]);
+          for i in 1:NOC loop
+          gamma[i] = exp(V[i] * ((Sp[i] - S) ^ 2) / (R * T));
+          end for;
+          liqfugcoeff = Liquid_Fugacity_Coeffcient(NOC,Sp,Tc,Pc,w,T,P,V,S,gamma);
+          
+          for i in 1:NOC loop
+          Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+          gamma_liq[i] = liqfugcoeff[i] * (P/Psat[i]);
+          end for;
+        //========================================================================================================     
+          //Calculation Routine for Vapour Phase Fugacity Coefficient
+          //Calculation of Equation of State Constants
+          a =    EOS_Constants(NOC,Tc,Pc,T);
+          b =    EOS_ConstantII(NOC,Tc,Pc,T);
+          a_ij = EOS_ConstantIII(NOC,a);
+          amv =  EOS_Constant1V(NOC,compMolFrac[3,:],a_ij);
+          bmv =  sum(compMolFrac[3,:] .* b[:]);
+          
+          AG = (amv * P) / ((R_gas * T) ^ 2);
+          BG = (bmv * P) / ( R_gas * T);
+          
+          for i in 1:NOC loop
+          if(bmv==0) then
+          C[i]=0;
+          else
+          C[i]=b[i]/bmv;
+          end if;
+          end for;
+          
+          for i in 1:NOC loop
+          if(amv==0) then
+          D[i]=0;
+          else
+          D[i]=a[i]/amv;
+          end if;
+          end for;
+          
+            
+          for i in 1:NOC loop
+          t1[i] = b[i] * (Zv - 1)/ bmv;
+          t3[i] = AG /(BG * (((u) ^ 2)^ 0.5)) * ((C[i]) - ( 2 * ((D[i]) ^ 0.5)));
+          end for;
+          t4 =  log(((2 * Zv) + (BG * (u + ((((u)^ 2)^ 0.5)))))/((2 * Zv) + (BG * (u - ((((u) ^ 2)^ 0.5))))));  
+          t2 = -log(Zv - BG);
+           
+          resMolSpHeat[:] = zeros(3);
+          resMolEnth[:] =   zeros(3);
+          resMolEntr[:] =   zeros(3);
+          
+          for i in 1:NOC loop
+          vapfugcoeff[i] = exp(t1[i] + t2 + (t3[i] * t4));
+          K[i] = liqfugcoeff[i]/vapfugcoeff[i];
+          end for;
+        
+         
+        //====================================================================================================
+          //Bubble Point Algorithm
+          
+           Vtot = sum(compMolFrac[1,:] .* V[:]);
+           Vs =   sum(compMolFrac[1,:] .* V[:] .* Sp[:]);
+           S_bubl = Vs / Vtot;
+           for i in 1:NOC loop
+           gamma_bubl[i] = exp(V[i] * ((Sp[i] - S_bubl) ^ 2) / (R * T));
+           end for;
+          
+          for i in 1:NOC loop
+            Tr[i] = T / Tc[i];
+            
+            if((Pc[i]<=0)) then
+            Pr_bubl[i] =0;
+            else
+            Pr_bubl[i] = Pbubl / Pc[i];
+            end if;
+         
+          if(Tc[i] == 33.19) then
+          
+          (v0[i]) = 10^(( 1.50709)+(( 2.74283)/Tr[i])+((-0.0211)*Tr[i])+(( 0.00011)*Tr[i]*Tr[i])+(((0.008585)- (log10(Pr_bubl[i])))));
+              
+          elseif(Tc[i] == 190.56) then 
+           
+            (v0[i]) =10^((1.36822)+((-1.54831)/Tr[i])+((0.02889)*Tr[i]*Tr[i])+((-0.01076) *Tr[i]*Tr[i]*Tr[i])+(((0.10486)+((-0.02529)*Tr[i])-(log10(Pr_bubl[i])))));   
+          
+          else 
+            
+            (v0[i]) = 10^((2.05135) + ((-2.10889)/Tr[i]) +((-0.19396) *Tr[i] *Tr[i])+((0.02282) *Tr[i]*Tr[i]*Tr[i])+(((0.08852)+((-0.00872)*Tr[i]*Tr[i]))*Pr_bubl[i])+(((-0.00353) +((0.00203)*Tr[i]))*(Pr_bubl[i]*Pr_bubl[i])) - (log10(Pr_bubl[i])));
+            
+         end if;
+         
+        (v1[i]) = 10^(-4.23893 + (8.65808 * Tr[i]) - (1.2206 / Tr[i]) - (3.15224 * Tr[i] ^ 3) - 0.025 * (Pr_bubl[i] - 0.6));
+         
+         if(v1[i] == 0) then 
+           v[i]  = 10^(log10(v0[i]) );
+         else 
+           v[i]  = 10^(log10(v0[i]) + (w[i] * log10(v1[i])));
+         end if; 
+           liqfugcoeff_bubl[i] = v[i] * gamma_bubl[i];
+          end for; 
+        
+         for i in 1:NOC loop
+           gammaBubl[i] = liqfugcoeff_bubl[i] * (Pbubl/Psat[i]);
+         end for;
+        //===================================================================================
+        //Dew Point Algorithm
+          for i in 1:NOC loop
+          if((gammaDew[i] * Psat[i]==0)) then
+          dewLiqMolFrac[i] = 0;
+          else
+          dewLiqMolFrac[i] = (compMolFrac[1, i] * Pdew) / (gammaDew[i] * Psat[i]);
+          end if;
+          end for; 
+           
+          amv_dew =  EOS_Constant1V(NOC,dewLiqMolFrac[:],a_ij);
+          bmv_dew =  sum(dewLiqMolFrac[:] .* b[:]);
+          
+          AG_dew = (amv_dew * Pdew) / ((R_gas * T) ^ 2);
+          BG_dew = (bmv_dew * Pdew) / ( R_gas * T);
+          
+          for i in 1:NOC loop
+          if(bmv_dew==0) then
+          A[i]=0;
+          else
+          A[i] = b[i]/bmv_dew;
+          end if;
+          end for;
+          
+          for i in 1:NOC loop
+          if(amv_dew==0) then
+          B[i]=0;
+          else
+          B[i] = a[i]/amv_dew;
+          end if;
+          end for;
+          
+          if((BG_dew * (((u) ^ 2)^ 0.5))==0) then
+          E =0;
+          else
+          E = (BG_dew * (((u) ^ 2)^ 0.5));
+          end if;
+          
+          if(E==0) then
+          G =0;
+          else
+          G = AG_dew /(E);
+          end if;
+          
+          if(bmv_dew==0) then
+          I =0;
+          else
+          I = (Zv_dew - 1)/ bmv_dew;
+          end if;
+          
+          if((Zv_dew - BG_dew)<=0) then
+          J = 0;
+          else
+          J = -log((Zv_dew - BG_dew));
+          end if;
+            
+          for i in 1:NOC loop
+          t1_dew[i] = b[i] * I;
+          t3_dew[i] = G * ((A[i]) - ( 2 * ((B[i]) ^ 0.5)));
+          end for;
+          if((((2 * Zv_dew) + (BG_dew * (u + ((((u)^ 2)^ 0.5)))))/((2 * Zv_dew) + (BG_dew * (u - ((((u) ^ 2)^ 0.5))))))<=0) then
+          t4_dew =0;
+          else 
+          t4_dew =  log(((2 * Zv_dew) + (BG_dew * (u + ((((u)^ 2)^ 0.5)))))/((2 * Zv_dew) + (BG_dew * (u - ((((u) ^ 2)^ 0.5))))));  
+          end if;
+          t2_dew = J;
+          
+          for i in 1:NOC loop
+          vapfugcoeff_dew[i] = exp(t1_dew[i] + t2_dew + (t3_dew[i] * t4_dew));  
+          
+          if(Psat[i]==0) then
+          H[i]=0;
+          else
+          H[i] = Pdew/Psat[i];
+          end if;
+          gammaDew[i] = vapfugcoeff_dew[i] * H[i];  
+          end for;
+           
+          algorithm
+          CV_dew[1] := 1;
+          CV_dew[2] := -(1+BG_dew - (u*BG_dew));
+          CV_dew[3] := (AG_dew -(u * BG_dew)-(u*(BG_dew^2)));
+          CV_dew[4] := (-AG_dew *BG_dew );
+          Z_RV_dew := Modelica.Math.Vectors.Utilities.roots(CV_dew);
+          ZV_dew := {Z_RV_dew[i, 1] for i in 1:3};
+          Zv_dew := max({ZV_dew}); 
+          algorithm   
+          CV[1] := 1;
+          CV[2] := -(1+BG - (u*BG));
+          CV[3] := (AG -(u * BG)-(u*(BG^2)));
+          CV[4] := (-AG *BG );
+          Z_RV := Modelica.Math.Vectors.Utilities.roots(CV);
+          ZV := {Z_RV[i, 1] for i in 1:3};
+          Zv := max({ZV}); 
+          
+        //==========================================================================================================
+        end Grayson_Streed;
+
+
+
+
+
+    
     end Thermodynamic_Packages;
+
 
   package Transport_Properties
     function LiqVis
@@ -3133,7 +3475,182 @@ end BIPNRTL;
       end for;
     end PoyntingCF;
     
+     
+       function Solublity_Parameter
+       
+       input Integer NOC;
+       input Real V[NOC];
+       input Real Sp[NOC];
+       input Real compMolFrac[NOC];
+       
+       output Real S;
+       protected Real Vs,Vtot;
+       
+       algorithm
+         
+         Vtot := sum(compMolFrac[:] .* V[:]);
+         Vs :=   sum(compMolFrac[:] .* V[:] .* Sp[:]);
+         
+         if(Vtot==0) then
+         S :=0;
+         else
+         S := Vs / Vtot;
+         end if;
+       
+       end Solublity_Parameter;
+       
+       
+       
+       function EOS_ConstantII
+       parameter Real R_gas = 8.314;
+       input Integer NOC;
+       input Real Tc[NOC],Pc[NOC];
+       input Real T;
+        
+       output Real b[NOC];
+       
+       algorithm
+       
+         for i in 1:NOC loop
+         b[i] := 0.08664 * R_gas * (Tc[i] / Pc[i]);
+         end for;
+       end EOS_ConstantII;
+       
+       
+       function EOS_ConstantIII
+       
+       input Integer NOC;
+       input Real a[NOC];
+       
+       output Real a_ij[NOC,NOC];
+       
+       algorithm
+       
+       for i in 1:NOC loop
+         a_ij[i,:] := (a[i] .* a[:]) .^ 0.5;
+       end for;
+         
+       end EOS_ConstantIII;
+       
+       function EOS_Constant1V
+       
+       input Integer NOC;
+       input Real compMolFrac[NOC];
+       input Real a_ij[NOC,NOC];
+       
+       output Real amv;
+       protected Real amvv[NOC];
+       
+       algorithm
+         for i in 1:NOC loop
+         amvv[i] := sum(compMolFrac[i] .* compMolFrac[:] .* a_ij[i,:]); 
+         end for;  
+         amv := sum(amvv[:]);
+       end EOS_Constant1V;
+       
+       function EOS_Constants
+       
+       parameter Real R_gas = 8.314;
+       input Integer NOC;
+       input Real Tc[NOC],Pc[NOC];
+       input Real T;
+        
+       output Real a[NOC];
+       
+       algorithm
+       
+         for i in 1:NOC loop
+         a[i] := 0.42748 * (R_gas^2) * ((Tc[i] ^ 2.5) / (Pc[i] * (T ^ 0.5)));
+        
+         end for;
+       
+       end EOS_Constants;
+       
+       
+       function Liquid_Fugacity_Coeffcient
+       
+       input Integer NOC;
+       
+       input Real Sp[NOC];
+       input Real Tc[NOC];
+       input Real Pc[NOC];
+       input Real w[NOC];
+       input Real T,P;
+       input Real V[NOC];
+       input Real S;
+       input Real gamma[NOC];
+       
+       output Real liqfugcoeff[NOC](each start = 2);
+       protected Real Tr[NOC];
+       protected Real Pr[NOC];
+       protected Real v0[NOC](each start=2),v1[NOC](each start=2),v[NOC];
+       protected Real A[10];
+       
+       algorithm
+        
+       
+         for i in 1:NOC loop
+         Tr[i] := T / Tc[i];
+         Pr[i] := P / Pc[i];
+        
+         if(Tc[i] == 33.19) then
+           A[1] := 1.50709;
+           A[2] := 2.74283;
+           A[3] := -0.0211;
+           A[4] := 0.00011;
+           A[5] := 0;
+           A[6] := 0.008585;
+           A[7] := 0;
+           A[8] := 0;
+           A[9] := 0;
+           A[10] :=0;
+         
+              v0[i] := 10^(A[1] + (A[2]/Tr[i]) + (A[3]*Tr[i])+(A[4] *Tr[i] *Tr[i])+(A[5] *Tr[i]*Tr[i]*Tr[i])+((A[6] +(A[7] *Tr[i]) +(A[8]*Tr[i]*Tr[i]))*Pr[i])+((A[9] +(A[10]*Tr[i]))*(Pr[i]*Pr[i])) - (log10(Pr[i])));
+             
+          elseif(Tc[i] == 190.56) then 
+           A[1] := 1.36822;
+           A[2] := -1.54831;
+           A[3] := 0;
+           A[4] := 0.02889;
+           A[5] := -0.01076;
+           A[6] := 0.10486;
+           A[7] := -0.02529;
+           A[8] := 0;
+           A[9] := 0;
+           A[10] := 0;
+        
+          v0[i] := 10^(A[1] + (A[2]/Tr[i]) + (A[3]*Tr[i])+(A[4] *Tr[i] *Tr[i])+(A[5] *Tr[i]*Tr[i]*Tr[i])+((A[6] +(A[7] *Tr[i]) +(A[8]*Tr[i]*Tr[i]))*Pr[i])+((A[9] +(A[10]*Tr[i]))*(Pr[i]*Pr[i])) - (log10(Pr[i])));   
+         
+         else 
+           A[1] := 2.05135;
+           A[2] := -2.10889;
+           A[3] := 0;
+           A[4] := -0.19396;
+           A[5] := 0.02282;
+           A[6] := 0.08852;
+           A[7] := 0;
+           A[8] := -0.00872;
+           A[9] := -0.00353;
+           A[10] := 0.00203;
+         
+         v0[i] := 10^(A[1] + (A[2]/Tr[i]) + (A[3]*Tr[i])+(A[4] *Tr[i] *Tr[i])+(A[5] *Tr[i]*Tr[i]*Tr[i])+((A[6] +(A[7] *Tr[i]) +(A[8]*Tr[i]*Tr[i]))*Pr[i])+((A[9] +(A[10]*Tr[i]))*(Pr[i]*Pr[i])) - (log10(Pr[i])));
+           
+        end if;
+        
+          v1[i] := 10^(-4.23893 + (8.65808 * Tr[i]) - (1.2206 / Tr[i]) - (3.15224 * Tr[i] ^ 3) - 0.025 * (Pr[i] - 0.6));
+        
+        if(v1[i] == 0) then 
+          v[i]  := 10^(log10(v0[i]) );
+        else 
+          v[i]  := 10^(log10(v0[i]) + (w[i] * log10(v1[i])));
+        end if; 
+         liqfugcoeff[i] := v[i] * gamma[i];
+       end for; 
+       
+       end Liquid_Fugacity_Coeffcient;
+    
     end Thermodynamic_Functions;
+
 
 
 
@@ -3687,6 +4204,7 @@ end Material_Stream;
       parameter Integer HKey, LKey;
       parameter String condType = "Total";
       Real vapPhasMolFrac[3], condLiqMixMolEnth, condVapMixMolEnth, condVapCompMolEnth[NOC], condLiqCompMolEnth[NOC], condLiqMolFrac[NOC], condVapMolFrac[NOC];
+      Real compMolFrac[3, NOC], Pdew, Pbubl;
       Real actR, actN, x, y, feedN;
       Real rectLiq, rectVap, stripLiq, stripVap, rebDuty, condDuty;
       Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
@@ -3724,6 +4242,19 @@ end Material_Stream;
       distillate.vapPhasMolFrac = vapPhasMolFrac[3];
       reboiler_duty.enFlo = rebDuty;
       condenser_duty.enFlo = condDuty;
+    
+     //adjustment for thermodynamic packages
+     compMolFrac[1,:] = mixMolFrac[1,:];
+     compMolFrac[2, :] = compMolFrac[1, :] ./ (1 .+ vapPhasMolFrac[1] .* (K[:] .- 1));
+     for i in 1:NOC loop
+       compMolFrac[3, i] = K[i] * compMolFrac[2, i];
+      end for;
+    //  sum(compMolFrac[1,:] .* (K[:] .- 1) ./ (1 .+ vapPhasMolFrac[1] .* (K[:] .- 1))) = 0;
+     //Bubble point calculation
+      Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+     //Dew point calculation
+      Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+    
     equation
       for i in 1:NOC loop
         if mixMolFrac[1, i] == 0 then
@@ -3791,6 +4322,7 @@ end Material_Stream;
       mixMolFlo[1] * mixMolEnth[1] + rebDuty - condDuty = mixMolFlo[2] * mixMolEnth[2] + mixMolFlo[3] * mixMolEnth[3];
       rectVap * condVapMixMolEnth = condDuty + mixMolFlo[3] * mixMolEnth[3] + rectLiq * condLiqMixMolEnth;
     end Shortcut_Column;
+
 
     model Compound_Separator
       parameter Integer NOC "Number of components", sepStrm "Specified Stream";
@@ -4667,6 +5199,7 @@ end Material_Stream;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P, T(start = 300);
         Real feedMolFlo(min = 0), sideDrawMolFlo(min = 0), inVapMolFlo(min = 0), outLiqMolFlo(min = 0), feedMolFrac[NOC](each min = 0, each max = 1), sideDrawMolFrac[NOC](each min = 0, each max = 1), inVapCompMolFrac[NOC](each min = 0, each max = 1), outLiqCompMolFrac[NOC](each min = 0, each max = 1), feedMolEnth, inVapMolEnth, outLiqMolEnth, heatLoad, sideDrawMolEnth, outLiqCompMolEnth[NOC];
+        Real compMolFrac[3, NOC], Pdew, Pbubl;
         //String sideDrawType(start = "Null");
         //L or V
         parameter String condType "Partial or Total";
@@ -4697,6 +5230,15 @@ end Material_Stream;
         vapor_inlet.mixMolEnth = inVapMolEnth;
         vapor_inlet.mixMolFrac[:] = inVapCompMolFrac[:];
         heat_load.enFlo = heatLoad;
+        //Adjustment for thermodynamic packages  
+          compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:])./(sideDrawMolFlo + outLiqMolFlo);
+         compMolFrac[2, :] = outLiqCompMolFrac[:];
+         compMolFrac[3, :] = K[:] .* compMolFrac[2, :];
+       //Bubble point calculation
+         Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+        //Dew point calculation
+        Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+                  
 //molar balance
 //feedMolFlo + inVapMolFlo = sideDrawMolFlo + outLiqMolFlo;
         feedMolFlo .* feedMolFrac[:] + inVapMolFlo .* inVapCompMolFrac[:] = sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:];
@@ -4728,12 +5270,14 @@ end Material_Stream;
           __OpenModelica_commandLineOptions = "");
       end Cond;
 
+
       model DistTray
         import Simulator.Files.*;
         parameter Integer NOC = 2;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P, T(start = (min(comp[:].Tb) + max(comp[:].Tb)) / NOC);
         Real feedMolFlo(min = 0), sideDrawMolFlo(min = 0), vapMolFlo[2](each min = 0), liqMolFlo[2](each min = 0), feedMolFrac[NOC](each min = 0, each max = 1), sideDrawMolFrac[NOC](each min = 0, each max = 1), vapCompMolFrac[2, NOC](each min = 0, each max = 1), liqCompMolFrac[2, NOC](each min = 0, each max = 1), feedMolEnth, vapMolEnth[2], liqMolEnth[2], heatLoad, sideDrawMolEnth, feedVapPhasMolFrac, outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
+        Real compMolFrac[3, NOC], Pdew, Pbubl;
         String sideDrawType(start = "Null");
         //L or V
         Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
@@ -4774,6 +5318,14 @@ end Material_Stream;
         vapor_outlet.mixMolEnth = vapMolEnth[2];
         vapor_outlet.mixMolFrac[:] = vapCompMolFrac[2, :];
         heat_load.enFlo = heatLoad;
+        //Adjustment for thermodynamic packages  
+       compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :]) / (liqMolFlo[2] + vapMolFlo[2] + sideDrawMolFlo);
+       compMolFrac[2, :] = liqCompMolFrac[2,:];
+       compMolFrac[3, :] = vapCompMolFrac[2,:];  
+       //Bubble point calculation
+       Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+       //Dew point calculation
+       Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
 //molar balance
 //feedMolFlo + vapMolFlo[1] + liqMolFlo[1] = sideDrawMolFlo + vapMolFlo[2] + liqMolFlo[2];
         feedMolFlo .* feedMolFrac[:] + vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
@@ -4809,12 +5361,15 @@ end Material_Stream;
       end DistTray;
 
 
+
       model Reb
         import Simulator.Files.*;
         parameter Integer NOC = 2;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P, T(start = 300);
-        Real feedMolFlo(min = 0), sideDrawMolFlo(min = 0), outVapMolFlo(min = 0), inLiqMolFlo(min = 0), feedMolFrac[NOC](each min = 0, each max = 1), sideDrawMolFrac[NOC](each min = 0, each max = 1), outVapCompMolFrac[NOC](each min = 0, each max = 1), inLiqCompMolFrac[NOC](each min = 0, each max = 1), feedMolEnth, outVapMolEnth, inLiqMolEnth, outVapCompMolEnth[NOC], heatLoad, sideDrawMolEnth;
+        Real feedMolFlo(min = 0), sideDrawMolFlo(min = 0), outVapMolFlo(min = 0), inLiqMolFlo(min = 0), feedMolFrac[NOC](each min = 0, each max = 1), sideDrawMolFrac[NOC](each min = 0, each max = 1), outVapCompMolFrac[NOC](each min = 0, each max = 1), inLiqCompMolFrac[NOC](each min = 0, each max = 1), feedMolEnth, outVapMolEnth, inLiqMolEnth,
+       outVapCompMolEnth[NOC], heatLoad, sideDrawMolEnth;
+       Real compMolFrac[3, NOC], Pdew, Pbubl;
         Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.matConn side_draw(connNOC = NOC) annotation(
@@ -4842,6 +5397,14 @@ end Material_Stream;
         vapor_outlet.mixMolEnth = outVapMolEnth;
         vapor_outlet.mixMolFrac[:] = outVapCompMolFrac[:];
         heat_load.enFlo = heatLoad;
+         //Adjustment for thermodynamic packages  
+         compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outVapMolFlo .* outVapCompMolFrac[:])./(sideDrawMolFlo + outVapMolFlo);
+         compMolFrac[2, :] = sideDrawMolFrac[:];//This equation is temporarily valid since this is only "partial" reboiler. Rewrite equation when "total" reboiler functionality is added
+         compMolFrac[3, :] = outVapCompMolFrac[:];
+       //Bubble point calculation
+         Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+       //Dew point calculation
+        Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
 //molar balance
 //  feedMolFlo + inLiqMolFlo = sideDrawMolFlo + outVapMolFlo;
         for i in 1:NOC loop
@@ -4865,6 +5428,7 @@ end Material_Stream;
           Icon(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
           __OpenModelica_commandLineOptions = "");
       end Reb;
+
 
 
       model DistCol
@@ -4981,6 +5545,7 @@ end Material_Stream;
 
 
     end Distillation_Column;
+
 
     package Absorption_Column
       model AbsTray
@@ -5226,12 +5791,31 @@ end Material_Stream;
       compMolFrac[1, :] = {0.5, 0.5};
       totMolFlo[1] = 50;
       P = 101325;
-      T = 353;
+      T = 354;
     end msTPUNIQUAC;
 
-
-
-
+model msTPGrayson
+    import data = Simulator.Files.Chemsep_Database;
+    parameter data.Ethylene eth;
+    parameter data.Acetylene acet;
+    parameter data.OneOnedichloroethane dich;
+    parameter data.Propadiene prop;
+   
+   //w=Acentric Factor
+   //Sp = Solublity Parameter
+   //V = Molar Volume 
+   //All the above three parameters have to be mentioned as arguments while extending the thermodynamic Package Grayson Streed  as shown below
+    
+    extends Simulator.Files.Thermodynamic_Packages.Grayson_Streed(w={0.0949,0.1841,0.244612,0.3125},Sp={0.00297044,0.00449341,0.00437069,0.00419199},V={61,42.1382,84.7207,60.4292});
+    extends Simulator.Streams.Material_Stream(NOC = 4, comp = {eth, acet, dich, prop});
+    //Equations
+  equation
+    P = 101325;
+    T = 210.246;
+    compMolFrac[1, :] = {0.4, 0.2, 0.3, 0.1};
+    totMolFlo[1] = 50;
+  end msTPGrayson;
+  
 
   
     package cmpstms
@@ -6139,6 +6723,7 @@ package PFR_Test
   
   
   end Test;
+
 
 
 package Binary_Phase_Envelope

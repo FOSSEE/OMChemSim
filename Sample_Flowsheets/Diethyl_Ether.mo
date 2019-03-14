@@ -66,7 +66,7 @@ package Diethyl_Ether
     //Number of Components
     parameter Integer NOC = 3;
     parameter data.General_Properties comp[NOC] = {dieth, eth, wat};
-    Simulator.Unit_Operations.Mixer Mixer(NI = 2, NOC = NOC, comp = comp, outPress = "Inlet_Average") annotation(
+    Simulator.Unit_Operations.Mixer Mixer(NI = 2, NOC = NOC, comp = comp, outPress = "Inlet_Average", outT(start = 300)) annotation(
       Placement(visible = true, transformation(origin = {-52, 70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Diethyl_Ether.Reactor CReactor(NOC = NOC, comp = comp, Nr = 1, Bc = {2}, Sc = {{1}, {-2}, {1}}, X = {0.50}, calcMode = "Define_Outlet_Temperature", Tdef = 298.15) annotation(
       Placement(visible = true, transformation(origin = {26, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -80,7 +80,7 @@ package Diethyl_Ether
       Placement(visible = true, transformation(origin = {-96, 82}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Diethyl_Ether.Feed_Raoults S_II(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-96, 50}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Feed_Raoults S_III(NOC = NOC, comp = comp) annotation(
+    Feed_Raoults S_III(NOC = NOC, comp = comp, totMolFlo(each start = 50), T(start = 300)) annotation(
       Placement(visible = true, transformation(origin = {-10, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Diethyl_Ether.Feed_Raoults S_IV(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {74, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -150,6 +150,16 @@ package Diethyl_Ether
     DC_II.refluxRatio = 2;
     Bottoms_II.totMolFlo[1] = 14.7189;
   end Flowsheet;
+
+
+
+
+
+
+
+
+
+
 
 
 

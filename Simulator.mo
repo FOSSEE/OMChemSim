@@ -3692,11 +3692,14 @@ end BIPNRTL;
 
     package Connection
       connector matConn
-        Real P(min = 0, start = 101325), T(min = 0, start = 273.15), mixMolFlo(min = 0, start = 100), mixMolEnth, mixMolEntr, mixMolFrac[connNOC](each min = 0, each max = 1, each start = 1/(connNOC + 1)), vapPhasMolFrac(min = 0, max = 1, start = 0.5);
-        parameter Integer connNOC;
+        Real P(min = 0, start = 101325), T(min = 0, start = 273.15), mixMolFlo(min = 0, start = 100), mixMolEnth, mixMolEntr, mixMolFrac[3, connNOC](each min = 0, each max = 1, each start = 1/(connNOC + 1)), vapPhasMolFrac(min = 0, max = 1, start = 0.5);
+        parameter Integer connNOC(start = 2);
         annotation(
           Icon(coordinateSystem(initialScale = 0.1), graphics = {Rectangle(fillColor = {175, 175, 175}, fillPattern = FillPattern.Solid, extent = {{-100, 100}, {100, -100}})}));
       end matConn;
+
+
+
 
 
 
@@ -3900,11 +3903,29 @@ end BIPNRTL;
     
     
     end Models;
+    
+    package Other_Functions
+      function colBoolCalc//column boolean calculator
+        input Integer noOfStages, noOfExCons, exConStages[noOfExCons];
+        output Boolean bool[noOfStages];
+        
+        algorithm
+          bool := fill(false, noOfStages);
+          for i in 1:noOfExCons loop
+            bool[exConStages[i]] := true;
+          end for;
+      end colBoolCalc;
+
+
+    
+    end Other_Functions;
+
 
   end Files;
 
 
-  model Streams
+
+  package Streams
     extends Modelica.Icons.VariantsPackage;
 
 model Material_Stream
@@ -3932,14 +3953,14 @@ equation
   inlet.mixMolFlo = totMolFlo[1];
   inlet.mixMolEnth = phasMolEnth[1];
   inlet.mixMolEntr = phasMolEntr[1];
-  inlet.mixMolFrac[:] = compMolFrac[1, :];
+  inlet.mixMolFrac = compMolFrac;
   inlet.vapPhasMolFrac = vapPhasMolFrac;
   outlet.P = P;
   outlet.T = T;
   outlet.mixMolFlo = totMolFlo[1];
   outlet.mixMolEnth = phasMolEnth[1];
   outlet.mixMolEntr = phasMolEntr[1];
-  outlet.mixMolFrac[:] = compMolFrac[1, :];
+  outlet.mixMolFrac = compMolFrac;
   outlet.vapPhasMolFrac = vapPhasMolFrac;
 //=====================================================================================
 //Mole Balance
@@ -4039,6 +4060,7 @@ end Material_Stream;
 
 
 
+
     model Energy_Stream
       Real enFlo;
       Files.Connection.enConn inlet annotation(
@@ -4051,6 +4073,7 @@ end Material_Stream;
       enFlo = outlet.enFlo;
     end Energy_Stream;
   end Streams;
+
 
   package Unit_Operations
     extends Modelica.Icons.VariantsPackage;
@@ -4079,7 +4102,7 @@ end Material_Stream;
         inlet[i].mixMolFlo = inMolFlo[i];
         inlet[i].mixMolEnth = inTotMolEnth[i];
         inlet[i].mixMolEntr = inTotMolEntr[i];
-        inlet[i].mixMolFrac[:] = inCompMolFrac[i, :];
+        inlet[i].mixMolFrac[1, :] = inCompMolFrac[i, :];
         inlet[i].vapPhasMolFrac = inVapPhasMolFrac[i];
       end for;
       outlet.P = outP;
@@ -4087,7 +4110,7 @@ end Material_Stream;
       outlet.mixMolFlo = outMolFlo;
       outlet.mixMolEnth = outTotMolEnth;
       outlet.mixMolEntr = outTotMolEntr;
-      outlet.mixMolFrac[:] = outCompMolFrac[:];
+      outlet.mixMolFrac[1, :] = outCompMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
 //===================================================================================
 //Output Pressure
@@ -4106,6 +4129,7 @@ end Material_Stream;
 //Energy balance
       outTotMolEnth = sum(inTotMolEnth[:] .* inMolFlo[:] / outMolFlo);
     end Mixer;
+
 
 
 
@@ -4135,13 +4159,13 @@ end Material_Stream;
       inlet.T = inT;
       inlet.mixMolFlo = inMolFlo;
       inlet.mixMolEnth = inMixMolEnth;
-      inlet.mixMolFrac[:] = mixMolFrac[:];
+      inlet.mixMolFrac[1, :] = mixMolFrac[:];
       inlet.vapPhasMolFrac = inVapPhasMolFrac;
       outlet.P = outP;
       outlet.T = outT;
       outlet.mixMolFlo = outMolFlo;
       outlet.mixMolEnth = outMixMolEnth;
-      outlet.mixMolFrac[:] = mixMolFrac[:];
+      outlet.mixMolFrac[1, :] = mixMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
       energy.enFlo = heatAdd;
 //=============================================================================================
@@ -4154,6 +4178,7 @@ end Material_Stream;
       inT + tempInc = outT;
 //temperature calculation
     end Heater;
+
 
 
 
@@ -4182,14 +4207,14 @@ end Material_Stream;
       inlet.mixMolFlo = inMolFlo;
       inlet.mixMolEnth = inMixMolEnth;
       inlet.mixMolEntr = inMixMolEntr;
-      inlet.mixMolFrac[:] = mixMolFrac[:];
+      inlet.mixMolFrac[1, :] = mixMolFrac[:];
       inlet.vapPhasMolFrac = inVapPhasMolFrac;
       outlet.P = outP;
       outlet.T = outT;
       outlet.mixMolFlo = outMolFlo;
       outlet.mixMolEnth = outMixMolEnth;
       outlet.mixMolEntr = outMixMolEntr;
-      outlet.mixMolFrac[:] = mixMolFrac[:];
+      outlet.mixMolFrac[1, :] = mixMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
       energy.enFlo = heatRem;
 //=============================================================================================
@@ -4202,6 +4227,7 @@ end Material_Stream;
       inT - tempDrop = outT;
 //temperature calculation
     end Cooler;
+
 
 
 
@@ -4227,14 +4253,14 @@ end Material_Stream;
       inlet.mixMolFlo = inMolFlo;
       inlet.mixMolEnth = inMixMolEnth;
       inlet.mixMolEntr = inMixMolEntr;
-      inlet.mixMolFrac[:] = mixMolFrac[:];
+      inlet.mixMolFrac[1, :] = mixMolFrac[:];
       inlet.vapPhasMolFrac = inVapPhasMolFrac;
       outlet.P = outP;
       outlet.T = outT;
       outlet.mixMolFlo = outMolFlo;
       outlet.mixMolEnth = outMixMolEnth;
       outlet.mixMolEntr = outMixMolEntr;
-      outlet.mixMolFrac[:] = mixMolFrac[:];
+      outlet.mixMolFrac[1, :] = mixMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
 //=============================================================================================
       inMolFlo = outMolFlo;
@@ -4246,6 +4272,7 @@ end Material_Stream;
       inT + tempInc = outT;
 //temperature calculation
     end Valve;
+
 
 
 
@@ -4279,21 +4306,21 @@ equation
   feed.P = P;
   feed.T = T;
   feed.mixMolFlo = mixMolFlo[1];
-  feed.mixMolFrac[:] = mixMolFrac[1, :];
+  feed.mixMolFrac[1, :] = mixMolFrac[1, :];
   feed.mixMolEnth = mixMolEnth[1];
   feed.mixMolEntr = mixMolEntr[1];
   feed.vapPhasMolFrac = vapPhasMolFrac[1];
   bottoms.P = rebP;
   bottoms.T = rebT;
   bottoms.mixMolFlo = mixMolFlo[2];
-  bottoms.mixMolFrac[:] = mixMolFrac[2, :];
+  bottoms.mixMolFrac[1, :] = mixMolFrac[2, :];
   bottoms.mixMolEnth = mixMolEnth[2];
   bottoms.mixMolEntr = mixMolEntr[2];
   bottoms.vapPhasMolFrac = vapPhasMolFrac[2];
   distillate.P = condP;
   distillate.T = condT;
   distillate.mixMolFlo = mixMolFlo[3];
-  distillate.mixMolFrac[:] = mixMolFrac[3, :];
+  distillate.mixMolFrac[1, :] = mixMolFrac[3, :];
   distillate.mixMolEnth = mixMolEnth[3];
   distillate.mixMolEntr = mixMolEntr[3];
   distillate.vapPhasMolFrac = vapPhasMolFrac[3];
@@ -4394,6 +4421,7 @@ end Shortcut_Column;
 
 
 
+
     model Compound_Separator
       parameter Integer NOC "Number of components", sepStrm "Specified Stream";
       parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] "Components array";
@@ -4416,15 +4444,15 @@ end Shortcut_Column;
       inlet.P = inP;
       inlet.T = inT;
       inlet.mixMolFlo = inMixMolFlo;
-      inlet.mixMolFrac = inMixMolFrac;
+      inlet.mixMolFrac[1, :] = inMixMolFrac[:];
       inlet.mixMolEnth = inMixMolEnth;
       outlet1.P = outP[1];
       outlet1.T = outT[1];
       outlet1.mixMolFlo = outMixMolFlo[1];
-      outlet1.mixMolFrac = outMixMolFrac[1];
+      outlet1.mixMolFrac[1, :] = outMixMolFrac[1, :];
       outlet1.mixMolEnth = outMixMolEnth[1];
       outlet2.mixMolFlo = outMixMolFlo[2];
-      outlet2.mixMolFrac = outMixMolFrac[2];
+      outlet2.mixMolFrac[1, :] = outMixMolFrac[2, :];
       outlet2.mixMolEnth = outMixMolEnth[2];
       outlet2.P = outP[2];
       outlet2.T = outT[2];
@@ -4462,6 +4490,7 @@ end Shortcut_Column;
 
 
 
+
     model Flash
       //extend thermodynamic package with this model
       import Simulator.Files.*;
@@ -4491,17 +4520,17 @@ end Shortcut_Column;
         feed.P = P;
       end if;
       feed.mixMolFlo = totMolFlo[1];
-      feed.mixMolFrac[:] = compMolFrac[1, :];
+      feed.mixMolFrac[1, :] = compMolFrac[1, :];
       liquid.T = T;
     //  liquid.mixMolEnth = phasMolEnth[2];
       liquid.P = P;
       liquid.mixMolFlo = totMolFlo[2];
-      liquid.mixMolFrac[:] = compMolFrac[2, :];
+      liquid.mixMolFrac[1, :] = compMolFrac[2, :];
       vapor.T = T;
     //  vapor.mixMolEnth= phasMolEnth[3];
       vapor.P = P;
       vapor.mixMolFlo = totMolFlo[3];
-      vapor.mixMolFrac[:] = compMolFrac[3, :];
+      vapor.mixMolFrac[1, :] = compMolFrac[3, :];
 //Mole Balance
       totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
       compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
@@ -4573,6 +4602,7 @@ end Shortcut_Column;
 
 
 
+
     model Splitter
       parameter Integer NOC = 2 "number of Components", NO = 2 "number of outputs";
       parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
@@ -4587,12 +4617,12 @@ end Shortcut_Column;
 //Connector equations
       inlet.P = inP;
       inlet.T = inT;
-      inlet.mixMolFrac[:] = inMixMolFrac[:];
+      inlet.mixMolFrac[1, :] = inMixMolFrac[:];
       inlet.mixMolFlo = inMixMolFlo;
       for i in 1:NO loop
         outlet[i].P = outP[i];
         outlet[i].T = outT[i];
-        outlet[i].mixMolFrac[:] = outMixMolFrac[i, :];
+        outlet[i].mixMolFrac[1, :] = outMixMolFrac[i, :];
         outlet[i].mixMolFlo = outMixMolFlo[i];
       end for;
 //specification value assigning equation
@@ -4624,6 +4654,7 @@ end Shortcut_Column;
 
 
 
+
     model Centrifugal_Pump
       parameter Integer NOC = 2 "Number of Components";
       parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] "Component array";
@@ -4641,12 +4672,12 @@ end Shortcut_Column;
       inlet.T = inT;
       inlet.mixMolFlo = inMixMolFlo;
       inlet.mixMolEnth = inMixMolEnth;
-      inlet.mixMolFrac = inMixMolFrac;
+      inlet.mixMolFrac[1, :] = inMixMolFrac[:];
       outlet.P = outP;
       outlet.T = outT;
       outlet.mixMolFlo = outMixMolFlo;
       outlet.mixMolEnth = outMixMolEnth;
-      outlet.mixMolFrac = outMixMolFrac;
+      outlet.mixMolFrac[1, :] = outMixMolFrac[:];
       energy.enFlo = reqPow;
 //Pump equations
 //balance
@@ -4667,6 +4698,7 @@ end Shortcut_Column;
 //vap pressure of mixture at outT
       vapPress = sum(inMixMolFrac .* exp(comp[:].VP[2] + comp[:].VP[3] / outT + comp[:].VP[4] * log(outT) + comp[:].VP[5] .* outT .^ comp[:].VP[6]));
     end Centrifugal_Pump;
+
 
 
     model Adiabatic_Compressor
@@ -4694,14 +4726,14 @@ end Shortcut_Column;
       inlet.mixMolFlo = inMolFlo;
       inlet.mixMolEnth = inMixMolEnth;
       inlet.mixMolEntr = inMixMolEntr;
-      inlet.mixMolFrac[:] = mixMolFrac[:];
+      inlet.mixMolFrac[1, :] = mixMolFrac[:];
       inlet.vapPhasMolFrac = inVapPhasMolFrac;
       outlet.P = outP;
       outlet.T = outT;
       outlet.mixMolFlo = outMolFlo;
       outlet.mixMolEnth = outMixMolEnth;
       outlet.mixMolEntr = outMixMolEntr;
-      outlet.mixMolFrac[:] = mixMolFrac[:];
+      outlet.mixMolFrac[1, :] = mixMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
       energy.enFlo = reqPow;
 //=============================================================================================
@@ -4721,6 +4753,7 @@ end Shortcut_Column;
       inMixMolEntr = phasMolEntr[1];
       mixMolFrac[:] = compMolFrac[1, :];
     end Adiabatic_Compressor;
+
 
 
 
@@ -4749,14 +4782,14 @@ end Shortcut_Column;
       inlet.mixMolFlo = inMolFlo;
       inlet.mixMolEnth = inMixMolEnth;
       inlet.mixMolEntr = inMixMolEntr;
-      inlet.mixMolFrac[:] = mixMolFrac[:];
+      inlet.mixMolFrac[1, :] = mixMolFrac[:];
       inlet.vapPhasMolFrac = inVapPhasMolFrac;
       outlet.P = outP;
       outlet.T = outT;
       outlet.mixMolFlo = outMolFlo;
       outlet.mixMolEnth = outMixMolEnth;
       outlet.mixMolEntr = outMixMolEntr;
-      outlet.mixMolFrac[:] = mixMolFrac[:];
+      outlet.mixMolFrac[1, :] = mixMolFrac[:];
       outlet.vapPhasMolFrac = outVapPhasMolFrac;
       energy.enFlo = genPow;
 //=============================================================================================
@@ -4776,6 +4809,7 @@ end Shortcut_Column;
       inMixMolEntr = phasMolEntr[1];
       mixMolFrac[:] = compMolFrac[1, :];
     end Adiabatic_Expander;
+
 
 
     
@@ -4810,12 +4844,12 @@ end Shortcut_Column;
       inlet.T = inT;
       inlet.mixMolFlo = inMolFlo;
       inlet.mixMolEnth = inMixMolEnth;
-      inlet.mixMolFrac[:] = inCompMolFrac[:];
+      inlet.mixMolFrac[1, :] = inCompMolFrac[:];
       outlet.P = outP;
       outlet.T = outT;
       outlet.mixMolFlo = outMolFlo;
       outlet.mixMolEnth = outMixMolEnth;
-      outlet.mixMolFrac[:] = outCompMolFrac[:];
+      outlet.mixMolFrac[1, :] = outCompMolFrac[:];
       
       //Reactor equations
       for i in 1:NOC loop
@@ -4846,6 +4880,7 @@ end Shortcut_Column;
       end if;
     
     end Conversion_Reactor;
+
 
 
 
@@ -4946,7 +4981,7 @@ end Shortcut_Column;
           inlet.mixMolFlo = totMolFlow[1];
           inlet.mixMolEnth = Enth;
           inlet.mixMolEntr = Entr;
-          inlet.mixMolFrac[:] = compMolFrac[1, :];
+          inlet.mixMolFrac[1, :] = compMolFrac[1, :];
           inlet.vapPhasMolFrac = Vapfrac;
           
           outlet.P = Pout;
@@ -4954,7 +4989,7 @@ end Shortcut_Column;
           outlet.mixMolFlo = outTotMolFlow[1];
           outlet.mixMolEnth = outEnth;
           outlet.mixMolEntr = outEntr;
-          outlet.mixMolFrac[:] = outCompMolFrac[1, :];
+          outlet.mixMolFrac[1, :] = outCompMolFrac[1, :];
           outlet.vapPhasMolFrac = outVapfrac;
           en_Conn.enFlo = energy_flo;
   //Phase Equilibria
@@ -5246,6 +5281,7 @@ end Shortcut_Column;
 
 
 
+
     
   //===========================================================================================================
   
@@ -5282,9 +5318,9 @@ end Shortcut_Column;
    
     package Distillation_Column
       model Cond
-        //    extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
         import Simulator.Files.*;
         parameter Integer NOC = 2;
+        parameter Boolean boolFeed = false;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
         Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), inVapMolFlo(min = 0, start = 100), outLiqMolFlo(min = 0, start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), inVapCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), outLiqCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, inVapMolEnth, outLiqMolEnth, heatLoad, sideDrawMolEnth, outLiqCompMolEnth[NOC];
@@ -5292,7 +5328,9 @@ end Shortcut_Column;
         //String sideDrawType(start = "Null");
         //L or V
         parameter String condType "Partial or Total";
-        Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
+        replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
+          Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Files.Connection.matConn dummy_feed(connNOC = NOC, P = 0, T = 0, mixMolFrac = zeros(3, NOC), mixMolFlo = 0, mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not boolFeed annotation(
           Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.matConn side_draw(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -5304,12 +5342,19 @@ end Shortcut_Column;
           Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
 //connector equation
-        feed.mixMolFrac = feedMolFrac;
-        feed.mixMolEnth = feedMolEnth;
-        feed.mixMolFlo = feedMolFlo;
+        if boolFeed then
+          feed.mixMolFrac[1, :] = feedMolFrac[:];
+          feed.mixMolEnth = feedMolEnth;
+          feed.mixMolFlo = feedMolFlo;
+        else
+          dummy_feed.mixMolFrac[1, :] = feedMolFrac[:];
+          dummy_feed.mixMolEnth = feedMolEnth;
+          dummy_feed.mixMolFlo = feedMolFlo;
+        end if;
+        
         side_draw.P = P;
         side_draw.T = T;
-        side_draw.mixMolFrac = sideDrawMolFrac;
+        side_draw.mixMolFrac[1, :] = sideDrawMolFrac[:];
         side_draw.mixMolFlo = sideDrawMolFlo;
         side_draw.mixMolEnth = sideDrawMolEnth;
         liquid_outlet.mixMolFlo = outLiqMolFlo;
@@ -5362,16 +5407,26 @@ end Shortcut_Column;
 
 
 
+
+
+
+
+
+
       model DistTray
         import Simulator.Files.*;
         parameter Integer NOC = 2;
+        parameter Boolean boolFeed = true;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P(min = 0, start = 101325), T(min = 0, start = (min(comp[:].Tb) + max(comp[:].Tb)) / 2);
-        Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), vapMolFlo[2](each min = 0, each start = 100), liqMolFlo[2](each min = 0, each start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, vapMolEnth[2], liqMolEnth[2], heatLoad, sideDrawMolEnth, feedVapPhasMolFrac(min = 0, max = 1, start = 0.5), outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
+        Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), vapMolFlo[2](each min = 0, each start = 100), liqMolFlo[2](each min = 0, each start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, vapMolEnth[2], liqMolEnth[2], heatLoad, sideDrawMolEnth, outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
         Real compMolFrac[3, NOC](each min =0, each max = 0, each start = 1/(NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc)/NOC), Pbubl(min = 0, start = sum(comp[:].Pc)/NOC);
+        Real dummyP1, dummyT1, dummyMixMolFrac1[3,NOC], dummyMixMolFlo1,dummyMixMolEnth1, dummyMixMolEntr1, dummyVapPhasMolFrac1;//this is adjustment done since OpenModelica 1.11 is not handling array modification properly
         String sideDrawType(start = "Null");
         //L or V
-        Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
+        replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
+          Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        replaceable Simulator.Files.Connection.matConn dummy_feed(connNOC = NOC, P = 0, T = 0, mixMolFlo = 0, mixMolFrac = zeros(3, NOC), mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not boolFeed annotation(
           Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.matConn side_draw(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -5387,13 +5442,30 @@ end Shortcut_Column;
           Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
 //connector equation
-        feed.mixMolFrac = feedMolFrac;
-        feed.mixMolEnth = feedMolEnth;
-        feed.mixMolFlo = feedMolFlo;
-        feed.vapPhasMolFrac = feedVapPhasMolFrac;
+        if boolFeed then
+          feed.P = dummyP1;//this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+          feed.T = dummyT1;
+          feed.mixMolFrac = dummyMixMolFrac1;
+          feed.mixMolFlo = dummyMixMolFlo1;
+          feed.mixMolEnth = dummyMixMolEnth1;
+          feed.mixMolEntr = dummyMixMolEntr1;
+          feed.vapPhasMolFrac = dummyVapPhasMolFrac1;
+        else
+          dummy_feed.P = dummyP1;
+          dummy_feed.T = dummyT1;
+          dummy_feed.mixMolFrac = dummyMixMolFrac1;
+          dummy_feed.mixMolFlo = dummyMixMolFlo1;
+          dummy_feed.mixMolEnth = dummyMixMolEnth1;
+          dummy_feed.mixMolEntr = dummyMixMolEntr1;
+          dummy_feed.vapPhasMolFrac = dummyVapPhasMolFrac1;
+        end if;
+        //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+        dummyMixMolFrac1[1,:] = feedMolFrac[:];
+        dummyMixMolEnth1 = feedMolEnth;
+        dummyMixMolFlo1 = feedMolFlo;
+        
         side_draw.P = P;
         side_draw.T = T;
-        side_draw.mixMolFrac = sideDrawMolFrac;
         side_draw.mixMolFlo = sideDrawMolFlo;
         side_draw.mixMolEnth = sideDrawMolEnth;
         liquid_inlet.mixMolFlo = liqMolFlo[1];
@@ -5456,15 +5528,33 @@ end Shortcut_Column;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       model Reb
         import Simulator.Files.*;
         parameter Integer NOC = 2;
+        parameter Boolean boolFeed = false;
         parameter Chemsep_Database.General_Properties comp[NOC];
         Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
         Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), outVapMolFlo(min = 0, start = 100), inLiqMolFlo(min = 0, start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), outVapCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), inLiqCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, outVapMolEnth, inLiqMolEnth,
        outVapCompMolEnth[NOC], heatLoad, sideDrawMolEnth;
        Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc)/NOC), Pbubl(min = 0, start = sum(comp[:].Pc)/NOC);
-        Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
+        replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
+          Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        replaceable Simulator.Files.Connection.matConn dummy_feed(connNOC = NOC, P = 0, T = 0, mixMolFrac = zeros(3, NOC), mixMolFlo = 0, mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not boolFeed annotation(
           Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.matConn side_draw(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -5476,12 +5566,18 @@ end Shortcut_Column;
           Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
       equation
 //connector equation
-        feed.mixMolFrac = feedMolFrac;
-        feed.mixMolEnth = feedMolEnth;
-        feed.mixMolFlo = feedMolFlo;
+        if boolFeed then
+          feed.mixMolFrac[1, :] = feedMolFrac[:];
+          feed.mixMolEnth = feedMolEnth;
+          feed.mixMolFlo = feedMolFlo;
+        else
+          dummy_feed.mixMolFrac[1, :] = feedMolFrac[:];
+          dummy_feed.mixMolEnth = feedMolEnth;
+          dummy_feed.mixMolFlo = feedMolFlo;
+        end if;
         side_draw.P = P;
         side_draw.T = T;
-        side_draw.mixMolFrac = sideDrawMolFrac;
+        side_draw.mixMolFrac[1, :] = sideDrawMolFrac;
         side_draw.mixMolFlo = sideDrawMolFlo;
         side_draw.mixMolEnth = sideDrawMolEnth;
         liquid_inlet.mixMolFlo = inLiqMolFlo;
@@ -5527,16 +5623,22 @@ end Shortcut_Column;
 
 
 
+
+
+
+
+
       model DistCol
         parameter Integer NOC;
         import data = Simulator.Files.Chemsep_Database;
         parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-        parameter Integer noOfStages = 4, noOfSideDraws = 0, noOfHeatLoads = 0, noOfFeeds = 1, feedStages[noOfFeeds] = {3};
+        parameter Boolean boolFeed[noOfStages] = Simulator.Files.Other_Functions.colBoolCalc(noOfStages, noOfFeeds, feedStages);
+        parameter Integer noOfStages = 4, noOfSideDraws = 0, noOfHeatLoads = 0, noOfFeeds = 1, feedStages[noOfFeeds];
         parameter String condType = "Total";
         //Total or Partial
-        Boolean boolFeed[noOfStages](each start = false);
+        
         Real refluxRatio(min = 0);
-        Simulator.Files.Connection.matConn feed[1](each connNOC = NOC) annotation(
+        Simulator.Files.Connection.matConn feed[noOfFeeds](each connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.matConn distillate(connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {98, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -5550,15 +5652,23 @@ end Shortcut_Column;
           Placement(visible = true, transformation(origin = {100, 20}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 24}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Files.Connection.enConn heat_load[noOfHeatLoads](each connNOC = NOC) annotation(
           Placement(visible = true, transformation(origin = {100, -20}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {102, -22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      algorithm
-        boolFeed[feedStages[1]] := true;
-        for i in 1:noOfStages loop
-          if boolFeed[i] <> true then
-            boolFeed[i] := false;
+      equation
+        for i in 1:noOfFeeds loop
+          if feedStages[i] == 1 then
+            connect(feed[i], condensor.feed);
+          elseif feedStages[i] == noOfStages then
+            connect(feed[i], reboiler.feed);
+          elseif (feedStages[i] > 1 and feedStages[i] < noOfStages) then
+          //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+              feed[i]. P = tray[feedStages[i] - 1].dummyP1;
+              feed[i].T = tray[feedStages[i] - 1].dummyT1;
+              feed[i].mixMolFlo = tray[feedStages[i] - 1].dummyMixMolFlo1;
+              feed[i].mixMolFrac = tray[feedStages[i] - 1].dummyMixMolFrac1;
+              feed[i].mixMolEnth = tray[feedStages[i] - 1].dummyMixMolEnth1;
+              feed[i].mixMolEntr = tray[feedStages[i] - 1].dummyMixMolEntr1;
+              feed[i].vapPhasMolFrac = tray[feedStages[i] - 1].dummyVapPhasMolFrac1;
           end if;
         end for;
-      equation
-//  connect(feed[1], tray[2].feed);
         connect(condensor.side_draw, distillate);
         connect(reboiler.side_draw, bottoms);
         connect(condensor.heat_load, condensor_duty);
@@ -5575,61 +5685,10 @@ end Shortcut_Column;
         for i in 1:noOfStages - 2 loop
           tray[i].P = condensor.P + i * (reboiler.P - condensor.P) / (noOfStages - 1);
         end for;
-        if boolFeed[1] then
-          condensor.feed.P = feed[1].P;
-          condensor.feed.T = feed[1].T;
-          condensor.feed.mixMolFlo = feed[1].mixMolFlo;
-          condensor.feed.mixMolEnth = feed[1].mixMolEnth;
-          condensor.feed.mixMolEntr = feed[1].mixMolEntr;
-          condensor.feed.mixMolFrac[:] = feed[1].mixMolFrac[:];
-          condensor.feed.vapPhasMolFrac = feed[1].vapPhasMolFrac;
-        else
-          condensor.feed.P = 0;
-          condensor.feed.T = 0;
-          condensor.feed.mixMolFlo = 0;
-          condensor.feed.mixMolEnth = 0;
-          condensor.feed.mixMolEntr = 0;
-          condensor.feed.mixMolFrac[:] = zeros(NOC);
-          condensor.feed.vapPhasMolFrac = 0;
-        end if;
-        for i in 2:noOfStages - 1 loop
-          if boolFeed[i] then
-            tray[i - 1].feed.P = feed[1].P;
-            tray[i - 1].feed.T = feed[1].T;
-            tray[i - 1].feed.mixMolFlo = feed[1].mixMolFlo;
-            tray[i - 1].feed.mixMolEnth = feed[1].mixMolEnth;
-            tray[i - 1].feed.mixMolEntr = feed[1].mixMolEntr;
-            tray[i - 1].feed.mixMolFrac[:] = feed[1].mixMolFrac[:];
-            tray[i - 1].feed.vapPhasMolFrac = feed[1].vapPhasMolFrac;
-          else
-            tray[i - 1].feed.P = 0;
-            tray[i - 1].feed.T = 0;
-            tray[i - 1].feed.mixMolFlo = 0;
-            tray[i - 1].feed.mixMolEnth = 0;
-            tray[i - 1].feed.mixMolEntr = 0;
-            tray[i - 1].feed.mixMolFrac[:] = zeros(NOC);
-            tray[i - 1].feed.vapPhasMolFrac = 0;
-          end if;
-        end for;
-        if boolFeed[noOfStages] then
-          reboiler.feed.P = feed[1].P;
-          reboiler.feed.T = feed[1].T;
-          reboiler.feed.mixMolFlo = feed[1].mixMolFlo;
-          reboiler.feed.mixMolEnth = feed[1].mixMolEnth;
-          reboiler.feed.mixMolEntr = feed[1].mixMolEntr;
-          reboiler.feed.mixMolFrac[:] = feed[1].mixMolFrac[:];
-          reboiler.feed.vapPhasMolFrac = feed[1].vapPhasMolFrac;
-        else
-          reboiler.feed.P = 0;
-          reboiler.feed.T = 0;
-          reboiler.feed.mixMolFlo = 0;
-          reboiler.feed.mixMolEnth = 0;
-          reboiler.feed.mixMolEntr = 0;
-          reboiler.feed.mixMolFrac[:] = zeros(NOC);
-          reboiler.feed.vapPhasMolFrac = 0;
-        end if;
+        
         for i in 2:noOfStages - 1 loop
           tray[i - 1].sideDrawType = "Null";
+          tray[i - 1].side_draw.mixMolFrac = zeros(3, NOC);
           tray[i - 1].side_draw.mixMolFlo = 0;
           tray[i - 1].side_draw.mixMolEnth = 0;
           tray[i - 1].side_draw.mixMolEntr = 0;
@@ -5638,6 +5697,46 @@ end Shortcut_Column;
         end for;
         refluxRatio = condensor.outLiqMolFlo / condensor.side_draw.mixMolFlo;
       end DistCol;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5715,6 +5814,7 @@ end Shortcut_Column;
 
 
 
+
       model AbsCol
         import data = Simulator.Files.Chemsep_Database;
         parameter Integer NOC "Number of Components";
@@ -5731,18 +5831,18 @@ end Shortcut_Column;
       equation
 //connector equation
         tray[1].liqMolFlo[1] = top_feed.mixMolFlo;
-        tray[1].liqCompMolFrac[1, :] = top_feed.mixMolFrac[:];
+        tray[1].liqCompMolFrac[1, :] = top_feed.mixMolFrac[1, :];
         tray[1].liqMolEnth[1] = top_feed.mixMolEnth;
         tray[1].vapMolFlo[2] = top_product.mixMolFlo;
-        tray[1].vapCompMolFrac[2, :] = top_product.mixMolFrac[:];
+        tray[1].vapCompMolFrac[2, :] = top_product.mixMolFrac[1, :];
 //  tray[1].vapMolEnth[2] = top_product.mixMolEnth;
         tray[1].T = top_product.T;
         tray[noOfStages].liqMolFlo[2] = bottom_product.mixMolFlo;
-        tray[noOfStages].liqCompMolFrac[2, :] = bottom_product.mixMolFrac[:];
+        tray[noOfStages].liqCompMolFrac[2, :] = bottom_product.mixMolFrac[1, :];
 //  tray[noOfStages].liqMolEnth[2] = bottom_product.mixMolEnth;
         tray[noOfStages].T = bottom_product.T;
         tray[noOfStages].vapMolFlo[1] = bottom_feed.mixMolFlo;
-        tray[noOfStages].vapCompMolFrac[1, :] = bottom_feed.mixMolFrac[:];
+        tray[noOfStages].vapCompMolFrac[1, :] = bottom_feed.mixMolFrac[1, :];
         tray[noOfStages].vapMolEnth[1] = bottom_feed.mixMolEnth;
         for i in 1:noOfStages - 1 loop
           connect(tray[i].liquid_outlet, tray[i + 1].liquid_inlet);
@@ -5757,6 +5857,7 @@ end Shortcut_Column;
         tray[1].P = top_product.P;
         tray[noOfStages].P = bottom_product.P;
       end AbsCol;
+
     end Absorption_Column;
   end Unit_Operations;
 
@@ -6519,12 +6620,83 @@ model msTPGrayson
 
 
 
-      model DistColumn
-        extends Simulator.Unit_Operations.Distillation_Column.DistCol;
-        Condensor condensor(NOC = NOC, comp = comp, condType = condType, T(start = 300));
-        Reboiler reboiler(NOC = NOC, comp = comp);
-        Tray tray[noOfStages - 2](each NOC = NOC, each comp = comp, each liqMolFlo(each start = 150), each vapMolFlo(each start = 150));
-      end DistColumn;
+model DistColumn
+  extends Simulator.Unit_Operations.Distillation_Column.DistCol;
+  Condensor condensor(NOC = NOC, comp = comp, condType = condType, boolFeed = boolFeed[1], T(start = 300));
+  Reboiler reboiler(NOC = NOC, comp = comp, boolFeed = boolFeed[noOfStages]);
+  Tray tray[noOfStages - 2](each NOC = NOC, each comp = comp, boolFeed = boolFeed[2:noOfStages -1], each liqMolFlo(each start = 150), each vapMolFlo(each start = 150));
+  
+end DistColumn;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
       model ms
@@ -6540,7 +6712,7 @@ model msTPGrayson
         parameter data.Benzene benz;
         parameter data.Toluene tol;
         parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {benz, tol};
-        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 4, feedStages = {3}) annotation(
+        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 4, noOfFeeds = 1, feedStages = {3}) annotation(
           Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
         ms feed(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -6575,13 +6747,109 @@ model msTPGrayson
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       model Test2
         parameter Integer NOC = 2;
         import data = Simulator.Files.Chemsep_Database;
         parameter data.Benzene benz;
         parameter data.Toluene tol;
         parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {benz, tol};
-        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 12, feedStages = {7}) annotation(
+        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 12, noOfFeeds = 1, feedStages = {7}) annotation(
           Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
         ms feed(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -6616,13 +6884,14 @@ model msTPGrayson
 
 
 
+
       model Test3
         parameter Integer NOC = 2;
         import data = Simulator.Files.Chemsep_Database;
         parameter data.Benzene benz;
         parameter data.Toluene tol;
         parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {benz, tol};
-        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 22, feedStages = {10}) annotation(
+        DistColumn distCol(NOC = NOC, comp = comp, noOfFeeds = 1, noOfStages = 22, feedStages = {10}) annotation(
           Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
         ms feed(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -6656,13 +6925,14 @@ model msTPGrayson
       end Test3;
 
 
+
       model Test4
         parameter Integer NOC = 2;
         import data = Simulator.Files.Chemsep_Database;
         parameter data.Benzene benz;
         parameter data.Toluene tol;
         parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {benz, tol};
-        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 22, feedStages = {10}, condensor.condType = "Partial", each tray.liqMolFlo(each start = 100), each tray.vapMolFlo(each start = 100)) annotation(
+        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 22, noOfFeeds = 1, feedStages = {10}, condensor.condType = "Partial", each tray.liqMolFlo(each start = 100), each tray.vapMolFlo(each start = 100)) annotation(
           Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
         ms feed(NOC = NOC, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -6695,7 +6965,56 @@ model msTPGrayson
         bottoms.totMolFlo[1] = 70;
       end Test4;
 
+      
+      model multiFeedTest
+        parameter Integer NOC = 2;
+        import data = Simulator.Files.Chemsep_Database;
+        parameter data.Benzene benz;
+        parameter data.Toluene tol;
+        parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] = {benz, tol};
+        DistColumn distCol(NOC = NOC, comp = comp, noOfStages = 5, noOfFeeds = 2, feedStages = {3, 4}) annotation(
+          Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
+        ms feed(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        ms distillate(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {64, 22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        ms bottoms(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {68, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Streams.Energy_Stream cond_duty annotation(
+          Placement(visible = true, transformation(origin = {38, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        Simulator.Streams.Energy_Stream reb_duty annotation(
+          Placement(visible = true, transformation(origin = {48, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+        ms ms1(NOC = NOC, comp = comp) annotation(
+          Placement(visible = true, transformation(origin = {-80, 50}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      equation
+        connect(ms1.outlet, distCol.feed[2]) annotation(
+          Line(points = {{-70, 50}, {-26, 50}, {-26, 2}, {-28, 2}}));
+        connect(distCol.condensor_duty, cond_duty.inlet) annotation(
+          Line(points = {{12, 28}, {12, 28}, {12, 62}, {28, 62}, {28, 62}}));
+        connect(distCol.reboiler_duty, reb_duty.inlet) annotation(
+          Line(points = {{16, -22}, {16, -22}, {16, -52}, {38, -52}, {38, -52}}));
+        connect(distCol.bottoms, bottoms.inlet) annotation(
+          Line(points = {{22, -14}, {56, -14}, {56, -16}, {58, -16}}));
+        connect(distCol.distillate, distillate.inlet) annotation(
+          Line(points = {{22, 22}, {54, 22}, {54, 22}, {54, 22}}));
+        connect(feed.outlet, distCol.feed[1]) annotation(
+          Line(points = {{-66, 2}, {-30, 2}, {-30, 2}, {-28, 2}}));
+        feed.P = 101325;
+        feed.T = 298.15;
+        feed.totMolFlo[1] = 100;
+        feed.compMolFrac[1, :] = {0.5, 0.5};
+        distCol.condensor.P = 101325;
+        distCol.reboiler.P = 101325;
+        distCol.refluxRatio = 2;
+        bottoms.totMolFlo[1] = 50;
+        ms1.P = 101325;
+        ms1.T = 298.15;
+        ms1.totMolFlo[1] = 100;
+        ms1.compMolFrac[1, :] = {0.5, 0.5};
+      end multiFeedTest;
+
     end rigDist;
+
 package PFR_Test
   
   model MS

@@ -2272,8 +2272,8 @@ end NRTL;
 
 
 
-    model UNIQUAC
-        //Libraries
+    model UNIQUAC  
+       //Libraries
         import Simulator.Files.*;
         //Parameter Section
         //Binary Interaction Parameters
@@ -2286,44 +2286,44 @@ end NRTL;
         //Variable Section
         Real tow[NOC, NOC] "Energy interaction parameter";
         //Intermediate variables to calculate the combinatorial and residual part of activity coefficient at the input conditions
-        Real r, q;
+        Real r(each start=2, min=0,max=1), q(each start=2);
         Real teta[NOC];
         Real S[NOC](each start = 1);
         Real sum[NOC];
         //Activity Coefficients
         Real gammac[NOC](each start = 1.2) "Combinatorial Part of activity coefficent at input conditions";
-        Real gammar[NOC](each start = 1) "Residual part of activity coefficient at input conditions";
-        Real gamma_new[NOC](each start = 2);
+        Real gammar[NOC](each start = 1.2) "Residual part of activity coefficient at input conditions";
+        Real gamma_new[NOC](each start = 1.2);
         Real gamma[NOC](each start = 1.2) "Activity coefficient with Poynting correction";
         //Fugacity coefficient
         Real phil[NOC](each start = 0.5) "Fugacity coefficient at the input conditions";
         //Dew Point Calculation Variables
-        Real dewLiqMolFrac[NOC];
+        Real dewLiqMolFrac[NOC](each start=0.5, each min=0, each max=1);
         //Intermediate variables to calculate the combinatorial and residual part of activity coefficient at dew point
-        Real r_dew, q_dew;
-        Real teta_dew[NOC];
+        Real r_dew(start=2), q_dew(start=2);
+        Real teta_dew[NOC](each start=2);
         Real S_dew[NOC](each start = 1);
-        Real sum_dew[NOC];
+        Real sum_dew[NOC](each start=2);
         //Activity Coefficients
-        Real gammac_dew[NOC](each start = 1.2) "Combinatorial Part of activity coefficent at dew point";
-        Real gammar_dew[NOC](each start = 1) "Residual part of activity coefficient at dew point";
-        Real gammaDew_old[NOC](each start = 1.2) "Combinatorial Part of activity coefficent(without correction)";
-        Real gammaDew[NOC](each start = 1.2) "Activity coefficent at dew point";
+        Real gammac_dew[NOC](each start = 5) "Combinatorial Part of activity coefficent at dew point";
+        Real gammar_dew[NOC](each start = 2.5) "Residual part of activity coefficient at dew point";
+        Real gammaDew_old[NOC](each start = 2.2) "Combinatorial Part of activity coefficent(without correction)";
+        Real gammaDew[NOC](each start = 2.2) "Activity coefficent at dew point";
         //Fugacity coefficient
         Real vapfugcoeff_dew[NOC] "Vapour Fugacity coefficient at dew point";
         Real phil_dew[NOC](each start = 0.5);
         Real PCF_dew[NOC] "Poynting Correction Factor";
         //Bubble Point Calculation Variables
         //Intermediate variables to calculate the combinatorial and residual part of activity coefficient at bubble point
-        Real r_bubl, q_bubl;
+        Real r_bubl(start=2), q_bubl(start=2);
         Real teta_bubl[NOC];
         Real S_bubl[NOC];
         Real sum_bubl[NOC];
         //Activity Coefficients
-        Real gammac_bubl[NOC](each start = 1.2) "Combinatorial Part of activity coefficent at bubble point";
+        Real gammac_bubl[NOC](each start = 2) "Combinatorial Part of activity coefficent at bubble point";
         Real gammar_bubl[NOC](each start = 1) "Residual part of activity coefficent at bubble point";
-        Real gammaBubl_old[NOC](each start = 1.2) "Combinatorial Part of activity coefficent(without correction)";
-        Real gammaBubl[NOC](each start = 1.2) "Activity coefficent at bubble point";
+        Real gammaBubl_old[NOC](each start = 1) "Combinatorial Part of activity coefficent(without correction)";
+        Real gammaBubl[NOC](each start = 1) "Activity coefficent at bubble point";
         //Fugacity coefficient
         Real liqfugcoeff_bubl[NOC];
         Real phil_bubl[NOC](each start = 0.5) "Liquid Phase Fugacity coefficient";
@@ -2336,6 +2336,10 @@ end NRTL;
         Real resMolSpHeat[3], resMolEnth[3], resMolEntr[3];
         //Transport Properties at the input conditions
         Real Density[NOC](each unit = "kmol/m^3");
+        Real A[NOC],B[NOC],D[NOC],E[NOC],Ff[NOC];
+        Real C[NOC];
+        Real A_bubl[NOC],B_bubl[NOC],C_bubl[NOC],D_bubl[NOC],E_bubl[NOC],F_bubl[NOC];
+        Real A_dew[NOC],B_dew[NOC],C_dew[NOC],D_dew[NOC],E_dew[NOC],F_dew[NOC];
         //===========================================================================================================
         //Equation Section
       equation
@@ -2346,24 +2350,99 @@ end NRTL;
         end for;
     //Calculation of Intermediate parameters to evaluate combinatorial and residual part of the activity coefficient
     //Note : compMolFrac is the referenced from "Material Stream" model
+       
         r = sum(compMolFrac[2, :] .* R[:]);
         q = sum(compMolFrac[2, :] .* Q[:]);
-        for i in 1:NOC loop
-          teta[i] = compMolFrac[2, i] * Q[i] * (1 / q);
-        end for;
-        for i in 1:NOC loop
-          S[i] = sum(teta[:] .* tow[i, :]);
-          sum[i] = sum(teta[:] .* tow[i, :] ./ S[:]);
-        end for;
-    //Calculation of Energy interaction parameter at the input tempetraure
+        
+        //Calculation of Energy interaction parameter at the input tempetraure
     //Function :Tow_UNIQUAC is used to instantiated
         tow = Simulator.Files.Thermodynamic_Functions.Tow_UNIQUAC(NOC, a, T);
     //Calculation of Combinatorial and Residual Activity coefficient
+            
         for i in 1:NOC loop
-          log(gammar[i]) = Q[i] * (1 - log(S[i]) - sum[i]);
-          log(gammac[i]) = 1 - R[i] / r + log(R[i] / r) + (-Z / 2 * Q[i] * (1 - R[i] / r / (Q[i] / q) + log(R[i] / r / (Q[i] / q))));
-          log(gamma[i]) = log(gammac[i]) + log(gammar[i]);
+        if(q>0) then
+        teta[i] = compMolFrac[2, i] * Q[i] * (1 / q);
+        elseif(q<0) then
+        teta[i]=0;
+        else
+        teta[i]=0;
+        end if;
         end for;
+    
+        for i in 1:NOC loop
+          if  (teta[i]==0) then
+          S[i]=1;
+          else
+          S[i] = sum(teta[:] .* tow[i, :]);
+          end if;
+          
+          if(S[i]==1) then
+          sum[i]=0;
+          else
+          sum[i] = sum(teta[:] .* tow[i, :] ./ S[:]);
+          end if;
+        end for;
+    
+        for i in 1:NOC loop
+        
+          if(S[i]==1) then
+          C[i] = 0;    
+          elseif(S[i]>0) then
+          C[i] = log(S[i]);
+          else
+          C[i]=0; 
+          end if;
+          
+         (gammar[i]) = exp(Q[i] * (1 - C[i] - sum[i]));
+        end for;
+    // //===================================================================     
+    //     equation
+         
+         for i in 1:NOC loop
+         if(r>0) then
+         D[i] = R[i]/r;   
+         elseif(r<=0) then
+         D[i] =0;
+         else
+         D[i]=0;     
+         end if;
+          
+          if(q>0) then
+          E[i] = Q[i]/q;
+          elseif(q<=0) then
+          E[i] = 0;
+          else
+          E[i] = 0;
+          end if;
+          
+          if(E[i]==0 or D[i]==0) then
+          Ff[i]=0;
+          else
+          Ff[i] = D[i]/E[i];
+          end if;
+          
+          
+          if(D[i]>0) then
+          A[i] =log(D[i]);
+          elseif(D[i]==1) then
+          A[i]=0;
+          else
+          A[i]=0;
+          end if;
+          
+          if(Ff[i]>1) then
+          B[i] =log(Ff[i]);
+          elseif(Ff[i]==1) then
+          B[i]=0;
+          else
+          B[i]=0;
+          end if;
+          
+          log(gammac[i])=1-D[i] + A[i] + (-Z / 2 * Q[i] * (1 - Ff[i] + B[i]));
+          
+         (gamma[i]) = (gammac[i]) * (gammar[i]);
+        end for;
+    //=====================================================================================================    
     //Excess Energy parameters are set to 0 since the calculation mode is Ideal
         resMolSpHeat[:] = zeros(3);
         resMolEnth[:] = zeros(3);
@@ -2389,30 +2468,179 @@ end NRTL;
         r_dew = sum(dewLiqMolFrac[:] .* R[:]);
         q_dew = sum(dewLiqMolFrac[:] .* Q[:]);
         for i in 1:NOC loop
+         if(q_dew==0 or compMolFrac[1,i]==0) then
+         dewLiqMolFrac[i]=0;
+         else
           dewLiqMolFrac[i] = compMolFrac[1, i] * Pdew / (gammaDew[i] * Psat[i]);
+         end if; 
+         if(q_dew==0 or dewLiqMolFrac[i]==0) then
+         teta_dew[i]=0;
+         else
           teta_dew[i] = dewLiqMolFrac[i] * Q[i] * (1 / q_dew);
+         end if; 
+          if(teta_dew[i]==0) then
+          S_dew[i] =1;
+          else
           S_dew[i] = sum(teta_dew[:] .* tow[i, :]);
-          sum_dew[i] = sum(teta_dew[:] .* tow[i, :] ./ S_dew[:]);
-          log(gammar_dew[i]) = Q[i] * (1 - log(S_dew[i]) - sum_dew[i]);
-          log(gammac_dew[i]) = 1 - R[i] / r_dew + log(R[i] / r_dew) + (-Z / 2 * Q[i] * (1 - R[i] / r_dew / (Q[i] / q_dew) + log(R[i] / r_dew / (Q[i] / q_dew))));
-          log(gammaDew_old[i]) = log(gammac_dew[i]) + log(gammar_dew[i]);
+          end if;
+          end for;
+     //===================================================================================================     
+    
+          for i in 1:NOC loop
+          if(S_dew[i]==1) then
+          sum_dew[i]=0;
+          else
+          sum_dew[i] = sum(teta_dew[:] .* tow[i, :] ./ (S_dew[:]));
+          end if;
+          
+          
+          if(S_dew[i]==1) then
+          C_dew[i]=0;
+          elseif(S_dew[i]>0) then
+          C_dew[i] =log(S_dew[i]);  
+          else
+          C_dew[i]=0;
+          end if;
+    
+          (gammar_dew[i]) = exp(Q[i] * (1 - C_dew[i] - sum_dew[i]));
+          end for;
+    //===============================================================================================     
+         
+         for i in 1:NOC loop
+         if(r_dew==0) then
+         D_dew[i] =0;
+         else
+         D_dew[i] = R[i]/r_dew;
+         end if;
+          
+          if(q_dew==0) then
+          E_dew[i] = 0;
+          else
+          E_dew[i] = Q[i]/q_dew;
+          end if;
+          
+          if(E_dew[i]==0) then
+          F_dew[i]=0;
+          else
+          F_dew[i] = D_dew[i]/E_dew[i];
+          end if;
+          
+          
+          if(D_dew[i]>0) then
+          A_dew[i] =log(D_dew[i]);
+          elseif(D_dew[i]==1) then
+          A_dew[i]=0;
+          else
+          A_dew[i]=0;
+          end if;
+          
+          if(F_dew[i]>0) then
+          B_dew[i] =log(F_dew[i]);
+          elseif(F_dew[i]==1) then
+          B_dew[i]=0;
+          else
+          B_dew[i]=0;
+          end if;
+          
+          log(gammac_dew[i])=1-D_dew[i] + A_dew[i] + (-Z / 2 * Q[i] * (1 - F_dew[i] + B_dew[i]));
+          
+          (gammaDew_old[i]) = (gammac_dew[i]) * (gammar_dew[i]);
         end for;
-        phil_dew[:] = gammaDew_old[:] .* Psat[:] ./ Pdew .* PCF_dew[:];
-        phil_dew[:] = gammaDew[:] .* Psat[:] ./ Pdew;
+        
+        for i in 1:NOC loop
+        if(Pdew==0) then
+        phil_dew[i]=1;
+        gammaDew[i]=1;
+        
+        else
+        
+        phil_dew[i] = gammaDew_old[i] .* Psat[i] ./ Pdew .* PCF_dew[i];
+        phil_dew[i] = gammaDew[i] .* Psat[i] ./ Pdew;
+        end if;
+        end for;
     //The same calculation routine is followed at the Bubble Point
     //Bubble Point
         r_bubl = sum(compMolFrac[1, :] .* R[:]);
         q_bubl = sum(compMolFrac[1, :] .* Q[:]);
         for i in 1:NOC loop
+        if(compMolFrac[1,i]==0) then
+        teta_bubl[i]=0;
+        else
           teta_bubl[i] = compMolFrac[1, i] * Q[i] * (1 / q_bubl);
+         end if; 
+         
+         if(teta_bubl[i]==0) then
+          S_bubl[i] =1;
+          else
           S_bubl[i] = sum(teta_bubl[:] .* tow[i, :]);
+         end if;
+          
+          if(S_bubl[i]==1) then
+          sum_bubl[i]=0;
+          else
           sum_bubl[i] = sum(teta_bubl[:] .* tow[i, :] ./ S_bubl[:]);
-          log(gammar_bubl[i]) = Q[i] * (1 - log(S_bubl[i]) - sum_bubl[i]);
-          log(gammac_bubl[i]) = 1 - R[i] / r_bubl + log(R[i] / r_bubl) + (-Z / 2 * Q[i] * (1 - R[i] / r_bubl / (Q[i] / q_bubl) + log(R[i] / r_bubl / (Q[i] / q_bubl))));
-          log(gammaBubl_old[i]) = log(gammac_bubl[i]) + log(gammar_bubl[i]);
+          end if;
+          
+          
+         if(S_bubl[i]==1) then
+          C_bubl[i] =0 ;
+          elseif(S_bubl[i]>0) then
+          C_bubl[i]=log(S_bubl[i]);
+          else
+          C_bubl[i]=0;
+          end if;
+          log(gammar_bubl[i]) = Q[i] * (1 - C_bubl[i] - sum_bubl[i]);
+    //=========================================================================================================
+          
+         if(r_bubl==0) then
+         D_bubl[i] =0;
+         else
+         D_bubl[i] = R[i]/r_bubl;
+         end if;
+          
+          if(q_bubl==0) then
+          E_bubl[i] = 0;
+          else
+          E_bubl[i] = Q[i]/q_bubl;
+          end if;
+          
+          if(E_bubl[i]==0) then
+          F_bubl[i]=0;
+          else
+          F_bubl[i] = D_bubl[i]/E_bubl[i];
+          end if;
+          
+          
+          if(D_bubl[i]>0) then
+          A_bubl[i] =log(D_bubl[i]);
+          elseif(D_bubl[i]==1) then
+          A_bubl[i]=0;
+          else
+          A_bubl[i]=0;
+          end if;
+          
+          if(F_bubl[i]>0) then
+          B_bubl[i] =log(F_bubl[i]);
+          elseif(F_bubl[i]==1) then
+          B_bubl[i]=0;
+          else
+          B_bubl[i]=0;
+          end if;
+          
+          log(gammac_bubl[i])=1-D_bubl[i] + A_bubl[i] + (-Z / 2 * Q[i] * (1 - F_bubl[i] + B_bubl[i]));
+         
+         (gammaBubl_old[i]) = (gammac_bubl[i]) * (gammar_bubl[i]);
         end for;
-        phil_bubl[:] = gammaBubl_old[:] .* Psat[:] ./ Pbubl .* PCF_bubl[:];
-        phil_bubl[:] = gammaBubl[:] .* Psat[:] ./ Pbubl;
+         
+       for i in 1:NOC loop
+       if(Pbubl==0) then
+        phil_bubl[i]=1;
+        gammaBubl[i]=1;
+       else 
+        phil_bubl[i] = gammaBubl_old[i] .* Psat[i] ./ Pbubl .* PCF_bubl[i];
+        phil_bubl[i] = gammaBubl[i] .* Psat[i] ./ Pbubl;
+       end if;
+       end for;
         annotation(
           Documentation(info = "<html>
        <p>
@@ -2431,6 +2659,9 @@ end NRTL;
       </html>"),
           experiment(StopTime = 1.0, Interval = 0.001));
       end UNIQUAC;
+    
+    
+
     
       //=======================================================================================================
     
@@ -4024,10 +4255,7 @@ equation
 //below bubble point region
     compMolFrac[3, :] = zeros(NOC);
     sum(compMolFrac[2, :]) = 1;
-//  elseif P <= Pdew then
-////above dew point region
-//    compMolFrac[2, :] = zeros(NOC);
-//    sum(compMolFrac[3, :]) = 1;
+
   elseif P >= Pdew then
 //VLE region
     for i in 1:NOC loop
@@ -4045,6 +4273,7 @@ algorithm
     MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
   end for;
 end Material_Stream;
+
 
 
 
@@ -4178,6 +4407,248 @@ end Material_Stream;
       inT + tempInc = outT;
 //temperature calculation
     end Heater;
+    
+    
+    
+    model Rigorous_HX
+  
+  //Heat-Exchanger Operates in various modes
+  //Mode-I - Estimation of Hot Fluid Outlet Temperature
+  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,coutT,Flow Direction,Name of the calculation type,Area
+  //Mode-II - Estimation of Cold Fluid Outlet Temperature
+  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,houtT,Flow Direction,Name of the calculation type,Area
+  //Mode-III - Estimation of Both the fluid outlet temperature
+  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,Qactual,Flow Direction,Name of the calculation type,Area
+  //Mode-IV - Estimation of both the fluid outlet temperature-NTU Method
+  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type,Area
+  
+  //Mode-V-Estimation of Heat Transfer Area
+  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type
+  //Mode-VI-Estimation of all parameters given the heat transfer efficiency
+  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,U,Efficiency,Flow Direction,Name of the calculation type
+  
+   import Simulator.Files.*;
+   import Simulator.Files.Thermodynamic_Functions.*;
+  
+   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
+   parameter Integer NOC "number of compounds ";
+      
+   Simulator.Files.Connection.matConn  Hot_In(connNOC=NOC) annotation(
+        Placement(visible = true, transformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+   Simulator.Files.Connection.matConn Hot_Out(connNOC=NOC) annotation(
+        Placement(visible = true, transformation(origin = {80, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {80, 34}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+   Simulator.Files.Connection.matConn Cold_In(connNOC=NOC) annotation(
+        Placement(visible = true, transformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+   Simulator.Files.Connection.matConn Cold_Out(connNOC=NOC) annotation(
+        Placement(visible = true, transformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
+  
+  //Parameters
+  //Mode-I -Outlet Temperature-Hot Stream Calculaions
+  parameter Real Heat_Loss;
+  parameter Real deltap_hot;
+  parameter Real deltap_cold;
+  parameter String Mode;
+  parameter String Calculation_Method;
+  
+  
+  //Variables
+  
+  //Hot Stream Inlet
+  Real hinP,hinT,hintotMolFlow[1],hinEnth,hinEntr,hincompMolFrac[2,NOC],hinVapfrac;
+  
+  //Hot Stream Outlet
+  Real houtP,houtT,houttotMolFlow[1],houtEnth,houtEntr,houtcompMolFrac[2,NOC],houtVapfrac;
+  
+  //Cold Stream Inlet 
+  Real cinP,cinT,cintotMolFlow[1],cinEnth,cinEntr,cincompMolFrac[2,NOC],cinVapfrac;
+  
+  //Cold Stream Outlet
+  Real coutP,coutT,couttT,couttotMolFlow[1],coutEnth,coutEntr,coutcompMolFrac[2,NOC],coutVapfrac;
+  
+  Real Qactual(start=2000)"Actual Heat Load";
+  Real Qmax,Qmax_hot,Qmax_cold;
+  
+  //Hot Stream Enthalpy at Cold Stream Inlet Temperature
+  Real hinCompMolEnth[2,NOC];
+  Real hinPhasMolEnth[3];
+  
+  //Cold Stream Enthalpy at Hot Stream Inlet Temperature
+  Real cinCompMolEnth[2,NOC];
+  Real cinPhasMolEnth[3];
+  
+  Real deltaH;
+  
+  //Heat Exchanger Effeciency
+  Real Efficiency;
+  
+  //LMTD
+  Real delta_T1(start=20),delta_T2(start=10);
+  Real LMTD"Log Mean Temperature Difference";
+  
+  //Global Heat Transfer Coefficient
+  Real U;
+  
+  //Heat Transfer Area
+  Real Area;
+  //==================================================================================================================
+  //Mode-4-NTU Method-when both the outlet temperatures are unknown 
+  //Heat Capacity Rate for hot and cold fluid
+  Real C_cold,C_hot;
+  
+  //Number of Transfer Units for Hot Side and Cold Side
+  Real NTU_cold,NTU_hot;
+  
+  //Heat Capacity Ratio for hot and cold side
+  Real R_cold,R_hot;
+  
+  //Effectiveness Factor 
+  Real Eff_cold,Eff_hot;
+  
+  equation
+  
+  //Hot Stream Inlet
+  
+     Hot_In.P = hinP;
+     Hot_In.T = hinT;
+     Hot_In.mixMolFlo = hintotMolFlow[1];
+     Hot_In.mixMolEnth = hinEnth;
+     Hot_In.mixMolEntr = hinEntr;
+     Hot_In.mixMolFrac[1,:] = hincompMolFrac[1, :];
+     Hot_In.mixMolFrac[2,:]= hincompMolFrac[2,:];
+     Hot_In.vapPhasMolFrac = hinVapfrac;
+  
+  //Hot Stream Outlet   
+     Hot_Out.P = houtP;
+     Hot_Out.T = houtT;
+     Hot_Out.mixMolFlo = houttotMolFlow[1];
+     Hot_Out.mixMolEnth = houtEnth;
+     Hot_Out.mixMolEntr = houtEntr;
+     Hot_Out.mixMolFrac[1,:] = houtcompMolFrac[1, :];
+     Hot_Out.mixMolFrac[2,:]= houtcompMolFrac[2,:];
+     Hot_Out.vapPhasMolFrac = houtVapfrac;
+  
+  //Cold Stream In   
+     Cold_In.P = cinP;
+     Cold_In.T = cinT;
+     Cold_In.mixMolFlo = cintotMolFlow[1];
+     Cold_In.mixMolEnth = cinEnth;
+     Cold_In.mixMolEntr = cinEntr;
+     Cold_In.mixMolFrac[1,:] = cincompMolFrac[1, :];
+     Cold_In.mixMolFrac[2,:]= cincompMolFrac[2,:];
+     Cold_In.vapPhasMolFrac = cinVapfrac;
+  
+  //Cold Stream Out   
+     Cold_Out.P = coutP;
+     Cold_Out.T = couttT;
+     Cold_Out.mixMolFlo = couttotMolFlow[1];
+     Cold_Out.mixMolEnth = coutEnth;
+     Cold_Out.mixMolEntr = coutEntr;
+     Cold_Out.mixMolFrac[1,:] = coutcompMolFrac[1, :];
+     Cold_Out.mixMolFrac[2,:]= coutcompMolFrac[2,:];
+     Cold_Out.vapPhasMolFrac = coutVapfrac;
+        
+  equation
+    
+    hintotMolFlow[1] = houttotMolFlow[1];
+    cintotMolFlow[1] = couttotMolFlow[1];
+    hincompMolFrac[1] = houtcompMolFrac[1];
+    cincompMolFrac[1] = coutcompMolFrac[1];
+    
+    houtP = hinP -deltap_hot;
+    coutP = cinP -deltap_cold;
+    
+    Qactual = cintotMolFlow[1] * (coutEnth-cinEnth);
+    deltaH = -(Qactual+ (Heat_Loss*1000))/hintotMolFlow[1];
+    
+    if(Calculation_Method=="BothOutletTemp(UA") then
+    houtEnth= hinEnth - (Qactual/hintotMolFlow[1])-((Heat_Loss*1000)/hintotMolFlow[1]);
+    coutT = cinT + (Eff_cold * (hinT- cinT));
+    else
+    coutT = couttT;
+    houtEnth = hinEnth + deltaH;
+    end if;
+  //==========================================================================================================
+  //Calculation of Hot Stream Enthalpy at  Cold Stream Inlet Temperature
+  
+  for i in 1:NOC loop
+   hinCompMolEnth[1,i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, cinT);
+   hinCompMolEnth[2,i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, cinT);
+  end for;
+  
+  for i in 1:2 loop
+   hinPhasMolEnth[i] = sum(hincompMolFrac[i, :] .* hinCompMolEnth[i, :]) /*+ inResMolEnth[2, i]*/;
+  end for;
+  
+  hinPhasMolEnth[3] = ((1-hinVapfrac) * hinPhasMolEnth[1]) + (hinVapfrac * hinPhasMolEnth[2]);
+  
+  //Maximum Theoritical Heat Exchange-Hot Fluid 
+  Qmax_hot = hintotMolFlow[1] * (hinEnth - hinPhasMolEnth[3]);  
+  
+  //===========================================================================================================
+  //Enthalpy of Cold Stream Enthalpy at Hot Fluid Inlet Temperature
+  for i in 1:NOC loop 
+  cinCompMolEnth[1,i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, hinT);
+  cinCompMolEnth[2,i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, hinT);
+  end for;
+  
+  for i in 1:2 loop
+  cinPhasMolEnth[i] = sum(cincompMolFrac[i, :] .* cinCompMolEnth[i,:]) /*+ inResMolEnth[1, i]*/;
+  end for;
+  
+  cinPhasMolEnth[3] = ((1-cinVapfrac) * cinPhasMolEnth[1]) + (cinVapfrac * cinPhasMolEnth[2]);
+  
+  //Maximum Theoritical Heat Exchange- Cold Fluid
+  Qmax_cold = cintotMolFlow[1] * abs(cinEnth - cinPhasMolEnth[3]);
+  
+  
+  //Maximum Heat Exchange
+  Qmax = min(Qmax_hot,Qmax_cold);
+  
+  Efficiency = ((Qactual-(Heat_Loss*1000))/Qmax)*100;
+  
+  //Log Mean Temperature Difference
+  if(Mode=="Parallal") then
+  delta_T1 =hinT-cinT;
+  delta_T2 =houtT-coutT;  
+  else
+  delta_T1 =hinT-coutT;
+  delta_T2 =houtT-cinT;
+  end if;
+  
+  if(delta_T1<=0 or delta_T2<=0) then
+  LMTD =1;
+  else
+  LMTD = (delta_T1-delta_T2)/log(delta_T1/delta_T2);
+  end if;
+  
+  U = (Qactual)/(Area*LMTD);
+  
+  //===========================================================================================================
+  //==========================================================================================================
+  //NTU-Method
+  C_cold = cintotMolFlow[1]* ((coutEnth-cinEnth)/(coutT-cinT));
+  C_hot  = hintotMolFlow[1]* ((houtEnth-hinEnth)/(houtT-hinT));
+  
+  //Number of Transfer Units 
+  NTU_cold = (U * Area)/C_cold;
+  NTU_hot  = (U * Area)/C_hot;
+  
+  //Heat Capacity Ratio for Hot and Cold Side
+  R_cold = C_cold/C_hot;
+  R_hot  = C_hot/C_cold;
+  
+  if(Mode=="Parallal") then
+  Eff_cold = (1- exp(-NTU_cold * (1+R_cold)))/(1+R_cold);
+  Eff_hot =  (1- exp(-NTU_hot * (1+R_hot)))/(1+R_hot);
+  else
+  Eff_cold = (1-exp((R_cold-1)*NTU_cold))/(1 -R_cold*  exp((R_cold-1)*NTU_cold));
+  Eff_hot =  (1-exp((R_hot-1) *NTU_hot ))/(1 -R_hot *  exp((R_hot-1)*NTU_hot));
+  end if;
+  
+  end Rigorous_HX;
+    
+    
 
 
 
@@ -5863,6 +6334,7 @@ end Shortcut_Column;
 
 
 
+
   package Test
     model msTP
       //we have to first instance components to give to material stream model.
@@ -6010,6 +6482,21 @@ end Shortcut_Column;
       P = 101325;
       T = 354;
     end msTPUNIQUAC;
+    
+    
+    model msTPNRTL
+      import data = Simulator.Files.Chemsep_Database;
+      parameter data.Onehexene ohex;
+      parameter data.Ethanol eth;
+      extends Simulator.Streams.Material_Stream(NOC = 2, comp = {ohex, eth}, compMolFrac(each start = 0.33));
+      extends Simulator.Files.Thermodynamic_Packages.NRTL;
+    equation
+      compMolFrac[1, :] = {0.5, 0.5};
+      totMolFlo[1] = 100;
+      P = 101325;
+      T = 330;
+    end msTPNRTL;
+  
 
 model msTPGrayson
     import data = Simulator.Files.Chemsep_Database;
@@ -6112,6 +6599,66 @@ model msTPGrayson
       end heat;
 
     end heater1;
+    
+    
+    package Heat_Exchanger
+    //Model of a General Purpouse Heat Exchanger operating with multiple modes
+    //================================================================================================================
+  
+    model MS
+      extends Simulator.Streams.Material_Stream;
+      //material stream extended
+      extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+      //thermodynamic package Raoults law is extended
+    end MS;
+  
+  model HX_Test
+  
+  import data = Simulator.Files.Chemsep_Database;
+    //instantiation of ethanol
+    parameter data.Styrene sty;
+    //instantiation of acetic acid
+    parameter data.Toluene tol;
+   
+    parameter Integer NOC =2;
+    parameter data.General_Properties comp[NOC] = {sty,tol};
+  
+    Simulator.Unit_Operations.Rigorous_HX HX(NOC=NOC,comp=comp,deltap_hot=0,deltap_cold=0,Heat_Loss=0,Calculation_Method="Outlet_Temparatures") annotation(
+      Placement(visible = true, transformation(origin = {-2, 16}, extent = {{-22, -22}, {22, 22}}, rotation = 0)));
+    Heat_Exchanger.MS Hot_In(NOC=NOC,comp=comp) annotation(
+      Placement(visible = true, transformation(origin = {-58, 70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Heat_Exchanger.MS Hot_Out(NOC=NOC,comp=comp) annotation(
+      Placement(visible = true, transformation(origin = {66, 56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Heat_Exchanger.MS Cold_In(NOC=NOC,comp=comp) annotation(
+      Placement(visible = true, transformation(origin = {-76, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Heat_Exchanger.MS Cold_Out(NOC=NOC,comp=comp) annotation(
+      Placement(visible = true, transformation(origin = {50, -32}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
+  equation
+    
+    connect(Cold_In.outlet, HX.Cold_In) annotation(
+      Line(points = {{-68, -16}, {-38, -16}, {-38, 10}, {-18, 10}}));
+    connect(HX.Hot_Out,  Hot_Out.inlet) annotation(
+      Line(points = {{16, 24}, {58, 24}, {58, 56}}));
+    connect(HX.Cold_Out, Cold_Out.inlet) annotation(
+      Line(points = {{14, 10}, {15, 10}, {15, -32}, {42, -32}}));
+    connect(Hot_In.outlet,HX.Hot_In) annotation(
+      Line(points = {{-50, 70}, {-18, 70}, {-18, 24}}));
+    
+    Hot_In.compMolFrac[1, :] = {1, 0};
+    Cold_In.compMolFrac[1, :] = {0, 1};
+    Hot_In.totMolFlo[1] = 181.46776;
+    Cold_In.totMolFlo[1] = 170.93083;
+    Hot_In.T = 422.03889;
+    Cold_In.T = 310.92778;
+    Hot_In.P = 344737.24128;
+    Cold_In.P = 620527.03429;
+    HX.U=300;
+    HX.Qactual=2700E03;
+  
+  end HX_Test;
+  
+  end Heat_Exchanger;
 
     package cooler1
       model ms
@@ -6582,18 +7129,7 @@ model msTPGrayson
 
     end adia_exp1;
 
-    model msTPNRTL
-      import data = Simulator.Files.Chemsep_Database;
-      parameter data.Onehexene ohex;
-      parameter data.Ethanol eth;
-      extends Simulator.Streams.Material_Stream(NOC = 2, comp = {ohex, eth}, compMolFrac(each start = 0.33));
-      extends Simulator.Files.Thermodynamic_Packages.NRTL;
-    equation
-      compMolFrac[1, :] = {0.5, 0.5};
-      totMolFlo[1] = 100;
-      P = 101325;
-      T = 330;
-    end msTPNRTL;
+  
 
 
     package rigDist
@@ -6627,74 +7163,6 @@ model DistColumn
   Tray tray[noOfStages - 2](each NOC = NOC, each comp = comp, boolFeed = boolFeed[2:noOfStages -1], each liqMolFlo(each start = 150), each vapMolFlo(each start = 150));
   
 end DistColumn;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -6744,103 +7212,6 @@ end DistColumn;
         distCol.refluxRatio = 2;
         bottoms.totMolFlo[1] = 50;
       end Test;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
       model Test2
@@ -7170,6 +7541,11 @@ package PFR_Test
   
   
   end Test;
+
+
+
+
+
 
 
 

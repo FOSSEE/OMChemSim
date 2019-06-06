@@ -50,12 +50,14 @@ model Flowsheet_Two
     Simulator.Streams.Energy_Stream Energy_II annotation(
       Placement(visible = true, transformation(origin = {-23, -89}, extent = {{-7, -7}, {7, 7}}, rotation = 0)));
   equation
-    connect(Cooler.outlet, Outlet.inlet) annotation(
-      Line(points = {{20, -52}, {37, -52}, {37, -53}, {54, -53}}));
-    connect(Energy_II.inlet, Cooler.energy) annotation(
-      Line(points = {{-30, -90}, {-56, -90}, {-56, -74}, {-4, -74}, {-4, -76}, {-4, -76}}));
-    connect(Distillate.outlet, Cooler.inlet) annotation(
+  connect(Distillate.outlet, Cooler.inlet) annotation(
       Line(points = {{62, 54}, {166, 54}, {166, -34}, {-84, -34}, {-84, -52}, {-28, -52}, {-28, -52}}));
+  connect(Energy_II.inlet, Cooler.energy) annotation(
+      Line(points = {{-30, -89}, {-56, -89}, {-56, -74}, {-4, -74}, {-4, -76}}));
+  connect(Cooler.outlet, Outlet.inlet) annotation(
+      Line(points = {{20, -52}, {37, -52}, {37, -53}, {54, -53}}));
+    connect(Energy_I.outlet, Heater.energy) annotation(
+      Line(points = {{-82, 3}, {-66, 3}, {-66, 9}}));
     connect(DC.reboiler_duty, R_duty.inlet) annotation(
       Line(points = {{37, 12}, {44, 12}, {44, -10}}));
     connect(DC.bottoms, Bottoms.inlet) annotation(
@@ -70,8 +72,6 @@ model Flowsheet_Two
       Line(points = {{-38, 35}, {-28, 35}, {-28, 36}}));
     connect(Input.outlet, Heater.inlet) annotation(
       Line(points = {{-104, 36}, {-94, 36}}));
-    connect(Energy_I.outlet, Heater.energy) annotation(
-      Line(points = {{-82, 3}, {-66, 3}, {-66, 9}}));
   equation
 //Design-Variables-
 //// Molar Flow Rate of the outlet stream
@@ -100,8 +100,6 @@ model Flowsheet_Two
   end Flowsheet_Two;
 
 
-
-
 //===============================================================================================
 
   package rigDist
@@ -122,9 +120,10 @@ model Flowsheet_Two
 
     model DistColumn
       extends Simulator.Unit_Operations.Distillation_Column.DistCol;
-      Condensor condensor(NOC = NOC, comp = comp, condType = condType, T(start = 300));
-      Reboiler reboiler(NOC = NOC, comp = comp);
-      Tray tray[noOfStages - 2](each NOC = NOC, each comp = comp, each liqMolFlo(each start = 150), each vapMolFlo(each start = 150));
+      Condensor condensor(NOC = NOC, comp = comp, boolFeed = boolFeed[1], condType = condType, T(start = 300));
+      Reboiler reboiler(NOC = NOC, comp = comp, boolFeed = boolFeed[noOfStages]);
+      Tray tray[noOfStages - 2](each NOC = NOC, each comp = comp, boolFeed = boolFeed[2:noOfStages - 1], each liqMolFlo(each start = 150), each vapMolFlo(each start = 150));
     end DistColumn;
+
   end rigDist;
 end Meth_Wat_Distillation_Seq;

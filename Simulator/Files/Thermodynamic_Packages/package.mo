@@ -182,56 +182,48 @@ package Thermodynamic_Packages
         
        (gammar[i]) = exp(Q[i] * (1 - C[i] - sum[i]));
       end for;
-  // //===================================================================     
-  //     equation
-       
-       for i in 1:NOC loop
-       if(r>0) then
-       D[i] = R[i]/r;   
-       elseif(r<=0) then
-       D[i] =0;
-       else
-       D[i]=0;     
-       end if;
-        
-        if(q>0) then
-        E[i] = Q[i]/q;
-        elseif(q<=0) then
+// //===================================================================
+//     equation
+    for i in 1:NOC loop
+      if r > 0 then
+        D[i] = R[i] / r;
+      elseif r <= 0 then
+        D[i] = 0;
+      else
+        D[i] = 0;
+      end if;
+      if q > 0 then
+        E[i] = Q[i] / q;
+      elseif q <= 0 then
         E[i] = 0;
-        else
+      else
         E[i] = 0;
-        end if;
-        
-        if(E[i]==0 or D[i]==0) then
-        Ff[i]=0;
-        else
-        Ff[i] = D[i]/E[i];
-        end if;
-        
-        
-        if(D[i]>0) then
-        A[i] =log(D[i]);
-        elseif(D[i]==1) then
-        A[i]=0;
-        else
-        A[i]=0;
-        end if;
-        
-        if(Ff[i]>1) then
-        B[i] =log(Ff[i]);
-        elseif(Ff[i]==1) then
-        B[i]=0;
-        else
-        B[i]=0;
-        end if;
-        
-        log(gammac[i])=1-D[i] + A[i] + (-Z / 2 * Q[i] * (1 - Ff[i] + B[i]));
-        
-       (gamma[i]) = (gammac[i]) * (gammar[i]);
-      end for;
-  //=====================================================================================================    
-  //Excess Energy parameters are set to 0 since the calculation mode is Ideal
-      resMolSpHeat[:] = zeros(3);
+      end if;
+      if E[i] == 0 or D[i] == 0 then
+        Ff[i] = 0;
+      else
+        Ff[i] = D[i] / E[i];
+      end if;
+      if D[i] > 0 then
+        A[i] = log(D[i]);
+      elseif D[i] == 1 then
+        A[i] = 0;
+      else
+        A[i] = 0;
+      end if;
+      if Ff[i] > 1 then
+        B[i] = log(Ff[i]);
+      elseif Ff[i] == 1 then
+        B[i] = 0;
+      else
+        B[i] = 0;
+      end if;
+      log(gammac[i]) = 1 - D[i] + A[i] + (-Z / 2 * Q[i] * (1 - Ff[i] + B[i]));
+      gamma[i] = gammac[i] * gammar[i];
+    end for;
+//=====================================================================================================
+//Excess Energy parameters are set to 0 since the calculation mode is Ideal
+    resMolSpHeat[:] = zeros(3);
       resMolEnth[:] = zeros(3);
       resMolEntr[:] = zeros(3);
   //Calculation of Saturated vapour pressure and Density at the given input condition
@@ -241,9 +233,11 @@ package Thermodynamic_Packages
       end for;
   //Calculation of Poynting correction Factor at input conditions,Bubble Point and Dew Point
   //Function :Poynting_CF is called from the Simulator Package
-      PCF[:] = Thermodynamic_Functions.PoyntingCF(NOC, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, T, P, gamma[:], Psat[:], Density[:]);
-      PCF_bubl[:] = Thermodynamic_Functions.PoyntingCF(NOC, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, T, Pbubl, gamma[:], Psat[:], Density[:]);
-      PCF_dew[:] = Thermodynamic_Functions.PoyntingCF(NOC, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, T, Pdew, gamma[:], Psat[:], Density[:]);
+    for i in 1:NOC loop
+      PCF[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, P, gamma[i], Psat[i], Density[i]);
+      PCF_bubl[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, Pbubl, gamma[i], Psat[i], Density[i]);
+      PCF_dew[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, Pdew, gamma[i], Psat[i], Density[i]);
+    end for;
   //Calculation of Fugacity coefficient with Poynting correction
       phil[:] = gamma[:] .* Psat[:] ./ P .* PCF[:];
       phil[:] = gamma_new[:] .* Psat[:] ./ P;
@@ -271,68 +265,56 @@ package Thermodynamic_Packages
         S_dew[i] = sum(teta_dew[:] .* tow[i, :]);
         end if;
         end for;
-   //===================================================================================================     
-  
-        for i in 1:NOC loop
-        if(S_dew[i]==1) then
-        sum_dew[i]=0;
-        else
-        sum_dew[i] = sum(teta_dew[:] .* tow[i, :] ./ (S_dew[:]));
-        end if;
-        
-        
-        if(S_dew[i]==1) then
-        C_dew[i]=0;
-        elseif(S_dew[i]>0) then
-        C_dew[i] =log(S_dew[i]);  
-        else
-        C_dew[i]=0;
-        end if;
-  
-        (gammar_dew[i]) = exp(Q[i] * (1 - C_dew[i] - sum_dew[i]));
-        end for;
-  //===============================================================================================     
-       
-       for i in 1:NOC loop
-       if(r_dew==0) then
-       D_dew[i] =0;
-       else
-       D_dew[i] = R[i]/r_dew;
-       end if;
-        
-        if(q_dew==0) then
+//===================================================================================================
+    for i in 1:NOC loop
+      if S_dew[i] == 1 then
+        sum_dew[i] = 0;
+      else
+        sum_dew[i] = sum(teta_dew[:] .* tow[i, :] ./ S_dew[:]);
+      end if;
+      if S_dew[i] == 1 then
+        C_dew[i] = 0;
+      elseif S_dew[i] > 0 then
+        C_dew[i] = log(S_dew[i]);
+      else
+        C_dew[i] = 0;
+      end if;
+      gammar_dew[i] = exp(Q[i] * (1 - C_dew[i] - sum_dew[i]));
+    end for;
+//===============================================================================================
+    for i in 1:NOC loop
+      if r_dew == 0 then
+        D_dew[i] = 0;
+      else
+        D_dew[i] = R[i] / r_dew;
+      end if;
+      if q_dew == 0 then
         E_dew[i] = 0;
-        else
-        E_dew[i] = Q[i]/q_dew;
-        end if;
-        
-        if(E_dew[i]==0) then
-        F_dew[i]=0;
-        else
-        F_dew[i] = D_dew[i]/E_dew[i];
-        end if;
-        
-        
-        if(D_dew[i]>0) then
-        A_dew[i] =log(D_dew[i]);
-        elseif(D_dew[i]==1) then
-        A_dew[i]=0;
-        else
-        A_dew[i]=0;
-        end if;
-        
-        if(F_dew[i]>0) then
-        B_dew[i] =log(F_dew[i]);
-        elseif(F_dew[i]==1) then
-        B_dew[i]=0;
-        else
-        B_dew[i]=0;
-        end if;
-        
-        log(gammac_dew[i])=1-D_dew[i] + A_dew[i] + (-Z / 2 * Q[i] * (1 - F_dew[i] + B_dew[i]));
-        
-        (gammaDew_old[i]) = (gammac_dew[i]) * (gammar_dew[i]);
-      end for;
+      else
+        E_dew[i] = Q[i] / q_dew;
+      end if;
+      if E_dew[i] == 0 then
+        F_dew[i] = 0;
+      else
+        F_dew[i] = D_dew[i] / E_dew[i];
+      end if;
+      if D_dew[i] > 0 then
+        A_dew[i] = log(D_dew[i]);
+      elseif D_dew[i] == 1 then
+        A_dew[i] = 0;
+      else
+        A_dew[i] = 0;
+      end if;
+      if F_dew[i] > 0 then
+        B_dew[i] = log(F_dew[i]);
+      elseif F_dew[i] == 1 then
+        B_dew[i] = 0;
+      else
+        B_dew[i] = 0;
+      end if;
+      log(gammac_dew[i]) = 1 - D_dew[i] + A_dew[i] + (-Z / 2 * Q[i] * (1 - F_dew[i] + B_dew[i]));
+      gammaDew_old[i] = gammac_dew[i] * gammar_dew[i];
+    end for;
       
       for i in 1:NOC loop
       if(Pdew==0) then
@@ -818,10 +800,9 @@ package Thermodynamic_Packages
       
   //w=Acentric Factor
   //Sp = Solublity Parameter
-  //V = Molar Volume 
-  //All the above three parameters have to be mentioned as arguments while extending the thermodynamic Package Grayson Streed  
-  
-     parameter Real   w[NOC] ;
+  //V = Molar Volume
+    //All the above three parameters have to be mentioned as arguments while extending the thermodynamic Package Grayson Streed
+    parameter Real   w[NOC] ;
       parameter Real  Sp[NOC](each unit = "(cal/mL)^0.5") ;
       parameter Real  V[NOC] (each unit = "mL/mol") ;
              
@@ -857,10 +838,9 @@ package Thermodynamic_Packages
       Real Vs,Vtot;
     
     equation
-      
-    //======================================================================================================  
-      //Calculation Routine for Liquid Phase Fugacity Coefficient
-      S = Solublity_Parameter(NOC,V,Sp,compMolFrac[2,:]);
+//======================================================================================================
+//Calculation Routine for Liquid Phase Fugacity Coefficient
+    S = Solublity_Parameter(NOC, V, Sp, compMolFrac[2, :]);
       for i in 1:NOC loop
       gamma[i] = exp(V[i] * ((Sp[i] - S) ^ 2) / (R * T));
       end for;
@@ -870,10 +850,10 @@ package Thermodynamic_Packages
       Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
       gamma_liq[i] = liqfugcoeff[i] * (P/Psat[i]);
       end for;
-    //========================================================================================================     
-      //Calculation Routine for Vapour Phase Fugacity Coefficient
-      //Calculation of Equation of State Constants
-      a =    EOS_Constants(NOC,Tc,Pc,T);
+//========================================================================================================
+//Calculation Routine for Vapour Phase Fugacity Coefficient
+//Calculation of Equation of State Constants
+    a = EOS_Constants(NOC, Tc, Pc, T);
       b =    EOS_ConstantII(NOC,Tc,Pc,T);
       a_ij = EOS_ConstantIII(NOC,a);
       amv =  EOS_Constant1V(NOC,compMolFrac[3,:],a_ij);
@@ -901,9 +881,9 @@ package Thermodynamic_Packages
         
       for i in 1:NOC loop
       t1[i] = b[i] * (Zv - 1)/ bmv;
-      t3[i] = AG /(BG * (((u) ^ 2)^ 0.5)) * ((C[i]) - ( 2 * ((D[i]) ^ 0.5)));
+      t3[i] = AG /(BG * u ^ (2^ 0.5)) * (C[i] - ( 2 * ((D[i]) ^ 0.5)));
       end for;
-      t4 =  log(((2 * Zv) + (BG * (u + ((((u)^ 2)^ 0.5)))))/((2 * Zv) + (BG * (u - ((((u) ^ 2)^ 0.5))))));  
+      t4 =  log(((2 * Zv) + BG * (u + u^ (2^ 0.5))))/((2 * Zv) + (BG * (u - (((u ^ (2^ 0.5)))))));  
       t2 = -log(Zv - BG);
        
       resMolSpHeat[:] = zeros(3);
@@ -994,10 +974,10 @@ package Thermodynamic_Packages
       end if;
       end for;
       
-      if((BG_dew * (((u) ^ 2)^ 0.5))==0) then
+      if((BG_dew * ((u ^ (2^ 0.5)))==0)) then
       E =0;
       else
-      E = (BG_dew * (((u) ^ 2)^ 0.5));
+      E = (BG_dew * ((u ^ (2^ 0.5))));
       end if;
       
       if(E==0) then
@@ -1022,10 +1002,10 @@ package Thermodynamic_Packages
       t1_dew[i] = b[i] * I;
       t3_dew[i] = G * ((A[i]) - ( 2 * ((B[i]) ^ 0.5)));
       end for;
-      if((((2 * Zv_dew) + (BG_dew * (u + ((((u)^ 2)^ 0.5)))))/((2 * Zv_dew) + (BG_dew * (u - ((((u) ^ 2)^ 0.5))))))<=0) then
+      if((((2 * Zv_dew) + (BG_dew * (u + ((u^ (2^ 0.5))))))/((2 * Zv_dew) + (BG_dew * (u - ((u ^ (2^ 0.5)))))))<=0) then
       t4_dew =0;
       else 
-      t4_dew =  log(((2 * Zv_dew) + (BG_dew * (u + ((((u)^ 2)^ 0.5)))))/((2 * Zv_dew) + (BG_dew * (u - ((((u) ^ 2)^ 0.5))))));  
+      t4_dew =  log(((2 * Zv_dew) + (BG_dew * (u + ((u^ (2^ 0.5))))))/((2 * Zv_dew) + (BG_dew * (u - ((u ^ (2^ 0.5)))))));  
       end if;
       t2_dew = J;
       

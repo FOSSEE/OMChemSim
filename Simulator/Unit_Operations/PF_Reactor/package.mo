@@ -148,7 +148,9 @@ package PF_Reactor
             compMasFrac[3, i] = 0;
           end for;
 //Liquid_Phase_Density
-          LiqDens = Thermodynamic_Functions.Density_Racket(NOC, T, P, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, Psat[:]);
+      for i in 1:NOC loop
+          LiqDens = Thermodynamic_Functions.Density_Racket(NOC, T, P, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, Psat[i]);
+      end for;
           Liquid_Phase_Density = 1 / sum(compMasFrac[2, :] ./ LiqDens[:]) / Mavg[2];
 //Vapour Phase Density
           for i in 1:NOC loop
@@ -195,7 +197,9 @@ package PF_Reactor
           compMasFrac[3, :] = compMolFrac[3, :] .* comp[:].MW / Mavg[3];
 //Calculation of Phase Densities
 //Liquid Phase Density-Inlet Conditions
-          LiqDens = Thermodynamic_Functions.Density_Racket(NOC, T, P, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, Psat[:]);
+        for i in 1:NOC  loop
+          LiqDens = Thermodynamic_Functions.Density_Racket(NOC, T, P, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, Psat[i]);
+        end for;
           Liquid_Phase_Density = 1 / sum(compMasFrac[2, :] ./ LiqDens[:]) / Mavg[2];
 //Vapour Phase Density
           for i in 1:NOC loop
@@ -298,7 +302,9 @@ package PF_Reactor
 //Reaction Manager
         n = sum(DO[:]);
 //Calculation of Rate Constants
-        k1[:] = Simulator.Files.Models.ReactionManager.Arhenious(Nr, A1[:], E1[:], T);
+      for i in 1:NOC loop
+        k1[:] = Simulator.Files.Models.ReactionManager.Arhenious(Nr, A1[i], E1[i], T);
+      end for;
 //Material Balance
 //Initial Number of Moles
         for i in 1:Nr loop

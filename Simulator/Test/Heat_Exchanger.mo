@@ -1,6 +1,6 @@
 within Simulator.Test;
 
-package Heat_Exchanger
+package Heat_Exchanger_test
   //Model of a General Purpouse Heat Exchanger operating with multiple modes
   //================================================================================================================
 
@@ -19,15 +19,15 @@ package Heat_Exchanger
     parameter data.Toluene tol;
     parameter Integer NOC = 2;
     parameter data.General_Properties comp[NOC] = {sty, tol};
-    Simulator.Unit_Operations.Rigorous_HX HX(NOC = NOC, comp = comp, deltap_hot = 0, deltap_cold = 0, Heat_Loss = 0, Calculation_Method = "Outlet_Temparatures") annotation(
+    Simulator.Unit_Operations.Heat_Exchanger HX( Calculation_Method = "Outlet_Temparatures", Heat_Loss = 0, Mode = "CounterCurrent",NOC = NOC, comp = comp, deltap_cold = 0, deltap_hot = 0) annotation(
       Placement(visible = true, transformation(origin = {-2, 16}, extent = {{-22, -22}, {22, 22}}, rotation = 0)));
-    Heat_Exchanger.MS Hot_In(NOC = NOC, comp = comp) annotation(
+    Heat_Exchanger_test.MS Hot_In(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-58, 70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Heat_Exchanger.MS Hot_Out(NOC = NOC, comp = comp) annotation(
+    Heat_Exchanger_test.MS Hot_Out(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {66, 56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Heat_Exchanger.MS Cold_In(NOC = NOC, comp = comp) annotation(
+    Heat_Exchanger_test.MS Cold_In(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-76, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Heat_Exchanger.MS Cold_Out(NOC = NOC, comp = comp) annotation(
+    Heat_Exchanger_test.MS Cold_Out(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {50, -32}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
     connect(Cold_In.outlet, HX.Cold_In) annotation(
@@ -49,4 +49,4 @@ package Heat_Exchanger
     HX.U = 300;
     HX.Qactual = 2700E03;
   end HX_Test;
-end Heat_Exchanger;
+end Heat_Exchanger_test;

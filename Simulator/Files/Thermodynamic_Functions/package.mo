@@ -354,30 +354,29 @@ end Tow_UNIQUAC;
   input Integer NOC;
   input Real T;
   input Real P;
-  input Real Pc[NOC];
-  input Real Tc[NOC];
-  input Real Racketparam[NOC];
-  input Real AF[NOC];
-  input Real MW[NOC];
-  input Real Psat[NOC];
-  output Real Density[NOC];
+  input Real Pc;
+  input Real Tc;
+  input Real Racketparam;
+  input Real AF;
+  input Real MW;
+  input Real Psat;
+  output Real Density;
   parameter Real R = 83.14;
 protected
-  Real Tr[NOC], Pcm[NOC], temp[NOC], tempcor[NOC], a, b, c[NOC], d, e[NOC], Beta[NOC], f, g, h, j, k, Racketparam_new[NOC];
+  Real Tr, Pcm, temp, tempcor, a, b, c, d, e, Beta, f, g, h, j, k, Racketparam_new;
 algorithm
-  for i in 1:NOC loop
-    Pcm[i] := Pc[i] / 100000;
-    Tr[i] := T / Tc[i];
-    if Tr[i] > 0.99 then
-      Tr[i] := 0.5;
+    Pcm := Pc / 100000;
+    Tr := T / Tc;
+    if Tr > 0.99 then
+      Tr := 0.5;
     end if;
-    if Racketparam[i] == 0 then
-      Racketparam_new[i] := 0.29056 - 0.08775 * AF[i];
+    if Racketparam == 0 then
+      Racketparam_new := 0.29056 - 0.08775 * AF;
     else
-      Racketparam_new[i] := Racketparam[i];
+      Racketparam_new := Racketparam;
     end if;
-    temp[i] := R * (Tc[i] / Pcm[i]) * Racketparam_new[i] ^ (1 + (1 - Tr[i]) ^ (2 / 7));
-    if T < Tc[i] then
+    temp := R * (Tc / Pcm) * Racketparam_new ^ (1 + (1 - Tr) ^ (2 / 7));
+    if T < Tc then
       a := -9.070217;
       b := 62.45326;
       d := -135.1102;
@@ -386,40 +385,36 @@ algorithm
       h := 1.14188;
       j := 0.0861488;
       k := 0.0344483;
-      e[NOC] := exp(f + g * AF[i] + h * AF[i] * AF[i]);
-      c[NOC] := j + k * AF[i];
-      Beta[i] := Pc[i] * ((-1) + a * (1 - Tr[i]) ^ (1 / 3) + b * (1 - Tr[i]) ^ (2 / 3) + d * (1 - Tr[i]) + e[i] * (1 - Tr[i]) ^ (4 / 3));
-      tempcor[i] := temp[i] * (1 - c[i] * log((Beta[i] + P) / (Beta[i] + Psat[i])));
-      Density[i] := 0.001 * MW[i] / (tempcor[i] * 0.000001);
+      e := exp(f + g * AF + h * AF * AF);
+      c := j + k * AF;
+      Beta := Pc * ((-1) + a * (1 - Tr) ^ (1 / 3) + b * (1 - Tr) ^ (2 / 3) + d * (1 - Tr) + e * (1 - Tr) ^ (4 / 3));
+      tempcor := temp * (1 - c * log((Beta + P) / (Beta + Psat)));
+      Density := 0.001 * MW / (tempcor * 0.000001);
     else
-      Density[i] := 0.001 * MW[i] / (temp[i] * 0.000001);
+      Density := 0.001 * MW / (temp * 0.000001);
     end if;
-  end for;
 end Density_Racket;
 
 function PoyntingCF
   import Simulator.Files.Thermodynamic_Functions.*;
   input Integer NOC;
-  input Real Pc[NOC], Tc[NOC], Racketparam[NOC], AF[NOC], MW[NOC];
+  input Real Pc, Tc, Racketparam, AF, MW;
   input Real T, P;
-  input Real gamma[NOC], Psat[NOC], Density[NOC];
+  input Real gamma, Psat, Density;
   parameter Integer Choice = 2;
-  output Real PCF[NOC];
+  output Real PCF;
 protected
-  Real vl[NOC];
+  Real vl;
 algorithm
-  for i in 1:NOC loop
-    if T < 0.98 * Tc[i] then
-      vl[i] := 1 / Density[i];
+    if T < 0.98 * Tc then
+      vl := 1 / Density;
     end if;
-  end for;
-  for i in 1:NOC loop
+
     if Choice == 1 then
-      PCF[i] := exp(vl[i] * abs(P - Psat[i]) / (8314.47 * T));
+      PCF := exp(vl * abs(P - Psat) / (8314.47 * T));
     else
-      PCF[i] := 1;
+      PCF := 1;
     end if;
-  end for;
 end PoyntingCF;
 
  

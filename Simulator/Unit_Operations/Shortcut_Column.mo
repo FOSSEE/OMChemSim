@@ -82,17 +82,63 @@ equation
   end for;
   alpha[:] = K[:] / K[HKey];
 //Calculation of temperature at distillate and bottoms
+  if condT <= 0 and rebT <= 0 then
   if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+    
+    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    
   elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+    
+    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+  end if;
+  
+elseif condT<=0 then
+  if condType == "Partial" then
+    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+    
+    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    
+  elseif condType == "Total" then
+    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+    
     rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
   end if;
+
+elseif rebT<=0 then
+  if condType == "Partial" then
+    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+    
+    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    
+  elseif condType == "Total" then
+    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+    
+    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+  end if;
+
+else
+  if condType == "Partial" then
+    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+    
+    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    
+  elseif condType == "Total" then
+    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+    
+    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+  end if;
+  
+end if;
 //Minimum Reflux, Underwoods method
-//  1 - q = vapPhasMolFrac[1];
-//  1 - q = sum(alpha[:] .* mixMolFrac[1, :] ./ (alpha[:] .- theta));
-  vapPhasMolFrac[1] = sum(alpha[:] .* mixMolFrac[1, :] ./ (alpha[:] .- theta));
+if theta > alpha[LKey] or theta < alpha[HKey] then
+  0= sum((alpha[:] .* mixMolFrac[1, :])./ (alpha[:] .- theta));
+  //This is mathamatical adjustment for right convergence of theta
+else
+  vapPhasMolFrac[1] = sum((alpha[:] .* mixMolFrac[1, :])./ (alpha[:] .- theta));
+end if;
+
   minR + 1 = sum(alpha[:] .* mixMolFrac[3, :] ./ (alpha[:] .- theta));
 //Actual number of trays,Gillilands method
   x = (actR - minR) / (actR + 1);

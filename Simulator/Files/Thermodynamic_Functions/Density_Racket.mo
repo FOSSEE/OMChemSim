@@ -18,8 +18,8 @@ algorithm
 
     Pcm := Pc./ 100000;
     Tr := T / Tc;
-    if Tr[i] > 0.99 then
-      Tr[i] := 0.5;
+    if Tr > 0.99 then
+      Tr := 0.5;
     end if;
     if Racketparam == 0 then
       Racketparam_new := 0.29056 - 0.08775 * AF;

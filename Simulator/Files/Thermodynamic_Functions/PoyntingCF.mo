@@ -14,8 +14,7 @@ algorithm
     if T < 0.98 * Tc then
       vl := 1 / Density;
     end if;
-  end for;
-  for i in 1:NOC loop
+
     if Choice == 1 then
       PCF := exp(vl * abs(P - Psat) / (8314.47 * T));
     else

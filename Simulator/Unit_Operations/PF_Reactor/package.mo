@@ -298,7 +298,9 @@ package PF_Reactor
 //Reaction Manager
         n = sum(DO[:]);
 //Calculation of Rate Constants
-        k1[:] = Simulator.Files.Models.ReactionManager.Arhenious(Nr, A1[:], E1[:], T);
+    for i in 1:Nr loop
+        k1[i] = Simulator.Files.Models.ReactionManager.Arhenious(Nr, A1[i], E1[i], T);
+    end for;
 //Material Balance
 //Initial Number of Moles
         for i in 1:Nr loop

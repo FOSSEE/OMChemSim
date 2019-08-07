@@ -17,7 +17,7 @@ package cmpstms
     parameter data.General_Properties comp[NOC] = {benz, tol};
     //instance of composite material stream
     Simulator.Test.cmpstms.ms ms1(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {-50, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-79, -31}, extent = {{-11, -11}, {11, 11}}, rotation = 0)));
   equation
     ms1.P = 101325;
     ms1.T = 368;

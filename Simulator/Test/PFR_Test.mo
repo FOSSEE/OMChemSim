@@ -22,18 +22,18 @@ package PFR_Test
     Simulator.Streams.Energy_Stream Energy annotation(
       Placement(visible = true, transformation(origin = {2, -36}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Unit_Operations.PF_Reactor.PFR PFR(NOC = 3, Nr = 1, comp = {eth, wat, eg}, Mode = 2, Phase = 3, Tdef = 410) annotation(
-      Placement(visible = true, transformation(origin = {8, 22}, extent = {{-38, -38}, {38, 38}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-7, 3}, extent = {{-33, -33}, {33, 33}}, rotation = 0)));
     MS Inlet(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-66, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     MS Outlet(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {86, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-    connect(Outlet.inlet, PFR.outlet) annotation(
-      Line(points = {{76, 10}, {60.5, 10}, {60.5, 22}, {41, 22}}));
-    connect(PFR.inlet, Inlet.outlet) annotation(
-      Line(points = {{-22, 22}, {-56, 22}, {-56, 8}}));
-    connect(Energy.inlet, PFR.en_Conn) annotation(
-      Line(points = {{-8, -36}, {0, -36}, {0, 5}, {3, 5}}));
+  connect(Outlet.inlet, PFR.outlet) annotation(
+      Line(points = {{76, 10}, {26, 10}, {26, 3}}));
+  connect(PFR.inlet, Inlet.outlet) annotation(
+      Line(points = {{-40, 3}, {-48, 3}, {-48, 8}, {-56, 8}}));
+  connect(Energy.inlet, PFR.en_Conn) annotation(
+      Line(points = {{-8, -36}, {-7, -36}, {-7, -20}}));
 // Connection of PFR with inlet and outlet stream
 // Giving values to the instantiated inlet material stream
 //mixture molar composition

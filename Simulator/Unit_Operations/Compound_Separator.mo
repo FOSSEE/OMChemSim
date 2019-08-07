@@ -1,6 +1,7 @@
 within Simulator.Unit_Operations;
 
 model Compound_Separator
+  extends Simulator.Files.Icons.Compound_Separator;
   parameter Integer NOC "Number of components", sepStrm "Specified Stream";
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] "Components array";
   Real inP(min = 0, start = 101325) "inlet pressure", inT(min = 0, start = 273.15) "inlet temperature", inMixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "inlet mixture mole fraction", inMixMolFlo(min = 0, start = 100) "inlet mixture molar flow", inCompMolFlo[NOC](each min = 0, each start = 100) "inlet compound molar flow", inCompMasFlo[NOC](each min = 0, each start = 100) "inlet compound mass flow", inMixMolEnth "inlet mixture molar enthalpy";
@@ -12,11 +13,11 @@ model Compound_Separator
   Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet1(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, 70}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {100, 70}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.enConn energy annotation(
-    Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -130}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet2(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {100, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 // Connector equation
   inlet.P = inP;
@@ -64,4 +65,8 @@ equation
   end for;
 //Energy balance
   enReq = sum(outMixMolEnth .* outMixMolFlo) - inMixMolFlo * inMixMolEnth;
-end Compound_Separator;
+
+annotation(
+    Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
+    Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
+    __OpenModelica_commandLineOptions = "");end Compound_Separator;

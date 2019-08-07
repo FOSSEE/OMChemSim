@@ -1,6 +1,7 @@
 within Simulator.Unit_Operations;
 
 model Flash
+  extends Simulator.Files.Icons.Flash;
   //extend thermodynamic package with this model
   import Simulator.Files.*;
   parameter Integer NOC;
@@ -13,9 +14,9 @@ model Flash
   Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn vapor(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {102, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {102, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {102, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn liquid(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //Connector equation
   if overSepTemp then
@@ -49,11 +50,13 @@ equation
   Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
   if P >= Pbubl then
     compMolFrac[3, :] = zeros(NOC);
-    sum(compMolFrac[2, :]) = 1;
+//    sum(compMolFrac[2, :]) = 1;
+    totMolFlo[3] = 0;
   elseif P >= Pdew then
 //VLE region
     for i in 1:NOC loop
-      compMolFrac[3, i] = K[i] * compMolFrac[2, i];
+//      compMolFrac[3, i] = K[i] * compMolFrac[2, i];
+      compMolFrac[2, i] = compMolFrac[1, i] ./ (1 + vapPhasMolFrac * (K[i] - 1));
     end for;
 //    sum(compMolFrac[3, :]) = 1;
     sum(compMolFrac[2, :]) = 1;
@@ -61,7 +64,8 @@ equation
   else
 //above dew point region
     compMolFrac[2, :] = zeros(NOC);
-    sum(compMolFrac[3, :]) = 1;
+//    sum(compMolFrac[3, :]) = 1;
+    totMolFlo[2] = 0;
   end if;
 //Energy Balance
   for i in 1:NOC loop
@@ -86,4 +90,7 @@ equation
 //phase molar fractions
   liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
   vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
-end Flash;
+annotation(
+    Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
+    Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
+    __OpenModelica_commandLineOptions = "");end Flash;

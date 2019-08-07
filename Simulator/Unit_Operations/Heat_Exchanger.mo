@@ -1,6 +1,7 @@
 within Simulator.Unit_Operations;
 
 model Heat_Exchanger
+  extends Simulator.Files.Icons.Heat_Exchanger;
   //Heat-Exchanger Operates in various modes
   //Mode-I - Estimation of Hot Fluid Outlet Temperature
   //      Inputs : deltap_hot,deltap_cold,Heat_Loss,coutT,Flow Direction,Name of the calculation type,Area
@@ -19,13 +20,13 @@ model Heat_Exchanger
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
   parameter Integer NOC "number of compounds ";
   Simulator.Files.Connection.matConn Hot_In(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn Hot_Out(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {80, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {80, 34}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {80, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn Cold_In(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn Cold_Out(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //Parameters
   //Mode-I -Outlet Temperature-Hot Stream Calculaions
   parameter Real Heat_Loss;

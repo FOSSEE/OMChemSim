@@ -1,6 +1,7 @@
 within Simulator.Unit_Operations;
 
 model Heater
+  extends Simulator.Files.Icons.Heater;
   // This is generic heater model. For using this model we need to extend this model and incorporte ouput material stream since this model is not doing any flash calculations. Refer heater models in Test section for this.
   //========================================================================================
   Real inMolFlo(min = 0, start = 100) "inlet mixture molar flow rate", outMolFlo(min = 0, start = 100) "outlet mixture molar flow rate", heatAdd "Heat added", inP(min = 0, start = 101325) "Inlet pressure", outP(min = 0, start = 101325) "Outlet pressure", inT(min = 0, start = 273.15) "Inlet Temperature", outT(min = 0, start = 273.15) "Outlet Temperature", tempInc "Temperature Increase", outVapPhasMolFrac(min = 0, max = 1, start = 0.5) "Outlet Vapor Mole Fraction";
@@ -16,7 +17,7 @@ model Heater
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.enConn energy annotation(
-    Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-98, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //=========================================================================================
 equation
 //connector equations
@@ -42,5 +43,4 @@ equation
 //pressure calculation
   inT + tempInc = outT;
 //temperature calculation
-
 end Heater;

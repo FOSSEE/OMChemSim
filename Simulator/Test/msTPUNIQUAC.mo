@@ -4,7 +4,7 @@ model msTPUNIQUAC
   import data = Simulator.Files.Chemsep_Database;
   parameter data.Ethanol eth;
   parameter data.Water wat;
-  extends Simulator.Streams.Material_Stream(NOC = 2, comp = {eth, wat}, Pbubl(start = 101325), Pdew(start = 101325), compMolFrac(each start = 0.33));
+  extends Simulator.Streams.Material_Stream(NOC = 2, comp = {eth, wat}, Pbubl(start = 101325), Pdew(start = 101325), compMolFrac(each start = 0.33), vapPhasMolFrac(start = 0.68));
   extends Simulator.Files.Thermodynamic_Packages.UNIQUAC;
 equation
   compMolFrac[1, :] = {0.5, 0.5};

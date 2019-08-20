@@ -1,6 +1,7 @@
 within Simulator.Unit_Operations;
 
 model Mixer
+  extends Simulator.Files.Icons.Mixer;
   import Simulator.Files.*;
   parameter Integer NOC "Number of Components", NI = 6 "Number of Input streams";
   parameter Chemsep_Database.General_Properties comp[NOC];
@@ -13,9 +14,9 @@ model Mixer
   //================================================================================
   //  Files.Connection.matConn inlet[NI](each connNOC = NOC);
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Files.Connection.matConn inlet[NI](each connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  Simulator.Files.Connection.matConn inlet[NI](each connNOC = NOC) annotation(
+    Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //Connector equation
   for i in 1:NI loop

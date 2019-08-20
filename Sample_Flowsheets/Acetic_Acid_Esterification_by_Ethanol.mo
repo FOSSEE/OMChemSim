@@ -13,42 +13,42 @@ package Acetic_Acid_Esterification_by_Ethanol
     parameter data.Ethanol eth;
     parameter data.General_Properties comp[NOC] = {etac, wat, aa, eth};
   Acetic_Acid_Esterification_by_Ethanol.ms ethanol(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {-132, 34}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-128, 30}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
     Acetic_Acid_Esterification_by_Ethanol.ms acetic_acid(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-132, -26}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Unit_Operations.Mixer mix(NOC = NOC, comp = comp, NI = 3, outPress = "Inlet_Average") annotation(
-      Placement(visible = true, transformation(origin = {-80, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-77, 1}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.ms reactor_feed(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {-26, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-34, 6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.Conv_React CR(NOC = NOC, comp = comp, Nr = 1, Bc = {3}, Sc = {{1}, {1}, {-1}, {-1}}, X = {0.6}, calcMode = "Define_Outlet_Temperature", Tdef = 300) annotation(
-      Placement(visible = true, transformation(origin = {16, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {3, 5}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.ms reactor_out(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {56, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {52, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Unit_Operations.Splitter split(NOC = NOC, comp = comp, NO = 2, calcType = "Split_Ratio") annotation(
       Placement(visible = true, transformation(origin = {106, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.ms recycle(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {160, 28}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {162, 28}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.ms product(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {162, -18}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {172, -14}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     equation
-  connect(split.outlet[2], product.inlet) annotation(
-      Line(points = {{116.2, 4}, {125.2, 4}, {125.2, -2}, {136.2, -2}, {136.2, -18}, {154.2, -18}, {154.2, -13}, {152.2, -13}, {152.2, -12}}));
-  connect(split.outlet[1], recycle.inlet) annotation(
-      Line(points = {{116.2, 4}, {126.2, 4}, {126.2, 12}, {136.2, 12}, {136.2, 28}, {150.2, 28}, {150.2, 28}, {150.2, 28}, {150.2, 20}, {150.2, 20}}));
-  connect(recycle.outlet, mix.inlet[3]) annotation(
-      Line(points = {{170, 28}, {187, 28}, {187, 28}, {204, 28}, {204, 84}, {-208, 84}, {-208, 4}, {-88, 4}, {-88, 4}, {-90, 4}, {-90, 4}}));
-  connect(reactor_out.outlet, split.inlet) annotation(
-      Line(points = {{66, 4}, {81, 4}, {81, 4}, {98, 4}, {98, 4}, {95, 4}, {95, 4}, {96, 4}}));
-  connect(CR.outlet, reactor_out.inlet) annotation(
-      Line(points = {{26, 4}, {46, 4}}));
-  connect(reactor_feed.outlet, CR.inlet) annotation(
-      Line(points = {{-16, 4}, {-5, 4}, {-5, 4}, {8, 4}, {8, 4}, {5, 4}, {5, 4}, {6, 4}}));
-  connect(mix.outlet, reactor_feed.inlet) annotation(
-      Line(points = {{-70, 3.8}, {-36, 3.8}}));
-  connect(ethanol.outlet, mix.inlet[1]) annotation(
-      Line(points = {{-122, 34}, {-104, 34}, {-104, 4}, {-90, 4}, {-90, 4}}));
-  connect(acetic_acid.outlet, mix.inlet[2]) annotation(
-      Line(points = {{-122, -26}, {-114, -26}, {-114, -26}, {-102, -26}, {-102, 4}, {-88, 4}, {-88, 3}, {-90, 3}, {-90, 4}}));
+    connect(recycle.inlet, split.outlet[2]) annotation(
+      Line(points = {{152, 28}, {140, 28}, {140, 4}, {116, 4}, {116, 4}}, color = {0, 70, 70}));
+    connect(split.outlet[1], product.inlet) annotation(
+      Line(points = {{116, 4}, {140, 4}, {140, -14}, {162, -14}, {162, -14}}, color = {0, 70, 70}));
+    connect(reactor_out.outlet, split.inlet) annotation(
+      Line(points = {{62, 4}, {96, 4}, {96, 4}, {96, 4}}, color = {0, 70, 70}));
+    connect(CR.outlet, reactor_out.inlet) annotation(
+      Line(points = {{16, 6}, {42, 6}, {42, 4}, {42, 4}}, color = {0, 70, 70}));
+    connect(reactor_feed.outlet, CR.inlet) annotation(
+      Line(points = {{-24, 6}, {-10, 6}, {-10, 6}, {-10, 6}}, color = {0, 70, 70}));
+    connect(mix.outlet, reactor_feed.inlet) annotation(
+      Line(points = {{-64, 2}, {-44, 2}, {-44, 6}, {-44, 6}}, color = {0, 70, 70}));
+    connect(recycle.outlet, mix.inlet[3]) annotation(
+      Line(points = {{172, 28}, {196, 28}, {196, 70}, {-166, 70}, {-166, 0}, {-90, 0}, {-90, 2}}, color = {0, 70, 70}));
+    connect(acetic_acid.outlet, mix.inlet[2]) annotation(
+      Line(points = {{-122, -26}, {-106, -26}, {-106, 0}, {-90, 0}, {-90, 2}}, color = {0, 70, 70}));
+    connect(ethanol.outlet, mix.inlet[1]) annotation(
+      Line(points = {{-114, 30}, {-106, 30}, {-106, 0}, {-90, 0}, {-90, 2}}, color = {0, 70, 70}));
       ethanol.P = 101325;
       ethanol.T = 300;
       ethanol.compMolFrac[1, :] = {0, 0, 0, 1};

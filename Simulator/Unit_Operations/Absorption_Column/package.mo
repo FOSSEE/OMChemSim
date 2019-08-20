@@ -31,20 +31,20 @@ package Absorption_Column
     vapor_outlet.mixMolFlo = vapMolFlo[2];
     vapor_outlet.mixMolEnth = vapMolEnth[2];
     vapor_outlet.mixMolFrac[:] = vapCompMolFrac[2, :];
-    
-    //Adjustment for thermodynamic packages  
+//Adjustment for thermodynamic packages
     compMolFrac[1, :] = (vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :]) / (liqMolFlo[2] + vapMolFlo[2]);
     compMolFrac[2, :] = liqCompMolFrac[2,:];
-    compMolFrac[3, :] = vapCompMolFrac[2,:];  
-    //Bubble point calculation
+    compMolFrac[3, :] = vapCompMolFrac[2,:];
+//Bubble point calculation
     Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
-    //Dew point calculation
+//Dew point calculation
     Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
-    
 //molar balance
     vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
 //equillibrium
     vapCompMolFrac[2, :] = K[:] .* liqCompMolFrac[2, :];
+//raschford rice
+//  liqCompMolFrac[2, :] = ((vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :])/(vapMolFlo[1] + liqMolFlo[1]))./(1 .+ (vapMolFlo[1]/(liqMolFlo[1] + vapMolFlo[1])) .* (K[:] .- 1));
 //  for i in 1:NOC loop
 //    vapCompMolFrac[2,i] = ((K[i]/(K[1])) * liqCompMolFrac[2,i]) / (1 + (K[i] / (K[1])) * liqCompMolFrac[2,i]);
 //  end for;
@@ -67,18 +67,19 @@ package Absorption_Column
   end AbsTray;
 
   model AbsCol
+    extends Simulator.Files.Icons.Absorption_Column;
     import data = Simulator.Files.Chemsep_Database;
     parameter Integer NOC "Number of Components";
     parameter Integer noOfStages;
     parameter data.General_Properties comp[NOC];
     Simulator.Files.Connection.matConn top_feed(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 302}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.matConn bottom_feed(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.matConn top_product(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.matConn bottom_product(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
 //connector equation
     tray[1].liqMolFlo[1] = top_feed.mixMolFlo;
@@ -107,6 +108,9 @@ package Absorption_Column
     tray[noOfStages].P = bottom_feed.P;
     tray[1].P = top_product.P;
     tray[noOfStages].P = bottom_product.P;
-  end AbsCol;
+    annotation(
+      Icon(coordinateSystem(extent = {{-250, -450}, {250, 450}})),
+      Diagram(coordinateSystem(extent = {{-250, -450}, {250, 450}})),
+      __OpenModelica_commandLineOptions = "");end AbsCol;
 
 end Absorption_Column;

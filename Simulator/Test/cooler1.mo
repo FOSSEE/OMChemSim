@@ -19,21 +19,21 @@ package cooler1
     //instantiation of ethanol
     parameter data.Water wat;
     //instantiation of water
-    Unit_Operations.Cooler cooler1(pressDrop = 0, eff = 1, NOC = 3, comp = {meth, eth, wat}) annotation(
-      Placement(visible = true, transformation(origin = {-4, 18}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
+    Simulator.Unit_Operations.Cooler cooler1(pressDrop = 0, eff = 1, NOC = 3, comp = {meth, eth, wat}) annotation(
+      Placement(visible = true, transformation(origin = {-8, 18}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
     ms inlet(NOC = 3, comp = {meth, eth, wat}) annotation(
       Placement(visible = true, transformation(origin = {-72, 18}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
-    ms outlet(NOC = 3, comp = {meth, eth, wat}, T(start = 352.6146), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.27, 0.32, 0.39}, {0.48, 0.33, 0.18}}), P(start = 101325)) annotation(
-      Placement(visible = true, transformation(origin = {58, 18}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
-    Streams.Energy_Stream energy annotation(
-      Placement(visible = true, transformation(origin = {33, -43}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
+    Simulator.Test.cooler1.ms outlet(NOC = 3, comp = {meth, eth, wat}, T(start = 352.6146), compMolFrac(start = {{0.33, 0.33, 0.34}, {0.27, 0.32, 0.39}, {0.48, 0.33, 0.18}}), P(start = 101325)) annotation(
+      Placement(visible = true, transformation(origin = {60, 12}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
+    Simulator.Streams.Energy_Stream energy annotation(
+      Placement(visible = true, transformation(origin = {47, -27}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
   equation
     connect(cooler1.energy, energy.inlet) annotation(
-      Line(points = {{-4, 4}, {-4, 4}, {-4, -44}, {20, -44}, {20, -44}}));
-    connect(cooler1.outlet, outlet.inlet) annotation(
-      Line(points = {{10, 18}, {44, 18}, {44, 18}, {46, 18}}));
-    connect(inlet.outlet, cooler1.inlet) annotation(
-      Line(points = {{-60, 18}, {-20, 18}, {-20, 18}, {-18, 18}}));
+      Line(points = {{6, 4}, {6, -27}, {34, -27}}, color = {255, 0, 0}));
+  connect(cooler1.outlet, outlet.inlet) annotation(
+      Line(points = {{6, 18}, {26, 18}, {26, 12}, {48, 12}}));
+  connect(inlet.outlet, cooler1.inlet) annotation(
+      Line(points = {{-60, 18}, {-22, 18}}));
   equation
     inlet.compMolFrac[1, :] = {0.33, 0.33, 0.34};
 //mixture molar composition

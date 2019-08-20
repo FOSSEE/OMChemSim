@@ -1,16 +1,17 @@
 within Simulator.Unit_Operations;
 
 model Centrifugal_Pump
+  extends Simulator.Files.Icons.Centrifugal_Pump;
   parameter Integer NOC = 2 "Number of Components";
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] "Component array";
   Real inP(min = 0, start = 101325) "Inlet Pressure", outP(min = 0, start = 101325) "Outlet Pressure", inT(min = 0, start = 273.15) "Inlet Temperature", outT(min = 0, start = 273.15) "Outlet Temperature", tempInc "Temperature increase", pressInc "Pressure Increase", inMixMolEnth "Inlet Mixture Molar Enthalpy", outMixMolEnth "Outlet Mixture Molar Enthalpy", reqPow "Power required", compDens[NOC](each min = 0) "Component density", dens(min = 0) "Density", vapPress(min = 0, start = 101325) "Vapor pressure of Mixture at outlet Temperature", NPSH "NPSH", inMixMolFlo(min = 0, start = 100) "inlet Mixture Molar Flow", outMixMolFlo(min = 0, start = 100) "Outlet Mixture Molar flow", inMixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Inlet Mixuture Molar Fraction", outMixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Outlet Mixture Molar Fraction";
   parameter Real eff "efficiency";
-  Files.Connection.matConn inlet(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
+    Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Files.Connection.enConn energy annotation(
-    Placement(visible = true, transformation(origin = {2, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {2, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  Simulator.Files.Connection.enConn energy annotation(
+    Placement(visible = true, transformation(origin = {2, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //Connector equation
   inlet.P = inP;

@@ -1,7 +1,9 @@
 within Simulator.Unit_Operations;
 
 model Conversion_Reactor
-  //This is generic conversion reactor model. we need to extend reaction manager model with this model for using this model.
+  extends Simulator.Files.Icons.Conversion_Reactor;
+
+//This is generic conversion reactor model. we need to extend reaction manager model with this model for using this model.
   parameter Real X[Nr] = fill(0.4, Nr) "Conversion of base component";
   parameter Integer NOC "Number of components";
   parameter Real pressDrop = 0 "pressure drop";
@@ -24,7 +26,7 @@ model Conversion_Reactor
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.enConn energy annotation(
-    Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -130}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
   inlet.P = inP;
   inlet.T = inT;
@@ -62,4 +64,7 @@ equation
     outT = Tdef;
     energy.enFlo = outMixMolEnth * outMolFlo - inMixMolEnth * inMolFlo;
   end if;
-end Conversion_Reactor;
+annotation(
+    Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
+    Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
+    __OpenModelica_commandLineOptions = "");end Conversion_Reactor;

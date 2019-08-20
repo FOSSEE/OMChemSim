@@ -17,18 +17,21 @@ package Models
     Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
     if P >= Pbubl then
       compMolFrac[3, :] = zeros(NOC);
-      sum(compMolFrac[2, :]) = 1;
+  //    sum(compMolFrac[2, :]) = 1;
+      totMolFlo[3] = 0;
     elseif P >= Pdew then
     //VLE region
       for i in 1:NOC loop
-        compMolFrac[3, i] = K[i] * compMolFrac[2, i];
+  //      compMolFrac[3, i] = K[i] * compMolFrac[2, i];
+        compMolFrac[2, i] = compMolFrac[1, i] ./ (1 + vapPhasMolFrac * (K[i] - 1));
       end for;
-      sum(compMolFrac[3, :]) = 1;
+      sum(compMolFrac[2, :]) = 1;
     //sum y = 1
     else
     //above dew point region
       compMolFrac[2, :] = zeros(NOC);
-      sum(compMolFrac[3, :]) = 1;
+  //    sum(compMolFrac[3, :]) = 1;
+      totMolFlo[2] = 0;
     end if;
   //Energy Balance
     for i in 1:NOC loop

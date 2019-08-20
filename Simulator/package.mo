@@ -4,4 +4,16 @@ package Simulator
   extends Modelica.Icons.Package;
   import SI = Modelica.SIunits;
   import Cv = Modelica.SIunits.Conversions;
+
+
+
+
+
+
+
+
+
+
+  annotation(
+    uses(Modelica(version = "3.2.3")));
 end Simulator;

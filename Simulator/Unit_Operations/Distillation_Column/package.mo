@@ -48,15 +48,14 @@ package Distillation_Column
     vapor_inlet.mixMolEnth = inVapMolEnth;
     vapor_inlet.mixMolFrac[:] = inVapCompMolFrac[:];
     heat_load.enFlo = heatLoad;
-    //Adjustment for thermodynamic packages  
-      compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:])./(sideDrawMolFlo + outLiqMolFlo);
+//Adjustment for thermodynamic packages
+    compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:]) ./ (sideDrawMolFlo + outLiqMolFlo);
      compMolFrac[2, :] = outLiqCompMolFrac[:];
      compMolFrac[3, :] = K[:] .* compMolFrac[2, :];
-   //Bubble point calculation
-     Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
-    //Dew point calculation
+//Bubble point calculation
+    Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+//Dew point calculation
     Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
-              
 //molar balance
 //feedMolFlo + inVapMolFlo = sideDrawMolFlo + outLiqMolFlo;
     feedMolFlo .* feedMolFrac[:] + inVapMolFlo .* inVapCompMolFrac[:] = sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:];
@@ -105,7 +104,8 @@ package Distillation_Column
     Real P(min = 0, start = 101325), T(min = 0, start = (min(comp[:].Tb) + max(comp[:].Tb)) / 2);
     Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), vapMolFlo[2](each min = 0, each start = 100), liqMolFlo[2](each min = 0, each start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, vapMolEnth[2], liqMolEnth[2], heatLoad, sideDrawMolEnth, outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
     Real compMolFrac[3, NOC](each min =0, each max = 0, each start = 1/(NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc)/NOC), Pbubl(min = 0, start = sum(comp[:].Pc)/NOC);
-    Real dummyP1, dummyT1, dummyMixMolFrac1[3,NOC], dummyMixMolFlo1,dummyMixMolEnth1, dummyMixMolEntr1, dummyVapPhasMolFrac1;//this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+    Real dummyP1, dummyT1, dummyMixMolFrac1[3,NOC], dummyMixMolFlo1,dummyMixMolEnth1, dummyMixMolEntr1, dummyVapPhasMolFrac1;
+  //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
     String sideDrawType(start = "Null");
     //L or V
     replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
@@ -127,7 +127,8 @@ package Distillation_Column
   equation
 //connector equation
     if boolFeed then
-      feed.P = dummyP1;//this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+      feed.P = dummyP1;
+//this is adjustment done since OpenModelica 1.11 is not handling array modification properly
       feed.T = dummyT1;
       feed.mixMolFrac = dummyMixMolFrac1;
       feed.mixMolFlo = dummyMixMolFlo1;
@@ -143,8 +144,8 @@ package Distillation_Column
       dummy_feed.mixMolEntr = dummyMixMolEntr1;
       dummy_feed.vapPhasMolFrac = dummyVapPhasMolFrac1;
     end if;
-    //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
-    dummyMixMolFrac1[1,:] = feedMolFrac[:];
+//this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+    dummyMixMolFrac1[1, :] = feedMolFrac[:];
     dummyMixMolEnth1 = feedMolEnth;
     dummyMixMolFlo1 = feedMolFlo;
     
@@ -165,19 +166,21 @@ package Distillation_Column
     vapor_outlet.mixMolEnth = vapMolEnth[2];
     vapor_outlet.mixMolFrac[:] = vapCompMolFrac[2, :];
     heat_load.enFlo = heatLoad;
-    //Adjustment for thermodynamic packages  
-   compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :]) / (liqMolFlo[2] + vapMolFlo[2] + sideDrawMolFlo);
+//Adjustment for thermodynamic packages
+    compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :]) / (liqMolFlo[2] + vapMolFlo[2] + sideDrawMolFlo);
    compMolFrac[2, :] = liqCompMolFrac[2,:];
-   compMolFrac[3, :] = vapCompMolFrac[2,:];  
-   //Bubble point calculation
-   Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
-   //Dew point calculation
-   Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+   compMolFrac[3, :] = vapCompMolFrac[2,:];
+//Bubble point calculation
+    Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+//Dew point calculation
+    Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
 //molar balance
 //feedMolFlo + vapMolFlo[1] + liqMolFlo[1] = sideDrawMolFlo + vapMolFlo[2] + liqMolFlo[2];
     feedMolFlo .* feedMolFrac[:] + vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
 //equillibrium
     vapCompMolFrac[2, :] = K[:] .* liqCompMolFrac[2, :];
+//raschford rice
+//    liqCompMolFrac[2,:] = ((feedMolFlo .* feedMolFrac[:] + vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :])./(feedMolFlo + vapMolFlo[1] + liqMolFlo[1])) ./(1 .+ (vapMolFlo[2]/ (vapMolFlo[2] + liqMolFlo[2])) * (K[:] .- 1));
 //  for i in 1:NOC loop
 //    vapCompMolFrac[2,i] = ((K[i]/(K[1])) * liqCompMolFrac[2,i]) / (1 + (K[i] / (K[1])) * liqCompMolFrac[2,i]);
 //  end for;
@@ -251,13 +254,14 @@ package Distillation_Column
     vapor_outlet.mixMolEnth = outVapMolEnth;
     vapor_outlet.mixMolFrac[:] = outVapCompMolFrac[:];
     heat_load.enFlo = heatLoad;
-     //Adjustment for thermodynamic packages  
-     compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outVapMolFlo .* outVapCompMolFrac[:])./(sideDrawMolFlo + outVapMolFlo);
-     compMolFrac[2, :] = sideDrawMolFrac[:];//This equation is temporarily valid since this is only "partial" reboiler. Rewrite equation when "total" reboiler functionality is added
-     compMolFrac[3, :] = outVapCompMolFrac[:];
-   //Bubble point calculation
-     Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
-   //Dew point calculation
+//Adjustment for thermodynamic packages
+    compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outVapMolFlo .* outVapCompMolFrac[:]) ./ (sideDrawMolFlo + outVapMolFlo);
+     compMolFrac[2, :] = sideDrawMolFrac[:];
+//This equation is temporarily valid since this is only "partial" reboiler. Rewrite equation when "total" reboiler functionality is added
+    compMolFrac[3, :] = outVapCompMolFrac[:];
+//Bubble point calculation
+    Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+//Dew point calculation
     Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
 //molar balance
 //  feedMolFlo + inLiqMolFlo = sideDrawMolFlo + outVapMolFlo;
@@ -284,6 +288,7 @@ package Distillation_Column
   end Reb;
 
   model DistCol
+    extends Simulator.Files.Icons.Distillation_Column;
     parameter Integer NOC;
     import data = Simulator.Files.Chemsep_Database;
     parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
@@ -291,37 +296,36 @@ package Distillation_Column
     parameter Integer noOfStages = 4, noOfSideDraws = 0, noOfHeatLoads = 0, noOfFeeds = 1, feedStages[noOfFeeds];
     parameter String condType = "Total";
     //Total or Partial
-    
     Real refluxRatio(min = 0);
     Simulator.Files.Connection.matConn feed[noOfFeeds](each connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-248, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.matConn distillate(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {98, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {250, 316}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 298}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.matConn bottoms(connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {100, -74}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {250, -296}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {252, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.enConn condensor_duty annotation(
-      Placement(visible = true, transformation(origin = {60, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {60, 96}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {246, 590}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.enConn reboiler_duty annotation(
-      Placement(visible = true, transformation(origin = {60, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {72, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {252, -588}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -598}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.matConn side_draw[noOfSideDraws](each connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {100, 20}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 24}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-36, 32}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-70, 60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.enConn heat_load[noOfHeatLoads](each connNOC = NOC) annotation(
-      Placement(visible = true, transformation(origin = {100, -20}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {102, -22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-34, -54}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-70, -60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-    for i in 1:noOfFeeds loop
+  for i in 1:noOfFeeds loop
       if feedStages[i] == 1 then
         connect(feed[i], condensor.feed);
       elseif feedStages[i] == noOfStages then
         connect(feed[i], reboiler.feed);
-      elseif (feedStages[i] > 1 and feedStages[i] < noOfStages) then
-      //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
-          feed[i]. P = tray[feedStages[i] - 1].dummyP1;
-          feed[i].T = tray[feedStages[i] - 1].dummyT1;
-          feed[i].mixMolFlo = tray[feedStages[i] - 1].dummyMixMolFlo1;
-          feed[i].mixMolFrac = tray[feedStages[i] - 1].dummyMixMolFrac1;
-          feed[i].mixMolEnth = tray[feedStages[i] - 1].dummyMixMolEnth1;
-          feed[i].mixMolEntr = tray[feedStages[i] - 1].dummyMixMolEntr1;
-          feed[i].vapPhasMolFrac = tray[feedStages[i] - 1].dummyVapPhasMolFrac1;
+      elseif feedStages[i] > 1 and feedStages[i] < noOfStages then
+//this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+        feed[i].P = tray[feedStages[i] - 1].dummyP1;
+        feed[i].T = tray[feedStages[i] - 1].dummyT1;
+        feed[i].mixMolFlo = tray[feedStages[i] - 1].dummyMixMolFlo1;
+        feed[i].mixMolFrac = tray[feedStages[i] - 1].dummyMixMolFrac1;
+        feed[i].mixMolEnth = tray[feedStages[i] - 1].dummyMixMolEnth1;
+        feed[i].mixMolEntr = tray[feedStages[i] - 1].dummyMixMolEntr1;
+        feed[i].vapPhasMolFrac = tray[feedStages[i] - 1].dummyVapPhasMolFrac1;
       end if;
     end for;
     connect(condensor.side_draw, distillate);
@@ -351,6 +355,9 @@ package Distillation_Column
       tray[i - 1].heatLoad = 0;
     end for;
     refluxRatio = condensor.outLiqMolFlo / condensor.side_draw.mixMolFlo;
-  end DistCol;
+  annotation(
+      Icon(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
+      Diagram(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
+      __OpenModelica_commandLineOptions = "");end DistCol;
   
 end Distillation_Column;

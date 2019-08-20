@@ -28,25 +28,25 @@ package mix1
       Placement(visible = true, transformation(origin = {-84, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms ms6(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-82, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Unit_Operations.Mixer mixer1(NOC = NOC, NI = 6, comp = comp, outPress = "Inlet_Average") annotation(
-      Placement(visible = true, transformation(origin = {0, 2}, extent = {{-26, -26}, {26, 26}}, rotation = 0)));
+    Simulator.Unit_Operations.Mixer mixer1(NOC = NOC, NI = 6, comp = comp, outPress = "Inlet_Average") annotation(
+      Placement(visible = true, transformation(origin = {-8, 2}, extent = {{-20, -20}, {20, 20}}, rotation = 0)));
     ms out1(NOC = NOC, comp = comp, T(start = 354), totMolFlo(start = 1600)) annotation(
       Placement(visible = true, transformation(origin = {62, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-    connect(mixer1.outlet, out1.inlet) annotation(
-      Line(points = {{26, 2}, {52, 2}, {52, 2}, {52, 2}}));
-    connect(ms6.outlet, mixer1.inlet[6]) annotation(
-      Line(points = {{-72, -86}, {-34, -86}, {-34, -20}, {-26, -20}, {-26, -20}}));
-    connect(ms5.outlet, mixer1.inlet[5]) annotation(
-      Line(points = {{-74, -52}, {-44, -52}, {-44, -12}, {-26, -12}, {-26, -12}}));
-    connect(ms4.outlet, mixer1.inlet[4]) annotation(
-      Line(points = {{-74, -16}, {-50, -16}, {-50, -2}, {-26, -2}, {-26, -4}}));
-    connect(ms3.outlet, mixer1.inlet[3]) annotation(
-      Line(points = {{-76, 24}, {-50, 24}, {-50, 6}, {-26, 6}, {-26, 8}}));
-    connect(ms2.outlet, mixer1.inlet[2]) annotation(
-      Line(points = {{-74, 58}, {-44, 58}, {-44, 16}, {-26, 16}, {-26, 16}}));
-    connect(ms1.outlet, mixer1.inlet[1]) annotation(
-      Line(points = {{-74, 88}, {-26, 88}, {-26, 25}}));
+  connect(mixer1.outlet, out1.inlet) annotation(
+      Line(points = {{12, 2}, {52, 2}}));
+  connect(ms6.outlet, mixer1.inlet[6]) annotation(
+      Line(points = {{-72, -86}, {-28, -86}, {-28, 2}}));
+  connect(ms5.outlet, mixer1.inlet[5]) annotation(
+      Line(points = {{-74, -52}, {-44, -52}, {-44, 2}, {-28, 2}}));
+  connect(ms4.outlet, mixer1.inlet[4]) annotation(
+      Line(points = {{-74, -16}, {-50, -16}, {-50, 2}, {-28, 2}}));
+  connect(ms3.outlet, mixer1.inlet[3]) annotation(
+      Line(points = {{-76, 24}, {-50, 24}, {-50, 2}, {-28, 2}}));
+  connect(ms2.outlet, mixer1.inlet[2]) annotation(
+      Line(points = {{-74, 58}, {-44, 58}, {-44, 2}, {-28, 2}}));
+  connect(ms1.outlet, mixer1.inlet[1]) annotation(
+      Line(points = {{-74, 88}, {-28, 88}, {-28, 2}}));
   equation
     ms1.P = 101325;
     ms2.P = 202650;

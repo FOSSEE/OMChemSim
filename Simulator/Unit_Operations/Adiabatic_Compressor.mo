@@ -1,6 +1,7 @@
 within Simulator.Unit_Operations;
 
 model Adiabatic_Compressor
+  extends Simulator.Files.Icons.Adiabatic_Compressor;
   // This is generic Adibatic Compressor model. For using this model we need to extend this model and respective thermodynamic model and use the new model in flowsheets. Refer adia_comp models in Test section for this.
   extends Simulator.Files.Models.Flash;
   //====================================================================================
@@ -13,10 +14,10 @@ model Adiabatic_Compressor
   //========================================================================================
   Files.Connection.matConn inlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Files.Connection.matConn outlet(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Files.Connection.enConn energy annotation(
-    Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
+    Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  Simulator.Files.Connection.enConn energy annotation(
+    Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -66}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
 equation
 //connector equations

@@ -23,25 +23,25 @@ package rigAbs
     parameter data.Air air;
     parameter data.Water wat;
     parameter data.General_Properties comp[NOC] = {acet, air, wat};
-    rigAbs.ms water(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {-70, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms air_acetone(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {-70, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    rigAbs.AbsColumn abs(NOC = NOC, comp = comp, noOfStages = 10) annotation(
-      Placement(visible = true, transformation(origin = {-3, 11}, extent = {{-33, -33}, {33, 33}}, rotation = 0)));
-    ms top(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {62, 60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms bottom(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {66, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.rigAbs.ms water(NOC = NOC, comp = comp) annotation(
+      Placement(visible = true, transformation(origin = {-90, 66}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.rigAbs.ms air_acetone(NOC = NOC, comp = comp) annotation(
+      Placement(visible = true, transformation(origin = {-88, -84}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.rigAbs.AbsColumn abs(NOC = NOC, comp = comp, noOfStages = 10) annotation(
+      Placement(visible = true, transformation(origin = {-20, -6}, extent = {{-16, -16}, {16, 16}}, rotation = 0)));
+    Simulator.Test.rigAbs.ms top(NOC = NOC, comp = comp) annotation(
+      Placement(visible = true, transformation(origin = {62, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.rigAbs.ms bottom(NOC = NOC, comp = comp) annotation(
+      Placement(visible = true, transformation(origin = {70, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-    connect(abs.bottom_product, bottom.inlet) annotation(
-      Line(points = {{30, -16}, {42, -16}, {42, -50}, {56, -50}, {56, -52}}));
-    connect(abs.top_product, top.inlet) annotation(
-      Line(points = {{30, 38}, {40, 38}, {40, 60}, {52, 60}, {52, 60}}));
-    connect(air_acetone.outlet, abs.bottom_feed) annotation(
-      Line(points = {{-60, -56}, {-52, -56}, {-52, -14}, {-36, -14}, {-36, -16}}));
-    connect(water.outlet, abs.top_feed) annotation(
-      Line(points = {{-60, 62}, {-48, 62}, {-48, 38}, {-36, 38}, {-36, 38}}));
+  connect(air_acetone.outlet, abs.bottom_feed) annotation(
+      Line(points = {{-78, -84}, {-69, -84}, {-69, -54}, {-60, -54}}));
+  connect(water.outlet, abs.top_feed) annotation(
+      Line(points = {{-80, 66}, {-69, 66}, {-69, 42}, {-60, 42}}));
+  connect(abs.top_product, top.inlet) annotation(
+      Line(points = {{20, 42}, {38, 42}, {38, 62}, {52, 62}}));
+  connect(abs.bottom_product, bottom.inlet) annotation(
+      Line(points = {{20, -54}, {36.5, -54}, {36.5, -86}, {60, -86}}));
     water.P = 101325;
     water.T = 325;
     water.totMolFlo[1] = 30;

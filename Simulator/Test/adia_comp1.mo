@@ -21,8 +21,8 @@ package adia_comp1
     //instantiation of ethanol
     parameter Integer NOC = 2;
     parameter data.General_Properties comp[NOC] = {ben, tol};
-    compres adiabatic_Compressor1(NOC = NOC, comp = comp, eff = 0.75) annotation(
-      Placement(visible = true, transformation(origin = {-9, 7}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
+    Simulator.Test.adia_comp1.compres adiabatic_Compressor1(NOC = NOC, comp = comp, eff = 0.75) annotation(
+      Placement(visible = true, transformation(origin = {-17, 17}, extent = {{-15, -15}, {15, 15}}, rotation = 0)));
     Simulator.Test.adia_comp1.ms inlet(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms outlet(NOC = NOC, comp = comp, T(start = 374)) annotation(
@@ -30,12 +30,12 @@ package adia_comp1
     Simulator.Streams.Energy_Stream power annotation(
       Placement(visible = true, transformation(origin = {-50, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-    connect(power.outlet, adiabatic_Compressor1.energy) annotation(
-      Line(points = {{-40, -56}, {-10, -56}, {-10, -16}, {-8, -16}}));
-    connect(adiabatic_Compressor1.outlet, outlet.inlet) annotation(
-      Line(points = {{14, 6}, {48, 6}, {48, 6}, {48, 6}}));
-    connect(inlet.outlet, adiabatic_Compressor1.inlet) annotation(
-      Line(points = {{-68, 8}, {-32, 8}}));
+  connect(inlet.outlet, adiabatic_Compressor1.inlet) annotation(
+      Line(points = {{-68, 8}, {-50, 8}, {-50, 17}, {-32, 17}}));
+  connect(adiabatic_Compressor1.outlet, outlet.inlet) annotation(
+      Line(points = {{-2, 17}, {31, 17}, {31, 6}, {48, 6}}));
+  connect(power.outlet, adiabatic_Compressor1.energy) annotation(
+      Line(points = {{-40, -56}, {-17, -56}, {-17, 7}}));
     inlet.compMolFrac[1, :] = {0.5, 0.5};
 //mixture molar composition
     inlet.P = 202650;

@@ -15,6 +15,8 @@ model Material_Stream
   Real phasMolSpHeat[3] "phase Molar Specific Heat", compMolSpHeat[3, NOC] "Component Molar Specific Heat";
   Real phasMolEnth[3] "Phase Molar Enthalpy", compMolEnth[3, NOC] "Component Molar Enthalpy";
   Real phasMolEntr[3] "Phase Molar Entropy", compMolEntr[3, NOC] "Component Molar Entropy";
+  Real Liquid_Phase_Density;
+  Real LiqDens[NOC];
   Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
@@ -75,7 +77,7 @@ equation
     compMolSpHeat[3, i] = Thermodynamic_Functions.VapCpId(comp[i].VapCp, T);
     compMolEnth[2, i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
     compMolEnth[3, i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
-    (compMolEntr[2, i], compMolEntr[3, i]) = Thermodynamic_Functions.SId(comp[i].AS, comp[i].VapCp, comp[i].HOV, comp[i].Tb, comp[i].Tc, T, P, compMolFrac[2, i], compMolFrac[3, i]);
+    (compMolEntr[2, i], compMolEntr[3, i]) = Thermodynamic_Functions.SId(comp[i].AS, comp[i].VapCp, comp[i].HOV, comp[i].Tb, comp[i].Tc, T, P, compMolFrac[2, i], compMolFrac[3, i],Liquid_Phase_Density);
   end for;
   for i in 2:3 loop
     phasMolSpHeat[i] = sum(compMolFrac[i, :] .* compMolSpHeat[i, :]) + resMolSpHeat[i];
@@ -117,5 +119,8 @@ algorithm
   for i in 1:NOC loop
     MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
   end for;
+   LiqDens[:] := Thermodynamic_Functions.Density_Racket(NOC, T, P, comp[:].Pc, comp[:].Tc, comp[:].Racketparam, comp[:].AF, comp[:].MW, Psat[:]);
+  
+  Liquid_Phase_Density := 1 / sum(compMasFrac[2, :] ./ LiqDens[:]) / MW[2];
 
 end Material_Stream;

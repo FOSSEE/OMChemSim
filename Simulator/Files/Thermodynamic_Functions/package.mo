@@ -86,6 +86,7 @@ package Thermodynamic_Functions
     input Real P;
     input Real x;
     input Real y;
+    input Real Phase_Density;
     output Real Sliq, Svap;
   protected
     parameter Real Tref = 298.15, Pref = 101325;
@@ -103,7 +104,7 @@ package Thermodynamic_Functions
       Entr := -(T - 298.15) * (Simulator.Files.Thermodynamic_Functions.VapCpId(VapCp, T) / (2 * T) + sum(Cp[:]) + Simulator.Files.Thermodynamic_Functions.VapCpId(VapCp, 298.15) / (2 * 298.15)) / n;
     end if;
     if x > 0 and y > 0 then
-      Sliq := Entr - R * log(P / Pref) - R * log(x) - HV(HOV, Tc, T) / T;
+      Sliq := Entr - R * log(P / Pref) - R * log(x) - HV(HOV, Tc, T) / T + P/1000/Phase_Density/T;
       Svap := Entr - R * log(P / Pref) - R * log(y);
     elseif x <= 0 and y <= 0 then
       Sliq := 0;
@@ -112,13 +113,14 @@ package Thermodynamic_Functions
       Sliq := 0;
       Svap := Entr - R * log(P / Pref) - R * log(y);
     elseif y == 0 then
-      Sliq := Entr - R * log(P / Pref) - R * log(x) - HV(HOV, Tc, T) / T;
+      Sliq := Entr - R * log(P / Pref) - R * log(x) - HV(HOV, Tc, T) / T + P/1000/Phase_Density/T;
       Svap := 0;
     else
       Sliq := 0;
       Svap := 0;
     end if;
   end SId;
+
 
 
 

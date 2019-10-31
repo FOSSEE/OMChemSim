@@ -4,13 +4,14 @@ model Splitter
   extends Simulator.Files.Icons.Splitter;
   parameter Integer NOC = 2 "number of Components", NO = 2 "number of outputs";
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-  Real inP(min = 0, start = 101325) "inlet pressure", inT(min = 0, start = 273.15) "Inlet Temperature", outP[NO](each min = 0, each start = 101325) "Outlet Pressure", outT[NO](each min = 0, each start = 273.15) "Outlet Temperature", inMixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "inlet Mixture Mole Fraction", outMixMolFrac[NO, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Outlet Mixture Molar Fraction", splRat[NO](each min = 0, each max = 1) "Split ratio", MW(each min = 0) "Stream molecular weight", inMixMolFlo(min = 0, start = 100) "inlet Mixture Molar Flow", outMixMolFlo[NO](each min = 0, each start = 100) "Outlet Mixture Molar Flow", outMixMasFlo[NO](each min = 0, each start = 100) "Outlet Mixture Mass Flow", specVal[NO] "Specification value";
+  Real inP(start = Press) "inlet pressure", inT(start = Temp) "Inlet Temperature", outP[NO](start = {Press, Press}) "Outlet Pressure", outT[NO](start = {Temp, Temp}) "Outlet Temperature", inMixMolFrac[NOC](each min = 0, each max = 1, start = CompMolFrac) "inlet Mixture Mole Fraction", outMixMolFrac[NO, NOC](each min = 0, each max = 1, start = {CompMolFrac, CompMolFrac}) "Outlet Mixture Molar Fraction", splRat[NO](each min = 0, each max = 1) "Split ratio", MW(each min = 0) "Stream molecular weight", inMixMolFlo(start = Feed_flow) "inlet Mixture Molar Flow", outMixMolFlo[NO](each min = 0, start = Feed_flow) "Outlet Mixture Molar Flow", outMixMasFlo[NO](each min = 0, each start = Feed_flow) "Outlet Mixture Mass Flow", specVal[NO] "Specification value";
   parameter String calcType "Split_Ratio, Mass_Flow or Molar_Flow";
   //  Simulator.Files.Connection.matConn outlet[NO](each connNOC = NOC);
   Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet[NO](each connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends Guess_Models.Initial_Guess;
 equation
 //Connector equations
   inlet.P = inP;

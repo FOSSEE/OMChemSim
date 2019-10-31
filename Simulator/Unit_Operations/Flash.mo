@@ -8,15 +8,16 @@ model Flash
   parameter Chemsep_Database.General_Properties comp[NOC];
   parameter Boolean overSepTemp = false, overSepPress = false;
   parameter Real Tdef = 298.15, Pdef = 101325;
-  Real T(start = 298.15, min = 0), P(start = 101325, min = 0);
-  Real Pbubl(min = 0, start = sum(comp[:].Pc) / NOC) "Bubble point pressure", Pdew(min = 0, start = sum(comp[:].Pc) / NOC) "dew point pressure";
-  Real totMolFlo[3](each min = 0, each start = 100), compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac(min = 0, max = 1, start = 0.5), vapPhasMolFrac(min = 0, max = 1, start = 0.5);
+  Real T(start = Temp), P(start = Press);
+  Real Pbubl(start = Pmin) "Bubble point pressure", Pdew(start = Pmax) "dew point pressure";
+  Real totMolFlo[3](each min = 0, start = {Feed_flow, Liquid_flow, Vapour_flow}), compMolFrac[3, NOC](each min = 0, each max = 1, start = {CompMolFrac, CompMolFrac, CompMolFrac}), compMolSpHeat[3, NOC], compMolEnth[3, NOC], compMolEntr[3, NOC], phasMolSpHeat[3], phasMolEnth[3], phasMolEntr[3], liqPhasMolFrac(min = 0, max = 1, start = Alpha_guess), vapPhasMolFrac(min = 0, max = 1, start = Beta_guess);
   Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn vapor(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {102, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn liquid(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends Guess_Models.Initial_Guess;
 equation
 //Connector equation
   if overSepTemp then
@@ -90,7 +91,8 @@ equation
 //phase molar fractions
   liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
   vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
-annotation(
+  annotation(
     Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
     Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
-    __OpenModelica_commandLineOptions = "");end Flash;
+    __OpenModelica_commandLineOptions = "");
+end Flash;

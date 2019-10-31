@@ -4,11 +4,11 @@ model Heater
   extends Simulator.Files.Icons.Heater;
   // This is generic heater model. For using this model we need to extend this model and incorporte ouput material stream since this model is not doing any flash calculations. Refer heater models in Test section for this.
   //========================================================================================
-  Real inMolFlo(min = 0, start = 100) "inlet mixture molar flow rate", outMolFlo(min = 0, start = 100) "outlet mixture molar flow rate", heatAdd "Heat added", inP(min = 0, start = 101325) "Inlet pressure", outP(min = 0, start = 101325) "Outlet pressure", inT(min = 0, start = 273.15) "Inlet Temperature", outT(min = 0, start = 273.15) "Outlet Temperature", tempInc "Temperature Increase", outVapPhasMolFrac(min = 0, max = 1, start = 0.5) "Outlet Vapor Mole Fraction";
-  Real inMixMolEnth "inlet mixture molar enthalpy", outMixMolEnth "outlet mixture molar enthalpy";
+  Real inMolFlo(start = Feed_flow) "inlet mixture molar flow rate", outMolFlo(start = Feed_flow) "outlet mixture molar flow rate", heatAdd "Heat added", inP(start = Press) "Inlet pressure", outP(start = Press) "Outlet pressure", inT(start = Temp) "Inlet Temperature", outT(start = Temp) "Outlet Temperature", tempInc "Temperature Increase", outVapPhasMolFrac(min = 0, max = 1, start = Beta_guess) "Outlet Vapor Mole Fraction";
+  Real inMixMolEnth(start = PhasMolEnth_mix_guess) "inlet mixture molar enthalpy", outMixMolEnth(start = PhasMolEnth_mix_guess) "outlet mixture molar enthalpy";
   //========================================================================================
   parameter Real pressDrop "Pressure drop", eff "Efficiency";
-  Real mixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "mixture mole fraction", inVapPhasMolFrac(min = 0, max = 1, start = 0.5) "Inlet vapor phase mole fraction";
+  Real mixMolFrac[NOC](each min = 0, each max = 1, start = CompMolFrac) "mixture mole fraction", inVapPhasMolFrac(min = 0, max = 1, start = Beta_guess) "Inlet vapor phase mole fraction";
   parameter Integer NOC "number of components";
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
   //========================================================================================
@@ -19,6 +19,7 @@ model Heater
   Simulator.Files.Connection.enConn energy annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-98, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //=========================================================================================
+  extends Guess_Models.Initial_Guess;
 equation
 //connector equations
   inlet.P = inP;

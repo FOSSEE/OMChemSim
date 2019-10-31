@@ -5,9 +5,9 @@ model Reb
   parameter Integer NOC = 2;
   parameter Boolean boolFeed = false;
   parameter Chemsep_Database.General_Properties comp[NOC];
-  Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
-  Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), outVapMolFlo(min = 0, start = 100), inLiqMolFlo(min = 0, start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), outVapCompMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), inLiqCompMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), feedMolEnth, outVapMolEnth, inLiqMolEnth, outVapCompMolEnth[NOC], heatLoad, sideDrawMolEnth;
-  Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc) / NOC), Pbubl(min = 0, start = sum(comp[:].Pc) / NOC);
+  Real P(start = Press), T(start = Temp);
+  Real feedMolFlo(start = Feed_flow), sideDrawMolFlo(start = Liquid_flow), outVapMolFlo(start = Vapour_flow), inLiqMolFlo(start = Liquid_flow), feedMolFrac[NOC](start = CompMolFrac), sideDrawMolFrac[NOC](start = CompMolFrac), outVapCompMolFrac[NOC](start = y_guess), inLiqCompMolFrac[NOC](start = x_guess), feedMolEnth(start = PhasMolEnth_mix), outVapMolEnth(start = PhasMolEnth_vap_guess), inLiqMolEnth(start = PhasMolEnth_liq_guess), outVapCompMolEnth[NOC](start = compMolEnth_vap), heatLoad, sideDrawMolEnth;
+  Real compMolFrac[3, NOC](each min = 0, each max = 1, start = {CompMolFrac, x_guess, y_guess}), Pdew(start = Pmax), Pbubl(start = Pmin);
   replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   replaceable Simulator.Files.Connection.matConn dummy_feed(connNOC = NOC, P = 0, T = 0, mixMolFrac = zeros(3, NOC), mixMolFlo = 0, mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not boolFeed annotation(
@@ -20,6 +20,7 @@ model Reb
     Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.enConn heat_load annotation(
     Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends Guess_Models.Initial_Guess;
 equation
 //connector equation
   if boolFeed then

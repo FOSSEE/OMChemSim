@@ -4,9 +4,9 @@ model AbsTray
   import Simulator.Files.*;
   parameter Integer NOC;
   parameter Chemsep_Database.General_Properties comp[NOC];
-  Real P(min = 0, start = 101325), T(min = 0, start = sum(comp[:].Tb) / NOC);
-  Real vapMolFlo[2](each min = 0, each start = 100), liqMolFlo[2](each min = 0, each start = 100), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), vapMolEnth[2], liqMolEnth[2], outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
-  Real compMolFrac[3, NOC](each min = 0, each max = 0, each start = 1 / (NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc) / NOC), Pbubl(min = 0, start = sum(comp[:].Pc) / NOC);
+  Real P(start = Press), T(start = Temp);
+  Real vapMolFlo[2](start = {Liquid_flow, Vapour_flow}), liqMolFlo[2](start = {Liquid_flow, Vapour_flow}), vapCompMolFrac[2, NOC](start = {x_guess, x_guess}), liqCompMolFrac[2, NOC](each min = 0, each max = 1, start = {x_guess, x_guess}), vapMolEnth[2](start = {PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}), liqMolEnth[2](start = {PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}), outVapCompMolEnth[NOC](start = compMolEnth_vap), outLiqCompMolEnth[NOC](start = compMolEnth_liq);
+  Real compMolFrac[3, NOC](each min = 0, each max = 0, start = {CompMolFrac, x_guess, x_guess}), Pdew(start = Pmax), Pbubl(start = Pmin);
   Simulator.Files.Connection.trayConn liquid_inlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.trayConn liquid_outlet(connNOC = NOC) annotation(
@@ -15,6 +15,7 @@ model AbsTray
     Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.trayConn vapor_inlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends Guess_Models.Initial_Guess;
 equation
 //connector equation
   liquid_inlet.mixMolFlo = liqMolFlo[1];
@@ -41,6 +42,8 @@ equation
   vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
 //equillibrium
   vapCompMolFrac[2, :] = K[:] .* liqCompMolFrac[2, :];
+//raschford rice
+//  liqCompMolFrac[2, :] = ((vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :])/(vapMolFlo[1] + liqMolFlo[1]))./(1 .+ (vapMolFlo[1]/(liqMolFlo[1] + vapMolFlo[1])) .* (K[:] .- 1));
 //  for i in 1:NOC loop
 //    vapCompMolFrac[2,i] = ((K[i]/(K[1])) * liqCompMolFrac[2,i]) / (1 + (K[i] / (K[1])) * liqCompMolFrac[2,i]);
 //  end for;

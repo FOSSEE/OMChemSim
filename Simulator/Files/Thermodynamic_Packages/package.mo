@@ -222,11 +222,11 @@ package Thermodynamic_Packages
     end for;
 //Calculation of Poynting correction Factor at input conditions,Bubble Point and Dew Point
 //Function :Poynting_CF is called from the Simulator Package
-  for i in 1:NOC loop
-    PCF[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, P, gamma[i], Psat[i], Density[i]);
-    PCF_bubl[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, Pbubl, gamma[i], Psat[i], Density[i]);
-    PCF_dew[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, Pdew, gamma[i], Psat[i], Density[i]);
-  end for;
+    for i in 1:NOC loop
+      PCF[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, P, gamma[i], Psat[i], Density[i]);
+      PCF_bubl[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, Pbubl, gamma[i], Psat[i], Density[i]);
+      PCF_dew[i] = Thermodynamic_Functions.PoyntingCF(NOC, comp[i].Pc, comp[i].Tc, comp[i].Racketparam, comp[i].AF, comp[i].MW, T, Pdew, gamma[i], Psat[i], Density[i]);
+    end for;
 //Calculation of Fugacity coefficient with Poynting correction
     phil[:] = gamma[:] .* Psat[:] ./ P .* PCF[:];
     phil[:] = gamma_new[:] .* Psat[:] ./ P;

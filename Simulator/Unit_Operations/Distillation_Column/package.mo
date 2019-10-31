@@ -6,9 +6,9 @@ package Distillation_Column
     parameter Integer NOC = 2;
     parameter Boolean boolFeed = false;
     parameter Chemsep_Database.General_Properties comp[NOC];
-    Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
-    Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), inVapMolFlo(min = 0, start = 100), outLiqMolFlo(min = 0, start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), inVapCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), outLiqCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, inVapMolEnth, outLiqMolEnth, heatLoad, sideDrawMolEnth, outLiqCompMolEnth[NOC];
-    Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc)/NOC), Pbubl(min = 0, start = sum(comp[:].Pc)/NOC);
+    Real P(start = Press), T(start = Temp);
+    Real feedMolFlo(start = Feed_flow), sideDrawMolFlo(start = Liquid_flow), inVapMolFlo(start = Vapour_flow), outLiqMolFlo(start = Liquid_flow), feedMolFrac[NOC](start = CompMolFrac), sideDrawMolFrac[NOC](start = CompMolFrac), inVapCompMolFrac[NOC](each min = 0, each max = 1, start = x_guess), outLiqCompMolFrac[NOC](each min = 0, each max = 1, start = x_guess), feedMolEnth(start = PhasMolEnth_mix_guess), inVapMolEnth(start = PhasMolEnth_vap_guess), outLiqMolEnth(start = PhasMolEnth_liq_guess), heatLoad, sideDrawMolEnth(start = PhasMolEnth_liq_guess), outLiqCompMolEnth[NOC](start = compMolEnth_liq);
+    Real compMolFrac[3, NOC](each min = 0, each max = 1, start = {CompMolFrac, x_guess, x_guess}), Pdew(start = Pmax), Pbubl(start = Pmin);
     //String sideDrawType(start = "Null");
     //L or V
     parameter String condType "Partial or Total";
@@ -24,6 +24,7 @@ package Distillation_Column
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.enConn heat_load annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    extends Guess_Models.Initial_Guess;
   equation
 //connector equation
     if boolFeed then
@@ -35,7 +36,6 @@ package Distillation_Column
       dummy_feed.mixMolEnth = feedMolEnth;
       dummy_feed.mixMolFlo = feedMolFlo;
     end if;
-    
     side_draw.P = P;
     side_draw.T = T;
     side_draw.mixMolFrac[1, :] = sideDrawMolFrac[:];
@@ -50,8 +50,8 @@ package Distillation_Column
     heat_load.enFlo = heatLoad;
 //Adjustment for thermodynamic packages
     compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:]) ./ (sideDrawMolFlo + outLiqMolFlo);
-     compMolFrac[2, :] = outLiqCompMolFrac[:];
-     compMolFrac[3, :] = K[:] .* compMolFrac[2, :];
+    compMolFrac[2, :] = outLiqCompMolFrac[:];
+    compMolFrac[3, :] = K[:] .* compMolFrac[2, :];
 //Bubble point calculation
     Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
 //Dew point calculation
@@ -87,25 +87,16 @@ package Distillation_Column
       __OpenModelica_commandLineOptions = "");
   end Cond;
 
-
-
-
-
-
-
-
-
-
   model DistTray
     import Simulator.Files.*;
     parameter Integer NOC = 2;
     parameter Boolean boolFeed = true;
     parameter Chemsep_Database.General_Properties comp[NOC];
-    Real P(min = 0, start = 101325), T(min = 0, start = (min(comp[:].Tb) + max(comp[:].Tb)) / 2);
-    Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), vapMolFlo[2](each min = 0, each start = 100), liqMolFlo[2](each min = 0, each start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, vapMolEnth[2], liqMolEnth[2], heatLoad, sideDrawMolEnth, outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
-    Real compMolFrac[3, NOC](each min =0, each max = 0, each start = 1/(NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc)/NOC), Pbubl(min = 0, start = sum(comp[:].Pc)/NOC);
-    Real dummyP1, dummyT1, dummyMixMolFrac1[3,NOC], dummyMixMolFlo1,dummyMixMolEnth1, dummyMixMolEntr1, dummyVapPhasMolFrac1;
-  //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
+    Real P(start = Press), T(start = Temp);
+    Real feedMolFlo(start = Feed_flow), sideDrawMolFlo(start = Liquid_flow), vapMolFlo[2](start = {Liquid_flow, Vapour_flow}), liqMolFlo[2](start = {Liquid_flow, Vapour_flow}), feedMolFrac[NOC](start = CompMolFrac), sideDrawMolFrac[NOC](start = CompMolFrac), vapCompMolFrac[2, NOC](start = {x_guess, x_guess}), liqCompMolFrac[2, NOC](start = {x_guess, x_guess}), feedMolEnth(start = PhasMolEnth_mix_guess), vapMolEnth[2](start = {PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}), liqMolEnth[2](start = {PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}), heatLoad, sideDrawMolEnth, outVapCompMolEnth[NOC](start = compMolEnth_vap), outLiqCompMolEnth[NOC](start = compMolEnth_liq);
+    Real compMolFrac[3, NOC](start = {CompMolFrac, x_guess, x_guess}), Pdew(start = Pmax), Pbubl(start = Pmin);
+    Real dummyP1, dummyT1, dummyMixMolFrac1[3, NOC], dummyMixMolFlo1, dummyMixMolEnth1, dummyMixMolEntr1, dummyVapPhasMolFrac1;
+    //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
     String sideDrawType(start = "Null");
     //L or V
     replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
@@ -124,6 +115,7 @@ package Distillation_Column
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.enConn heat_load annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    extends Guess_Models.Initial_Guess;
   equation
 //connector equation
     if boolFeed then
@@ -148,7 +140,6 @@ package Distillation_Column
     dummyMixMolFrac1[1, :] = feedMolFrac[:];
     dummyMixMolEnth1 = feedMolEnth;
     dummyMixMolFlo1 = feedMolFlo;
-    
     side_draw.P = P;
     side_draw.T = T;
     side_draw.mixMolFlo = sideDrawMolFlo;
@@ -168,8 +159,8 @@ package Distillation_Column
     heat_load.enFlo = heatLoad;
 //Adjustment for thermodynamic packages
     compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :]) / (liqMolFlo[2] + vapMolFlo[2] + sideDrawMolFlo);
-   compMolFrac[2, :] = liqCompMolFrac[2,:];
-   compMolFrac[3, :] = vapCompMolFrac[2,:];
+    compMolFrac[2, :] = liqCompMolFrac[2, :];
+    compMolFrac[3, :] = vapCompMolFrac[2, :];
 //Bubble point calculation
     Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
 //Dew point calculation
@@ -215,10 +206,9 @@ package Distillation_Column
     parameter Integer NOC = 2;
     parameter Boolean boolFeed = false;
     parameter Chemsep_Database.General_Properties comp[NOC];
-    Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
-    Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), outVapMolFlo(min = 0, start = 100), inLiqMolFlo(min = 0, start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), outVapCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), inLiqCompMolFrac[NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), feedMolEnth, outVapMolEnth, inLiqMolEnth,
-   outVapCompMolEnth[NOC], heatLoad, sideDrawMolEnth;
-   Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1/(NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc)/NOC), Pbubl(min = 0, start = sum(comp[:].Pc)/NOC);
+    Real P(start = Press), T(start = Temp);
+    Real feedMolFlo(start = Feed_flow), sideDrawMolFlo(start = Liquid_flow), outVapMolFlo(start = Vapour_flow), inLiqMolFlo(start = Liquid_flow), feedMolFrac[NOC](start = CompMolFrac), sideDrawMolFrac[NOC](start = CompMolFrac), outVapCompMolFrac[NOC](start = y_guess), inLiqCompMolFrac[NOC](start = x_guess), feedMolEnth(start = PhasMolEnth_mix), outVapMolEnth(start = PhasMolEnth_vap_guess), inLiqMolEnth(start = PhasMolEnth_liq_guess), outVapCompMolEnth[NOC](start = compMolEnth_vap), heatLoad, sideDrawMolEnth;
+    Real compMolFrac[3, NOC](each min = 0, each max = 1, start = {CompMolFrac, x_guess, y_guess}), Pdew(start = Pmax), Pbubl(start = Pmin);
     replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
       Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     replaceable Simulator.Files.Connection.matConn dummy_feed(connNOC = NOC, P = 0, T = 0, mixMolFrac = zeros(3, NOC), mixMolFlo = 0, mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not boolFeed annotation(
@@ -231,6 +221,7 @@ package Distillation_Column
       Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.enConn heat_load annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    extends Guess_Models.Initial_Guess;
   equation
 //connector equation
     if boolFeed then
@@ -256,7 +247,7 @@ package Distillation_Column
     heat_load.enFlo = heatLoad;
 //Adjustment for thermodynamic packages
     compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outVapMolFlo .* outVapCompMolFrac[:]) ./ (sideDrawMolFlo + outVapMolFlo);
-     compMolFrac[2, :] = sideDrawMolFrac[:];
+    compMolFrac[2, :] = sideDrawMolFrac[:];
 //This equation is temporarily valid since this is only "partial" reboiler. Rewrite equation when "total" reboiler functionality is added
     compMolFrac[3, :] = outVapCompMolFrac[:];
 //Bubble point calculation
@@ -312,7 +303,7 @@ package Distillation_Column
     Simulator.Files.Connection.enConn heat_load[noOfHeatLoads](each connNOC = NOC) annotation(
       Placement(visible = true, transformation(origin = {-34, -54}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-70, -60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-  for i in 1:noOfFeeds loop
+    for i in 1:noOfFeeds loop
       if feedStages[i] == 1 then
         connect(feed[i], condensor.feed);
       elseif feedStages[i] == noOfStages then
@@ -344,7 +335,6 @@ package Distillation_Column
     for i in 1:noOfStages - 2 loop
       tray[i].P = condensor.P + i * (reboiler.P - condensor.P) / (noOfStages - 1);
     end for;
-    
     for i in 2:noOfStages - 1 loop
       tray[i - 1].sideDrawType = "Null";
       tray[i - 1].side_draw.mixMolFrac = zeros(3, NOC);
@@ -355,9 +345,9 @@ package Distillation_Column
       tray[i - 1].heatLoad = 0;
     end for;
     refluxRatio = condensor.outLiqMolFlo / condensor.side_draw.mixMolFlo;
-  annotation(
+    annotation(
       Icon(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
       Diagram(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
-      __OpenModelica_commandLineOptions = "");end DistCol;
-  
+      __OpenModelica_commandLineOptions = "");
+  end DistCol;
 end Distillation_Column;

@@ -5,7 +5,7 @@ model Shortcut_Column
   import data = Simulator.Files.Chemsep_Database;
   parameter data.General_Properties comp[NOC];
   parameter Integer NOC;
-  Real mixMolFlo[3](each min = 0, each start = 100), mixMolFrac[3, NOC](each start = 1 / (NOC + 1), each min = 0, each max = 1), mixMolEnth[3], mixMolEntr[3];
+  Real mixMolFlo[3](each min = 0, s), mixMolFrac[3, NOC](each start = 1 / (NOC + 1), each min = 0, each max = 1), mixMolEnth[3], mixMolEntr[3];
   Real minN(min = 0, start = 10), minR(start = 1);
   Real alpha[NOC], theta(start = 1);
   Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
@@ -82,63 +82,47 @@ equation
     end if;
   end for;
   alpha[:] = K[:] / K[HKey];
-  //Calculation of temperature at distillate and bottoms
+//Calculation of temperature at distillate and bottoms
   if condT <= 0 and rebT <= 0 then
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-    
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    if condType == "Partial" then
+      1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    elseif condType == "Total" then
+      condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    end if;
+  elseif condT <= 0 then
+    if condType == "Partial" then
+      1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    elseif condType == "Total" then
+      condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    end if;
+  elseif rebT <= 0 then
+    if condType == "Partial" then
+      1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    elseif condType == "Total" then
+      condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    end if;
+  else
+    if condType == "Partial" then
+      1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    elseif condType == "Total" then
+      condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+      rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    end if;
   end if;
-  
-elseif condT<=0 then
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-    
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-  end if;
-
-elseif rebT<=0 then
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-    
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-  end if;
-
-else
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-    
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-  end if;
-  
-end if;
 //Minimum Reflux, Underwoods method
-if theta > alpha[LKey] or theta < alpha[HKey] then
-  0= sum((alpha[:] .* mixMolFrac[1, :])./ (alpha[:] .- theta));
-  //This is mathamatical adjustment for right convergence of theta
-else
-  vapPhasMolFrac[1] = sum((alpha[:] .* mixMolFrac[1, :])./ (alpha[:] .- theta));
-end if;
+  if theta > alpha[LKey] or theta < alpha[HKey] then
+    0 = sum(alpha[:] .* mixMolFrac[1, :] ./ (alpha[:] .- theta));
+//This is mathamatical adjustment for right convergence of theta
+  else
+    vapPhasMolFrac[1] = sum(alpha[:] .* mixMolFrac[1, :] ./ (alpha[:] .- theta));
+  end if;
   minR + 1 = sum(alpha[:] .* mixMolFrac[3, :] ./ (alpha[:] .- theta));
 //Actual number of trays,Gillilands method
   x = (actR - minR) / (actR + 1);
@@ -174,7 +158,8 @@ end if;
 //Energy Balance
   mixMolFlo[1] * mixMolEnth[1] + rebDuty - condDuty = mixMolFlo[2] * mixMolEnth[2] + mixMolFlo[3] * mixMolEnth[3];
   rectVap * condVapMixMolEnth = condDuty + mixMolFlo[3] * mixMolEnth[3] + rectLiq * condLiqMixMolEnth;
-annotation(
+  annotation(
     Icon(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
     Diagram(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
-    __OpenModelica_commandLineOptions = "");end Shortcut_Column;
+    __OpenModelica_commandLineOptions = "");
+end Shortcut_Column;

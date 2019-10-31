@@ -32,8 +32,8 @@ model Heat_Exchanger
   parameter Real Heat_Loss;
   parameter Real deltap_hot;
   parameter Real deltap_cold;
-  parameter String Mode"''CoCurrent'',''CounterCurrent''";
-  parameter String Calculation_Method"''BothOutletTemp(UA)''";
+  parameter String Mode "''CoCurrent'',''CounterCurrent''";
+  parameter String Calculation_Method "''BothOutletTemp(UA)''";
   //Variables
   //Hot Stream Inlet
   Real hinP, hinT, hintotMolFlow[1], hinEnth, hinEntr, hincompMolFrac[2, NOC], hinVapfrac;
@@ -154,14 +154,13 @@ equation
   Qmax = min(Qmax_hot, Qmax_cold);
   Efficiency = (Qactual - Heat_Loss * 1000) / Qmax * 100;
 //Log Mean Temperature Difference
-  if(Mode=="CoCurrent") then
-    delta_T1 =hinT-cinT;
-    delta_T2 =houtT-coutT;  
-  elseif Mode=="CounterCurrent" then
-    delta_T1 =hinT-coutT;
-    delta_T2 =houtT-cinT;
+  if Mode == "CoCurrent" then
+    delta_T1 = hinT - cinT;
+    delta_T2 = houtT - coutT;
+  elseif Mode == "CounterCurrent" then
+    delta_T1 = hinT - coutT;
+    delta_T2 = houtT - cinT;
   end if;
-  
   if delta_T1 <= 0 or delta_T2 <= 0 then
     LMTD = 1;
   else
@@ -179,11 +178,11 @@ equation
 //Heat Capacity Ratio for Hot and Cold Side
   R_cold = C_cold / C_hot;
   R_hot = C_hot / C_cold;
-  if Mode=="CoCurrent" then
-    Eff_cold = (1- exp(-NTU_cold * (1+R_cold)))/(1+R_cold);
-    Eff_hot =  (1- exp(-NTU_hot * (1+R_hot)))/(1+R_hot);
-  elseif Mode=="CounterCurrent" then
-    Eff_cold = (1-exp((R_cold-1)*NTU_cold))/(1 -R_cold*  exp((R_cold-1)*NTU_cold));
-    Eff_hot =  (1-exp((R_hot-1) *NTU_hot ))/(1 -R_hot *  exp((R_hot-1)*NTU_hot));
+  if Mode == "CoCurrent" then
+    Eff_cold = (1 - exp(-NTU_cold * (1 + R_cold))) / (1 + R_cold);
+    Eff_hot = (1 - exp(-NTU_hot * (1 + R_hot))) / (1 + R_hot);
+  elseif Mode == "CounterCurrent" then
+    Eff_cold = (1 - exp((R_cold - 1) * NTU_cold)) / (1 - R_cold * exp((R_cold - 1) * NTU_cold));
+    Eff_hot = (1 - exp((R_hot - 1) * NTU_hot)) / (1 - R_hot * exp((R_hot - 1) * NTU_hot));
   end if;
 end Heat_Exchanger;

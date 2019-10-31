@@ -5,9 +5,9 @@ model DistTray
   parameter Integer NOC = 2;
   parameter Boolean boolFeed = true;
   parameter Chemsep_Database.General_Properties comp[NOC];
-  Real P(min = 0, start = 101325), T(min = 0, start = (min(comp[:].Tb) + max(comp[:].Tb)) / 2);
-  Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), vapMolFlo[2](each min = 0, each start = 100), liqMolFlo[2](each min = 0, each start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), vapCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), liqCompMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), feedMolEnth, vapMolEnth[2], liqMolEnth[2], heatLoad, sideDrawMolEnth, outVapCompMolEnth[NOC], outLiqCompMolEnth[NOC];
-  Real compMolFrac[3, NOC](each min = 0, each max = 0, each start = 1 / (NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc) / NOC), Pbubl(min = 0, start = sum(comp[:].Pc) / NOC);
+  Real P(start = Press), T(start = Temp);
+  Real feedMolFlo(start = Feed_flow), sideDrawMolFlo(start = Liquid_flow), vapMolFlo[2](start = {Liquid_flow, Vapour_flow}), liqMolFlo[2](start = {Liquid_flow, Vapour_flow}), feedMolFrac[NOC](start = CompMolFrac), sideDrawMolFrac[NOC](start = CompMolFrac), vapCompMolFrac[2, NOC](start = {x_guess, x_guess}), liqCompMolFrac[2, NOC](start = {x_guess, x_guess}), feedMolEnth(start = PhasMolEnth_mix_guess), vapMolEnth[2](start = {PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}), liqMolEnth[2](start = {PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}), heatLoad, sideDrawMolEnth, outVapCompMolEnth[NOC](start = compMolEnth_vap), outLiqCompMolEnth[NOC](start = compMolEnth_liq);
+  Real compMolFrac[3, NOC](start = {CompMolFrac, x_guess, x_guess}), Pdew(start = Pmax), Pbubl(start = Pmin);
   Real dummyP1, dummyT1, dummyMixMolFrac1[3, NOC], dummyMixMolFlo1, dummyMixMolEnth1, dummyMixMolEntr1, dummyVapPhasMolFrac1;
   //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
   String sideDrawType(start = "Null");
@@ -28,6 +28,7 @@ model DistTray
     Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.enConn heat_load annotation(
     Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends Guess_Models.Initial_Guess;
 equation
 //connector equation
   if boolFeed then
@@ -82,6 +83,8 @@ equation
   feedMolFlo .* feedMolFrac[:] + vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :] = sideDrawMolFlo .* sideDrawMolFrac[:] + vapMolFlo[2] .* vapCompMolFrac[2, :] + liqMolFlo[2] .* liqCompMolFrac[2, :];
 //equillibrium
   vapCompMolFrac[2, :] = K[:] .* liqCompMolFrac[2, :];
+//raschford rice
+//    liqCompMolFrac[2,:] = ((feedMolFlo .* feedMolFrac[:] + vapMolFlo[1] .* vapCompMolFrac[1, :] + liqMolFlo[1] .* liqCompMolFrac[1, :])./(feedMolFlo + vapMolFlo[1] + liqMolFlo[1])) ./(1 .+ (vapMolFlo[2]/ (vapMolFlo[2] + liqMolFlo[2])) * (K[:] .- 1));
 //  for i in 1:NOC loop
 //    vapCompMolFrac[2,i] = ((K[i]/(K[1])) * liqCompMolFrac[2,i]) / (1 + (K[i] / (K[1])) * liqCompMolFrac[2,i]);
 //  end for;

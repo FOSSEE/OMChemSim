@@ -10,7 +10,7 @@ model msTP
   //instantiation of ethanol
   parameter data.Water wat;
   //instantiation of water
-  extends Streams.Material_Stream(NOC = 3, comp = {meth, eth, wat}, compMolFrac(each min = 0.01, each max = 1, start = {{0.33, 0.33, 0.34}, {0.32, 0.33, 0.34}, {0.53, 0.32, 0.14}}), totMolFlo(each start = 50));
+  extends Streams.Material_Stream(NOC = 3, comp = {meth, eth, wat});
   //material stream model is extended and values of parameters NOC and comp are given. These parameters are declared in Material stream model. We are only giving them values here.
   //NOC - number of components, comp -  component array.
   //start values are given for convergence

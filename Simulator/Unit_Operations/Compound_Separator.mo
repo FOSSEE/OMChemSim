@@ -4,8 +4,8 @@ model Compound_Separator
   extends Simulator.Files.Icons.Compound_Separator;
   parameter Integer NOC "Number of components", sepStrm "Specified Stream";
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] "Components array";
-  Real inP(min = 0, start = 101325) "inlet pressure", inT(min = 0, start = 273.15) "inlet temperature", inMixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "inlet mixture mole fraction", inMixMolFlo(min = 0, start = 100) "inlet mixture molar flow", inCompMolFlo[NOC](each min = 0, each start = 100) "inlet compound molar flow", inCompMasFlo[NOC](each min = 0, each start = 100) "inlet compound mass flow", inMixMolEnth "inlet mixture molar enthalpy";
-  Real outP[2](each min = 0, each start = 100) "outlet Pressure", outT[2](each min = 0, each start = 273.15) "outlet temperature", outMixMolFrac[2, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "outlet mixture mole fraction", outMixMolFlo[2](each min = 0, each start = 100) "Outlet mixture molar flow", outCompMolFlo[2, NOC](each min = 0, each start = 100) "outlet compounds molar flow", outCompMasFlo[2, NOC](each min = 0, each start = 100) "outlet compound mass flow", outMixMolEnth[2] "outlet mixture molar enthalpy";
+  Real inP(start = Press) "inlet pressure", inT(start = Temp) "inlet temperature", inMixMolFrac[NOC](each min = 0, each max = 1, start = CompMolFrac) "inlet mixture mole fraction", inMixMolFlo(start = Feed_flow) "inlet mixture molar flow", inCompMolFlo[NOC](each min = 0, each start = Feed_flow) "inlet compound molar flow", inCompMasFlo[NOC](each min = 0, each start = Feed_flow) "inlet compound mass flow", inMixMolEnth(start = PhasMolEnth_mix_guess) "inlet mixture molar enthalpy";
+  Real outP[2](each min = 0, start = {Press, Press}) "outlet Pressure", outT[2](each min = 0, start = {Temp, Temp}) "outlet temperature", outMixMolFrac[2, NOC](each min = 0, each max = 1, start = CompMolFrac) "outlet mixture mole fraction", outMixMolFlo[2](each min = 0, each start = Feed_flow) "Outlet mixture molar flow", outCompMolFlo[2, NOC](each min = 0, each start = Feed_flow) "outlet compounds molar flow", outCompMasFlo[2, NOC](each min = 0, each start = Feed_flow) "outlet compound mass flow", outMixMolEnth[2] "outlet mixture molar enthalpy";
   Real enReq "energy required";
   Real sepFactVal[NOC] "Separation factor value";
   parameter String sepFact[NOC] "Separation factor";
@@ -18,6 +18,7 @@ model Compound_Separator
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -130}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet2(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {100, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends Guess_Models.Initial_Guess;
 equation
 // Connector equation
   inlet.P = inP;
@@ -65,8 +66,8 @@ equation
   end for;
 //Energy balance
   enReq = sum(outMixMolEnth .* outMixMolFlo) - inMixMolFlo * inMixMolEnth;
-
-annotation(
+  annotation(
     Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
     Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
-    __OpenModelica_commandLineOptions = "");end Compound_Separator;
+    __OpenModelica_commandLineOptions = "");
+end Compound_Separator;

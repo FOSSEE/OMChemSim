@@ -2,23 +2,26 @@ within Simulator.Streams;
 
 model Material_Stream
   //1 -  Mixture, 2 - Liquid phase, 3 - Gas Phase
-//  extends Modelica.Icons.SourcesPackage;
+  //  extends Modelica.Icons.SourcesPackage;
   extends Simulator.Files.Icons.Material_Stream;
   import Simulator.Files.*;
   parameter Integer NOC;
   parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-  Real P(min = 0, start = 101325) "Pressure", T(start = 273) "Temperature";
-  Real Pbubl(min = 0, start = sum(comp[:].Pc) / NOC) "Bubble point pressure", Pdew(min = 0, start = sum(comp[:].Pc) / NOC) "dew point pressure";
-  Real liqPhasMolFrac(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction", vapPhasMolFrac(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction", liqPhasMasFrac(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction", vapPhasMasFrac(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
-  Real totMolFlo[3](each min = 0, each start = 100) "Total molar flow", totMasFlo[3](each min = 0, each start = 100) "Total Mass Flow", MW[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
-  Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Component mole fraction", compMasFrac[3, NOC](each start = 1 / (NOC + 1), each min = 0, each max = 1) "Component Mass fraction", compMolFlo[3, NOC](each start = 100, each min = 0) "Component Molar flow", compMasFlo[3, NOC](each min = 0, each start = 100) "Component Mass Fraction";
-  Real phasMolSpHeat[3] "phase Molar Specific Heat", compMolSpHeat[3, NOC] "Component Molar Specific Heat";
-  Real phasMolEnth[3] "Phase Molar Enthalpy", compMolEnth[3, NOC] "Component Molar Enthalpy";
+  Real P(start = Press) "Pressure", T(start = Temp) "Temperature";
+  Real Pbubl(start = Pmin) "Bubble point pressure", Pdew(start = Pmax) "dew point pressure";
+  Real liqPhasMolFrac(start = Alpha_guess) "Liquid Phase mole fraction", vapPhasMolFrac(start = Beta_guess) "Vapor Phase mole fraction", liqPhasMasFrac(start = Alpha_guess) "Liquid Phase mass fraction", vapPhasMasFrac(start = Beta_guess) "Vapor Phase Mass fraction";
+  Real totMolFlo[3](start = {Feed_flow, Liquid_flow, Vapour_flow}) "Total molar flow", totMasFlo[3] "Total Mass Flow", MW[3] "Average Molecular weight of Phases";
+  Real compMolFrac[3, NOC](start = {CompMolFrac, x_guess, y_guess}, each min = 0, each max = 1) "Component mole fraction", compMasFrac[3, NOC](start = {CompMolFrac, x_guess, y_guess}, each min = 0, each max = 1) "Component Mass fraction", compMolFlo[3, NOC](each start = 100, each min = 0) "Component Molar flow", compMasFlo[3, NOC](each min = 0, each start = 100) "Component Mass Fraction";
+  Real phasMolSpHeat[3](start = {PhasMolEnth_mix_guess, PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}) "phase Molar Specific Heat", compMolSpHeat[3, NOC] "Component Molar Specific Heat";
+  Real phasMolEnth[3](start = {PhasMolEnth_mix_guess, PhasMolEnth_liq_guess, PhasMolEnth_vap_guess}) "Phase Molar Enthalpy";
+  Real compMolEnth[3, NOC] "Component Molar Enthalpy";
   Real phasMolEntr[3] "Phase Molar Entropy", compMolEntr[3, NOC] "Component Molar Entropy";
   Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)),
+    HideResult = "true");
+  extends Guess_Models.Initial_Guess;
 equation
 //Connector equations
   inlet.P = P;
@@ -97,7 +100,7 @@ equation
     compMolFrac[3, :] = zeros(NOC);
 //    sum(compMolFrac[2, :]) = 1;
     totMolFlo[3] = 0;
-    compMolFrac[2,:] = compMolFrac[1,:];
+    compMolFrac[2, :] = compMolFrac[1, :];
   elseif P >= Pdew then
 //VLE region
     for i in 1:NOC loop
@@ -117,5 +120,8 @@ algorithm
   for i in 1:NOC loop
     MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
   end for;
-
+  annotation(
+    HideResult = "true");
+  annotation(
+    HideResult = "true");
 end Material_Stream;

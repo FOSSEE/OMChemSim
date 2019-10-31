@@ -6,17 +6,18 @@ model Mixer
   parameter Integer NOC "Number of Components", NI = 6 "Number of Input streams";
   parameter Chemsep_Database.General_Properties comp[NOC];
   parameter String outPress;
-  Real outP(min = 0, start = 101325), inP[NI](min = 0, start = 101325);
+  Real outP(start = Press), inP[NI](start = Press);
   Real inCompMolFrac[NI, NOC](each start = 1 / (NOC + 1), each min = 0, each max = 1) "Input stream component mol fraction", inMolFlo[NI](each min = 0, each start = 100) "Input stream Molar Flow";
-  Real outCompMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Output Stream component mol fraction", outMolFlo(each min = 0, each start = 100) "Output stream Molar Flow";
+  Real outCompMolFrac[NOC](each min = 0, each max = 1, start = CompMolFrac) "Output Stream component mol fraction", outMolFlo(each min = 0, start = Feed_flow) "Output stream Molar Flow";
   Real inTotMolEnth[NI] "Inlet molar enthalpy of each stream", outTotMolEnth "Outlet molar enthalpy";
-  Real inT[NI](each min = 0, each start = 273.15) "Temperature of each stream", outT(each min = 0, each start = 273.15) "Temperature of outlet stream", inTotMolEntr[NI] "Inlet molar enthalpy of each stream", outTotMolEntr "Outlet molar entropy", inVapPhasMolFrac[NI](each min = 0, each max = 1, each start = 0.5) "Inlet vapor phase mol fraction", outVapPhasMolFrac(min = 0, max = 1, start = 0.5) "Outlet vapor phase mol fraction";
+  Real inT[NI](each min = 0, each start = Temp) "Temperature of each stream", outT(start = Temp) "Temperature of outlet stream", inTotMolEntr[NI] "Inlet molar enthalpy of each stream", outTotMolEntr "Outlet molar entropy", inVapPhasMolFrac[NI](each min = 0, each max = 1, each start = 0.5) "Inlet vapor phase mol fraction", outVapPhasMolFrac(min = 0, max = 1, start = Beta_guess) "Outlet vapor phase mol fraction";
   //================================================================================
   //  Files.Connection.matConn inlet[NI](each connNOC = NOC);
   Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn inlet[NI](each connNOC = NOC) annotation(
     Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends Guess_Models.Initial_Guess;
 equation
 //Connector equation
   for i in 1:NI loop

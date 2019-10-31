@@ -1,18 +1,19 @@
 within Simulator.Unit_Operations.Absorption_Column;
 
 model AbsCol
+  extends Simulator.Files.Icons.Absorption_Column;
   import data = Simulator.Files.Chemsep_Database;
   parameter Integer NOC "Number of Components";
   parameter Integer noOfStages;
   parameter data.General_Properties comp[NOC];
   Simulator.Files.Connection.matConn top_feed(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 302}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn bottom_feed(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn top_product(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Connection.matConn bottom_product(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //connector equation
   tray[1].liqMolFlo[1] = top_feed.mixMolFlo;
@@ -41,4 +42,8 @@ equation
   tray[noOfStages].P = bottom_feed.P;
   tray[1].P = top_product.P;
   tray[noOfStages].P = bottom_product.P;
+  annotation(
+    Icon(coordinateSystem(extent = {{-250, -450}, {250, 450}})),
+    Diagram(coordinateSystem(extent = {{-250, -450}, {250, 450}})),
+    __OpenModelica_commandLineOptions = "");
 end AbsCol;

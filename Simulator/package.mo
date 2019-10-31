@@ -4659,13 +4659,13 @@ package Simulator
       parameter Integer Noc = 2 "Number of Components";
       
       //Input Variables
-      Real Pin(start = Pguess) "Inlet Pressure";
+      Real Pin(start = Press) "Inlet Pressure";
       Real Fin(min = 0, start = Fguess) "inlet Mixture Molar Flow";
       Real Tin(start = Tg) "Inlet Temperature";
       Real Hin(start = Htotg) "Inlet Mixture Molar Enthalpy";
       
       //Output Variables
-      Real Pout(start = Pguess) "Outlet Pressure";
+      Real Pout(start = Press) "Outlet Pressure";
       Real Tout(start = Tg) "Outlet Temperature";
       Real Fout(min = 0, start = Fguess) "Outlet Mixture Molar flow";
       Real Hout(start =Htotg) "Outlet Mixture Molar Enthalpy";
@@ -4689,7 +4689,7 @@ package Simulator
       Real xin[Noc](each min = 0, each max = 1, start = xguess) "Inlet Mixuture Molar Fraction";
       Real xout[Noc](each min = 0, each max = 1, start = xguess) "Outlet Mixture Molar Fraction";
       
-      parameter Real Eff "Ffficiency";
+      parameter Real Eff "efficiency";
       
       Simulator.Files.Connection.matConn inlet(Cnoc = Noc) annotation(
         Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -4705,33 +4705,33 @@ package Simulator
 //Connector equation
       inlet.P = Pin;
       inlet.T = Tin;
-      inlet.Fmol = Fin;
-      inlet.Hmol = Hin;
-      inlet.xfrac[1, :] = xin[:];
+      inlet.mixMolFlo = inMixMolFlo;
+      inlet.mixMolEnth = inMixMolEnth;
+      inlet.mixMolFrac[1, :] = inMixMolFrac[:];
       outlet.P = Pout;
       outlet.T = Tout;
-      outlet.Fmol = Fout;
-      outlet.Hmol = Hout;
-      outlet.xfrac[1, :] = xout[:];
-      energy.Qflow = Preq;
+      outlet.mixMolFlo = outMixMolFlo;
+      outlet.mixMolEnth = outMixMolEnth;
+      outlet.mixMolFrac[1, :] = outMixMolFrac[:];
+      energy.enFlo = reqPow;
 //Pump equations
 //balance
-      Fin = Fout;
-      xin = xout;
-      Pin + Deltap = Pout;
+      inMixMolFlo = outMixMolFlo;
+      inMixMolFrac = outMixMolFrac;
+      Pin + pressInc = Pout;
       Tin + Deltat = Tout;
 //density
       for i in 1:Noc loop
-        Densc[i] = Simulator.Files.Thermodynamic_Functions.Dens(comp[i].LiqDen, comp[i].Tc, Tin, Pin);
+        compDens[i] = Simulator.Files.Thermodynamic_Functions.Dens(comp[i].LiqDen, comp[i].Tc, Tin, Pin);
       end for;
-      Dens = 1 / sum(xin ./ Densc);
+      dens = 1 / sum(inMixMolFrac ./ compDens);
 //energy balance
-      Hout = Hin + Deltap / Dens;
-      Preq = Fin * (Hout - Hin) / Eff;
+      outMixMolEnth = inMixMolEnth + pressInc / dens;
+      reqPow = inMixMolFlo * (outMixMolEnth - inMixMolEnth) / eff;
 //NPSH
       NPSH = (Pin - vapPress) / dens;
 //vap pressure of mixture at Tout
-      Pv = sum(xin .* exp(comp[:].VP[2] + comp[:].VP[3] / Tout + comp[:].VP[4] * log(Tout) + comp[:].VP[5] .* Tout .^ comp[:].VP[6]));
+      vapPress = sum(inMixMolFrac .* exp(comp[:].VP[2] + comp[:].VP[3] / Tout + comp[:].VP[4] * log(Tout) + comp[:].VP[5] .* Tout .^ comp[:].VP[6]));
     end Centrifugal_Pump;
 
     model Adiabatic_Compressor
@@ -5995,7 +5995,7 @@ package Simulator
       extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
     equation
 //Here vapor phase mole fraction, temperature, mixture component mole fraction and mixture molar flow is given.
-      Bvap = 0.036257;
+      vapPhasMolFrac = 0.036257;
       T = 351;
       xmol[1, :] = {0.33, 0.33, 0.34};
       Ftot[1] = 31.346262;
@@ -6010,7 +6010,7 @@ package Simulator
       extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
     equation
       P = 101325;
-      Bvap = 0.036257;
+      vapPhasMolFrac = 0.036257;
       xmol[1, :] = {0.33, 0.33, 0.34};
       Ftot[1] = 100;
     end msPVF;
@@ -6613,7 +6613,7 @@ package Simulator
         parameter data.Toluene tol;
         Simulator.Test.pump.ms inlet(Noc = 2, comp = {benz, tol}) annotation(
           Placement(visible = true, transformation(origin = {-70, -8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-        Simulator.Unit_Operations.Centrifugal_Pump pump(comp = {benz, tol}, Noc = 2, Eff = 0.75) annotation(
+        Simulator.Unit_Operations.Centrifugal_Pump pump(comp = {benz, tol}, Noc = 2, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-2, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         Simulator.Test.pump.ms outlet(Noc = 2, comp = {benz, tol}) annotation(
           Placement(visible = true, transformation(origin = {68, 16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -6630,7 +6630,7 @@ package Simulator
         inlet.xmol[1, :] = {0.5, 0.5};
         inlet.P = 101325;
         inlet.T = 300;
-        pump.Deltap = 101325;
+        pump.pressInc = 101325;
       end main;
     end pump;
 
@@ -6678,7 +6678,7 @@ package Simulator
 //input temperature
         inlet.Ftot[1] = 100;
 //input molar flow
-        adiabatic_Compressor1.Deltap = 10000;
+        adiabatic_Compressor1.pressInc = 10000;
 //pressure increase
       end main;
     end adia_comp1;
@@ -6703,7 +6703,7 @@ package Simulator
         //instantiation of ethanol
         parameter Integer Noc = 2;
         parameter data.General_Properties comp[Noc] = {ben, tol};
-        Simulator.Test.adia_exp1.exp exp1(Noc = Noc, comp = comp, Eff = 0.75) annotation(
+        Simulator.Test.adia_exp1.exp exp1(Noc = Noc, comp = comp, eff = 0.75) annotation(
           Placement(visible = true, transformation(origin = {-9, 7}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
         Simulator.Test.adia_comp1.ms inlet(Noc = Noc, comp = comp) annotation(
           Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -6726,7 +6726,7 @@ package Simulator
 //input temperature
         inlet.Ftot[1] = 100;
 //input molar flow
-        exp1.Deltap = 10000;
+        exp1.pressDrop = 10000;
 //pressure drop
       end main;
     end adia_exp1;

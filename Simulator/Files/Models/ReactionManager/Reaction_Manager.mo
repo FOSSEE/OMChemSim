@@ -1,6 +1,6 @@
 within Simulator.Files.Models.ReactionManager;
 
-  model Reaction_Manager
+  model ReactionManager
     //===================================================================================================
     import Simulator.Files.*;
     import data = Simulator.Files.Chemsep_Database;
@@ -38,5 +38,5 @@ within Simulator.Files.Models.ReactionManager;
           for i in 1:Nr loop
             Hr_r[i] = (sum(Hf_c[:] .* Sc_cr[:, i]))/BC_r[i];
           end for;
-    end Reaction_Manager;
+    end ReactionManager;
 

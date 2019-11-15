@@ -1,6 +1,6 @@
 within Simulator.Unit_Operations;
 
-model Heat_Exchanger
+model HeatExchanger
   extends Simulator.Files.Icons.Heat_Exchanger;
   //Heat-Exchanger Operates in various modes
   //Mode-I - Estimation of Hot Fluid Outlet Temperature
@@ -186,4 +186,4 @@ equation
     Effc = (1-exp((Rc-1)*Ntuc))/(1 -Rc*  exp((Rc-1)*Ntuc));
     Effh =  (1-exp((Rh-1) *Ntuh ))/(1 -Rh *  exp((Rh-1)*Ntuh));
   end if;
-end Heat_Exchanger;
+end HeatExchanger;

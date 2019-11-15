@@ -43,11 +43,11 @@ within Simulator.Files.Thermodynamic_Packages;
   equation
 //======================================================================================================
 //Calculation Routine for Liquid Phase Fugacity Coefficient
-    S = Solublity_Parameter(Nc, V_c, SP_c, compMolFrac[2, :]);
+    S = Solublity_Parameter(Nc, V_c, SP_c, x_pc[2, :]);
     for i in 1:Nc loop
       gma_c[i] = exp(V_c[i] * (SP_c[i] - S) ^ 2 / (Rgas * T));
     end for;
-    philiq_c = Liquid_Fugacity_Coeffcient(Nc, SP_c, Tc, Pc_c, W_c, T, P, V_c, S, gma_c);
+    philiq_c = Liquid_Fugacity_Coeffcient(Nc, Tc, Pc_c, W_c, T, P, V_c, S, gma_c);
     for i in 1:Nc loop
       Pvap_c[i] = Simulator.Files.Thermodynamic_Functions.Psat(C[i].VP, T);
       gmaliq_c[i] = philiq_c[i] * (P / Pvap_c[i]);
@@ -58,8 +58,8 @@ within Simulator.Files.Thermodynamic_Packages;
     a_c = EOS_Constants(Nc, Tc, Pc_c, T);
     b_c = EOS_ConstantII(Nc, Tc, Pc_c, T);
     aij_c = EOS_ConstantIII(Nc, a_c);
-    amv = EOS_Constant1V(Nc, compMolFrac[3, :], aij_c);
-    bmv = sum(compMolFrac[3, :] .* b_c[:]);
+    amv = EOS_Constant1V(Nc, x_pc[3, :], aij_c);
+    bmv = sum(x_pc[3, :] .* b_c[:]);
     Avap = amv * P / (R * T) ^ 2;
     Bvap = bmv * P / (R * T);
     for i in 1:Nc loop
@@ -91,8 +91,8 @@ within Simulator.Files.Thermodynamic_Packages;
     end for;
 //====================================================================================================
 //Bubble Point Algorithm
-    V = sum(compMolFrac[1, :] .* V_c[:]);
-    Vs = sum(compMolFrac[1, :] .* V_c[:] .* SP_c[:]);
+    V = sum(x_pc[1, :] .* V_c[:]);
+    Vs = sum(x_pc[1, :] .* V_c[:] .* SP_c[:]);
     S_bubl = Vs / V;
     for i in 1:Nc loop
       gmabubl[i] = exp(V_c[i] * (SP_c[i] - S_bubl) ^ 2 / (Rgas * T));
@@ -128,7 +128,7 @@ within Simulator.Files.Thermodynamic_Packages;
       if gmadew_c[i] * Pvap_c[i] == 0 then
         xliqdew_c[i] = 0;
       else
-        xliqdew_c[i] = compMolFrac[1, i] * Pdew / (gmadew_c[i] * Pvap_c[i]);
+        xliqdew_c[i] = x_pc[1, i] * Pdew / (gmadew_c[i] * Pvap_c[i]);
       end if;
     end for;
     amvdew = EOS_Constant1V(Nc, xliqdew_c[:], aij_c);

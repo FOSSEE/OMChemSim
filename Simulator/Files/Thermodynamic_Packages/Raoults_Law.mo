@@ -14,7 +14,7 @@ within Simulator.Files.Thermodynamic_Packages;
       phivapdew_c[i] = 1;
     end for;
     for i in 1:Nc loop
-      Psat_c[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
+      Psat_c[i] = Simulator.Files.Thermodynamic_Functions.Psat(C[i].VP, T);
     end for;
     for j in 1:Nc loop
       K_c[j] = Psat_c[j] / P;

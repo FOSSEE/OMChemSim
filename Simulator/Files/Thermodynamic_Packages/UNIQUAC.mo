@@ -38,7 +38,7 @@ within Simulator.Files.Thermodynamic_Packages;
     Real  gmaolddew_c[Nc](each start = 2.2) "Combinatorial Part of activity coefficent(without correction)";
     Real gmadew_c[Nc](each start = 2.2) "Activity coefficent at dew point";
     //Fugacity coefficient
-    Real  phivdew_c[Nc] "Vapour Fugacity coefficient at dew point";
+    Real  phivapdew_c[Nc] "Vapour Fugacity coefficient at dew point";
     Real phildew_c[Nc](each start = 0.5);
     Real PCFdew_c[Nc] "Poynting Correction Factor";
     //Bubble Point Calculation Variables
@@ -53,7 +53,7 @@ within Simulator.Files.Thermodynamic_Packages;
     Real  gmaoldbubl_c[Nc](each start = 1) "Combinatorial Part of activity coefficent(without correction)";
     Real  gmabubl_c[Nc](each start = 1) "Activity coefficent at bubble point";
     //Fugacity coefficient
-    Real  philbubl_c[Nc];
+    Real  philiqbubl_c[Nc];
     Real phibubl[Nc](each start = 0.5) "Liquid Phase Fugacity coefficient";
     Real PCFbubl_c[Nc] "Poynting Correction Factor";
     //Phase Envelope
@@ -73,8 +73,8 @@ within Simulator.Files.Thermodynamic_Packages;
   equation
 //Fugacity coefficients set to 1 since the model type is Activity Coefficient
     for i in 1:Nc loop
-       philbubl_c[i] = 1;
-       phivdew_c[i] = 1;
+       philiqbubl_c[i] = 1;
+       phivapdew_c[i] = 1;
     end for;
 //Calculation of Intermediate parameters to evaluate combinatorial and residual part of the activity coefficient
 //Note : compMolFrac is the referenced from "Material Stream" model

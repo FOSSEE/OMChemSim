@@ -25,13 +25,13 @@ for i in 1:Nc loop
     c_cc[i, j] := CAS[i] + Us + CAS[j];
     d_cc[i, j] := CAS[j] + Us + CAS[i];
     for k in 1:352 loop
-      if c_cc[i, j] == CAS1_CAS2[k] then
+      if c_cc[i, j] == CAS_CAS[k] then
         BIP[i, j, 1] := BIPdb[k, 1];
         BIP[j, i, 1] := BIPdb[k, 2];
         BIP[i, j, 2] := BIPdb[k, 3];
         BIP[j, i, 2] := BIPdb[k, 3];
       end if;
-      if d_cc[i, j] == CAS1_CAS2[k] then
+      if d_cc[i, j] == CAS_CAS[k] then
         BIP[j, i, 1] := BIPdb[k, 1];
         BIP[i, j, 1] := BIPdb[k, 2];
         BIP[i, j, 2] := BIPdb[k, 3];

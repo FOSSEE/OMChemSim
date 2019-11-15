@@ -1,6 +1,6 @@
 within Simulator.Streams;
 
-model Energy_Stream
+model EnergyStream
   extends Simulator.Files.Icons.Energy_Stream;
   Real Q;
   Simulator.Files.Connection.enConn inlet annotation(
@@ -11,4 +11,4 @@ equation
 //connector equation
   Q = inlet.Q;
   Q = outlet.Q;
-end Energy_Stream;
+end EnergyStream;

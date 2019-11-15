@@ -10,7 +10,7 @@ model msTPbbp "material stream below bubble point"
   //instantiation of ethanol
   parameter data.Water wat;
   //instantiation of water
-  extends Streams.Material_Stream(Nc = 3, C = {meth, eth, wat}, H_pc(each start = eth.SH), S_pc(each start = eth.AS), x_pc(each min = 0.01, each max = 1, each start = 0.33));
+  extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat}, H_pc(each start = eth.SH), S_pc(each start = eth.AS), x_pc(each min = 0.01, each max = 1, each start = 0.33));
   //material stream model is extended and values of parameters NOC and comp are given. These parameters are declared in Material stream model. We are only giving them values here.
   //NOC - number of components, comp -  component array.
   extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;

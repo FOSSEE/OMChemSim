@@ -68,7 +68,7 @@ equation
 //===================================================================================
 //VLE region
     for i in 1:Nc loop
-      x_pc[2, i] = x_pc[1, i] ./ (1 + xvap * (K[i] - 1));
+      x_pc[2, i] = x_pc[1, i] ./ (1 + xvap * (K_c[i] - 1));
     end for;
     sum(x_pc[2, :]) = 1;
   else
@@ -84,7 +84,7 @@ equation
     Cp_pc[3, i] = Thermodynamic_Functions.VapCpId(C[i].VapCp, T);
     H_pc[2, i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
     H_pc[3, i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
-    (S_pc[2, i], S_pc[3, i]) = Thermodynamic_Functions.SId(C[i].AS, C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
+    (S_pc[2, i], S_pc[3, i]) = Thermodynamic_Functions.SId(C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
   end for;
 //=======================================================================================
 //Specific Heat and Enthalpy calculation for Liquid and Vapor Phase

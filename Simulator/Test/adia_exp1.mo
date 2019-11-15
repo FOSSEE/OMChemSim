@@ -2,14 +2,14 @@ within Simulator.Test;
 
 package adia_exp1
   model ms
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
   end ms;
 
-  model exp
+  model Exp
     extends Simulator.Unit_Operations.Adiabatic_Expander;
     extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
-  end exp;
+  end Exp;
 
   model main
   
@@ -27,9 +27,9 @@ package adia_exp1
       Placement(visible = true, transformation(origin = {-82, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Test.adia_exp1.ms S2(Nc = Nc, C = C, T(start = 374)) annotation(
       Placement(visible = true, transformation(origin = {62, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Test.adia_exp1.exp B1(Nc = Nc, C = C, eff = 0.75) annotation(
+    Simulator.Test.adia_exp1.Exp B1(Nc = Nc, C = C, Eff = 0.75) annotation(
       Placement(visible = true, transformation(origin = {-3, -1}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
-    Simulator.Streams.Energy_Stream E1 annotation(
+    Simulator.Streams.EnergyStream E1 annotation(
       Placement(visible = true, transformation(origin = {-30, -60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   
   equation

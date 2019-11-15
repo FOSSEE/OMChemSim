@@ -13,7 +13,7 @@ within Simulator.Files.Models.ReactionManager;
     parameter Integer Comp;    
 //Number of components involved in the reaction
 
-    parameter Real Sc_cr[Nc,Nr];  //Stochiometry of reactions
+    parameter Real Coef_cr[Nc,Nr];  //Stochiometry of reactions
     parameter Real DO_cr[Nc,Nr];  //Direct order of reactions
     parameter Real RO_cr[Nc,Nr]; //Reverse order of reactions
     Real Schk_r[Nr];    
@@ -31,12 +31,12 @@ within Simulator.Files.Models.ReactionManager;
     equation
 
 //Check of stoichiometric balance
-          Schk_r = Stoichiometrycheck(Nr, Nc, C[:].MW, Sc_cr);
+          Schk_r = Stoichiometrycheck(Nr, Nc, C[:].MW, Coef_cr);
 //Calculation of Heat of Reaction
           Hf_c[:] = C[:].IGHF .* 1E-3;
 //=============================================================================================
           for i in 1:Nr loop
-            Hr_r[i] = (sum(Hf_c[:] .* Sc_cr[:, i]))/BC_r[i];
+            Hr_r[i] = (sum(Hf_c[:] .* Coef_cr[:, i]))/BC_r[i];
           end for;
     end ReactionManager;
 

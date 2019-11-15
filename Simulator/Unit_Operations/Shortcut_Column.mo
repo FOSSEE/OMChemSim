@@ -15,7 +15,7 @@ model Shortcut_Column
   Real F_p[3](each min = 0, each start = 100) "Inlet Molar Flow", x_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Inlet Mole Fraction", H_p[3]"Inlet Molar Enthalpy ", S_p[3] "Inlet Molar Entropy";
   Real Ntmin(min = 0, start = 10) "Minimum Number of trays", RRmin(start = 1) "Minimum Reflux Ratio";
   Real alpha_c[Nc] "Relative Volatility", theta(start = 1) "Fraction";
-  Real Pin(min = 0, start = 101325) "Feed Pressure", Tin(min = 0, start = 273.15)"Feed Temperature";
+  Real Pin(min = 0, start = 101325) "Feed Pressure", Tin(min = 0, start = 273.15)"Feed Temperature",T "Thermodynamic Adjustment", P "Thermodynamic Adjustment";
   Real Tcond(start = max(C[:].Tb), min = 0)"Condenser Temperature", Pcond(min = 0, start = 101325) "Condenser Pressure", Preb(min = 0, start = 101325)"Re-boiler Pressure", Treb(start = min(C[:].Tb), min = 0) "Re-boiler Temperature";
   Real xvap_p[3](each min = 0, each max = 1, each start = 0.5) "Vapor Phase Mole Fraction", Hliqcond "Total Enthalpy of Liquid in Condenser", Hvapcond "Total Enthalpy of Vapor in Condenser", Hvapcond_c[Nc] "Component Enthalpy of Vapor in Condenser", Hliqcond_c[Nc] "Component Enthalpy of Vapor in Condenser", xliqcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Liquid Mole Fraction in Condenser", xvapcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Vapor Mole Fraction in Condenser";
   Real xin_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Adjustment for Thermodynamics", Pdew(min = 0, start = sum(C[:].Pc) / Nc)"Dew Point Pressure", Pbubl(min = 0, start = sum(C[:].Pc) / Nc)"Bubble Point Pressure";
@@ -39,7 +39,7 @@ equation
 //==============================================================================
 // Connector equations
   In.P = Pin;
-  In.T = T;
+  In.T = Tin;
   In.F = F_p[1];
   In.x_pc[1, :] = x_pc[1, :];
   In.H = H_p[1];
@@ -59,23 +59,25 @@ equation
   Out1.H = H_p[3];
   Out1.S = S_p[3];
   Out1.xvap = xvap_p[3];
-  En2.enFlo = Qr;
-  En1.enFlo = Qc;
+  En2.Q = Qr;
+  En1.Q = Qc;
 
 //==============================================================================
 //Adjustment for thermodynamic packages
   xin_pc[1, :] = x_pc[1, :];
-  xin_pc[2, :] = xin_pc[1, :] ./ (1 .+ xvap_p[1] .* (K[:] .- 1));
+  xin_pc[2, :] = xin_pc[1, :] ./ (1 .+ xvap_p[1] .* (K_c[:] .- 1));
   for i in 1:Nc loop
-    xin_pc[3, i] = K[i] * xin_pc[2, i];
+    xin_pc[3, i] = K_c[i] * xin_pc[2, i];
   end for;
+  T = Tin;
+  P = Pin;
 //==============================================================================
 //Bubble point calculation
-  Pbubl = sum(gmabubl_c[:] .* xin_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
+  Pbubl = sum(gmabubl_c[:] .* xin_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tin + C[:].VP[4] * log(Tin) + C[:].VP[5] .* Tin .^ C[:].VP[6]) ./ philiqbubl_c[:]);
   
 //==============================================================================
 //Dew point calculation
-  Pdew = 1 / sum(xin_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
+  Pdew = 1 / sum(xin_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tin + C[:].VP[4] * log(Tin) + C[:].VP[5] .* Tin .^ C[:].VP[6])) .* phivapdew_c[:]);
   for i in 1:Nc loop
     if x_pc[1, i] == 0 then
       x_pc[3, i] = 0;
@@ -99,56 +101,56 @@ equation
   end for;
 //==============================================================================
 //Relative Volatility
-  alpha_c[:] = K[:] / K[HKey];
+  alpha_c[:] = K_c[:] / K_c[HKey];
   
 //==============================================================================
 //Calculation of temperature at Distillate and Bottoms
   if Tcond <= 0 and Treb <= 0 then
   if Ctype == "Partial" then
-    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
+    1 / Pcond = sum(x_pc[3, :] ./ (gma_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
     
   elseif Ctype == "Total" then
-    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
+    Pcond = sum(gma_c[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
   end if;
  //============================================================================== 
 elseif Tcond<=0 then
   if Ctype == "Partial" then
-    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
+    1 / Pcond = sum(x_pc[3, :] ./ (gma_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
     
   elseif Ctype == "Total" then
-    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
+    Pcond = sum(gma_c[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
   end if;
 //==============================================================================
 elseif Treb<=0 then
   if Ctype == "Partial" then
-    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
+    1 / Pcond = sum(x_pc[3, :] ./ (gma_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
     
   elseif Ctype == "Total" then
-    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
+    Pcond = sum(gma_c[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
   end if;
 //==============================================================================
 else
   if Ctype == "Partial" then
-    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
+    1 / Pcond = sum(x_pc[3, :] ./ (gma_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
     
   elseif Ctype == "Total" then
-    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
+    Pcond = sum(gma_c[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
     
-    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    Preb = sum(gma_c[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
   end if;
 end if;
 
@@ -172,7 +174,7 @@ end if;
   end if;
 //==============================================================================
 // Feed location, Fenske equation
-  Intray = Nt / Ntmin * log(x_pc[1, LKey] / x_pc[1, HKey] * (x_pc[2, HKey] / x_pc[2, LKey])) / log(K[LKey] / K[HKey]);
+  Intray = Nt / Ntmin * log(x_pc[1, LKey] / x_pc[1, HKey] * (x_pc[2, HKey] / x_pc[2, LKey])) / log(K_c[LKey] / K_c[HKey]);
   
 //==============================================================================
 //Rectifying and Stripping flows Calculation

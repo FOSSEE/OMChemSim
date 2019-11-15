@@ -2,7 +2,7 @@ within Simulator.Test;
 
 package shortcut1
   model ms
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
   end ms;
 
@@ -30,9 +30,9 @@ package shortcut1
       Placement(visible = true, transformation(origin = {62, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Test.shortcut1.ms S2(Nc = Nc, C = C, T(start = 353.83), x_pc(start = {{0.99, 0.01}, {0.99, 0.01}, {0, 0}})) annotation(
       Placement(visible = true, transformation(origin = {62, 30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Streams.Energy_Stream E1 annotation(
+    Simulator.Streams.EnergyStream E1 annotation(
       Placement(visible = true, transformation(origin = {60, 60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Streams.Energy_Stream E2 annotation(
+    Simulator.Streams.EnergyStream E2 annotation(
       Placement(visible = true, transformation(origin = {62, -60}, extent = {{10, -10}, {-10, 10}}, rotation = 0)));
     Simulator.Test.shortcut1.Shortcut B1(Nc = Nc, C = C, HKey = 2, LKey = 1) annotation(
       Placement(visible = true, transformation(origin = {4, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

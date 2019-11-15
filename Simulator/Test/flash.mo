@@ -2,7 +2,7 @@ within Simulator.Test;
 
 package flash
   model ms
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
   end ms;
 

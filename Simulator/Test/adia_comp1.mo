@@ -3,7 +3,7 @@ within Simulator.Test;
 package adia_comp1
   model ms
     //This model will be instantiated in adia_comp model as outlet stream of heater. Dont run this model. Run adia_comp model for test
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
   end ms;
 
@@ -22,7 +22,7 @@ package adia_comp1
     parameter Integer Nc = 2;
     parameter data.General_Properties C[Nc] = {ben, tol};
     Simulator.Test.adia_comp1.compres adiabatic_Compressor1(Nc = Nc, C = C, Eff = 0.75) annotation(
-      Placement(visible = true, transformation(origin = {-17, 17}, extent = {{-15, -15}, {15, 15}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-17, 7}, extent = {{-15, -15}, {15, 15}}, rotation = 0)));
     Simulator.Test.adia_comp1.ms inlet(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms outlet(Nc = Nc, C = C, T(start = 374)) annotation(

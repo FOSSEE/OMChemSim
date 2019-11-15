@@ -2,7 +2,7 @@ within Simulator.Test;
 
 package PFR_Test
   model MS
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
   end MS;
 
@@ -25,7 +25,7 @@ package PFR_Test
       Placement(visible = true, transformation(origin = {90, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
    Simulator.Unit_Operations.PF_Reactor.PFR B1(Nc = 3, Nr = 1, C = {eth, wat, eg}, Mode = 2, Phase = 3,  Tdef = 410) annotation(
       Placement(visible = true, transformation(origin = { 3, -1}, extent = {{-33, -33}, {33, 33}}, rotation = 0)));
-   Simulator.Streams.Energy_Stream Energy annotation(
+   Simulator.Streams.EnergyStream Energy annotation(
       Placement(visible = true, transformation(origin = {-14, -54}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     
   equation
@@ -41,7 +41,7 @@ package PFR_Test
 
   //========================================================================
   //Inputs and Specifications
-    S1.compMolFrac[1, :] = {0.2, 0.8, 0};
+    S1.x_pc[1, :] = {0.2, 0.8, 0};
     S1.P = 101325;
     S1.T = 395;
     S1.F_p[1] = 100;

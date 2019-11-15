@@ -11,9 +11,9 @@ within Simulator.Files.Models;
     x_pc[1, :] .* F_p[1] = x_pc[2, :] .* F_p[2] + x_pc[3, :] .* F_p[3];
 
   //Bubble point calculation
-    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ philbubl_c[:]);
+    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
   //Dew point calculation
-    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* phivdew_c[:]);
+    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
     if P >= Pbubl then
       x_pc[3, :] = zeros(Nc);
   //    sum(x_pc[2, :]) = 1;
@@ -22,7 +22,7 @@ within Simulator.Files.Models;
     //VLE region
       for i in 1:Nc loop
   //      x_pc[3, i] = K[i] * x_pc[2, i];
-        x_pc[2, i] = x_pc[1, i] ./ (1 + xvap * (K[i] - 1));
+        x_pc[2, i] = x_pc[1, i] ./ (1 + xvap * (K_c[i] - 1));
       end for;
       sum(x_pc[2, :]) = 1;
     //sum y = 1
@@ -35,11 +35,11 @@ within Simulator.Files.Models;
   //Energy Balance
     for i in 1:Nc loop
 //Specific Heat and Enthalpy calculation
-      Cp_pc[2, i] = Thermodynamic_Functions.LiqCpId(comp[i].LiqCp, T);
-      Cp_pc[3, i] = Thermodynamic_Functions.VapCpId(comp[i].VapCp, T);
-      H_pc[2, i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
-      H_pc[3, i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
-      (S_pc[2, i], S_pc[3, i]) = Thermodynamic_Functions.SId(comp[i].AS, comp[i].VapCp, comp[i].HOV, comp[i].Tb, comp[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
+      Cp_pc[2, i] = Thermodynamic_Functions.LiqCpId(C[i].LiqCp, T);
+      Cp_pc[3, i] = Thermodynamic_Functions.VapCpId(C[i].VapCp, T);
+      H_pc[2, i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      H_pc[3, i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      (S_pc[2, i], S_pc[3, i]) = Thermodynamic_Functions.SId(C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
     end for;
     for i in 2:3 loop
       Cp_p[i] = sum(x_pc[i, :] .* Cp_pc[i, :]) + Cpres_p[i];

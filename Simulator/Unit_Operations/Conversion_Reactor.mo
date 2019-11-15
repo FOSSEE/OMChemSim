@@ -53,12 +53,12 @@ equation
 //=============================================================================
 //Mole Balance
   for i in 1:Nc loop
-    Fout_cr[i, 1] = Fin * xin_c[i] - Coef_cr[i, 1] / Coef_cr[Bc_r[1], 1] * Fin * xin_c[Bc_r[1]] * X_r[1];
+    Fout_cr[i, 1] = Fin * xin_c[i] - Coef_cr[i, 1] / Coef_cr[BC_r[1], 1] * Fin * xin_c[BC_r[1]] * X_r[1];
   end for;
   if Nr > 1 then
     for j in 2:Nr loop
       for i in 1:Nc loop
-        Fout_cr[i, j] = Fout_cr[i, j - 1] - Coef_cr[i, j] / Coef_cr[Bc_r[j], j] * Fin * xin_c[Bc_r[j]] * X_r[j];
+        Fout_cr[i, j] = Fout_cr[i, j - 1] - Coef_cr[i, j] / Coef_cr[BC_r[j], j] * Fin * xin_c[BC_r[j]] * X_r[j];
       end for;
     end for;
   end if;
@@ -75,13 +75,13 @@ equation
 //Energy Balance
   if CalcMode == "Isothermal" then
     Tin = Tout;
-    energy.enFlo = Hout * Fout - Hin * Fin;
+    energy.Q = Hout * Fout - Hin * Fin;
   elseif CalcMode == "Adiabatic" then
     Hout * Fout = Hin * Fin;
-    energy.enFlo = 0;
+    energy.Q = 0;
   elseif CalcMode == "Define_Outlet_Temperature" then
     Tout = Tdef;
-    energy.enFlo = Hout * Fout - Hin * Fin;
+    energy.Q = Hout * Fout - Hin * Fin;
   end if;
 annotation(
     Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),

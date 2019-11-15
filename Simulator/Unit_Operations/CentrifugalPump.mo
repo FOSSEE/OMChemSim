@@ -1,6 +1,6 @@
 within Simulator.Unit_Operations;
 
-model Centrifugal_Pump
+model CentrifugalPump
 //===========================================================================
 //Header files and Parameters
   extends Simulator.Files.Icons.Centrifugal_Pump;
@@ -46,7 +46,7 @@ equation
 //=============================================================================
 //Calculation of Density
   for i in 1:Nc loop
-    rho_c[i] = Simulator.Files.Thermodynamic_Functions.rho(C[i].LiqDen, C[i].Tc, Tin, Pin);
+    rho_c[i] = Simulator.Files.Thermodynamic_Functions.Dens(C[i].LiqDen, C[i].Tc, Tin, Pin);
   end for;
   rho = 1 / sum(xin_c ./ rho_c);
   
@@ -59,4 +59,4 @@ equation
 //===============================================================================
 //Vapor Pressure of mixture at Outlet Temperature
   Pvap = sum(xin_c .* exp(C[:].VP[2] + C[:].VP[3] / Tout + C[:].VP[4] * log(Tout) + C[:].VP[5] .* Tout .^ C[:].VP[6]));
-end Centrifugal_Pump;
+end CentrifugalPump;

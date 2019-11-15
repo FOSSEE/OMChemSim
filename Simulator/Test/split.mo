@@ -2,7 +2,7 @@ within Simulator.Test;
 
 package split
   model ms
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
   end ms;
 
@@ -24,7 +24,7 @@ package split
       Placement(visible = true, transformation(origin = {36, 30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Test.split.ms S3(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {40, -10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Unit_Operations.Splitter B1(Nc = Nc, C = C, NO = 2, CalcType = "Molar_Flow") annotation(
+    Simulator.Unit_Operations.Splitter B1(Nc = Nc, C = C, No = 2, CalcType = "Molar_Flow") annotation(
       Placement(visible = true, transformation(origin = {-24, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   
   equation
@@ -43,7 +43,7 @@ package split
     S1.P = 101325;
     S1.T = 300;
     S1.x_pc[1, :] = {0.5, 0.5};
-    S1.F_c[1] = 100;
+    S1.F_p[1] = 100;
     B1.SpecVal_s = {20, 80};
   end main;
 end split;

@@ -10,7 +10,7 @@ model msPS
   //instantiation of ethanol
   parameter data.Water wat;
   //instantiation of water
-  extends Streams.Material_Stream(Nc = 3, comp = {meth, eth, wat}, F_p(each start = 100), x_pc(each start = 0.33), T(start = sum(comp.Tb) / Nc));
+  extends Streams.Material_Stream(Nc = 3, C = {meth, eth, wat}, F_p(each start = 100), x_pc(each start = 0.33), T(start = sum(comp.Tb) / Nc));
   //material stream model is extended and values of parameters NOC and comp are given. These parameters are declred in Material stream model. We are only giving them values here.
   //we need to give proper initialization values for converging, Initialization values are provided for totMolFlo, compMolFrac and T while extending.
   //NOC - number of components, comp -  component array.

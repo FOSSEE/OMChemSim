@@ -1,32 +1,32 @@
 within Simulator.Files.Thermodynamic_Packages;
 
-model NRTL
-  import Simulator.Files.Thermodynamic_Functions.*;
-  Simulator.Files.Models.gammaNRTL Gamma(NOC = NOC, comp = comp, molFrac = compMolFrac[2, :], T = T), dewGamma(NOC = NOC, comp = comp, molFrac = dewLiqMolFrac, T = T), bublGamma(NOC = NOC, comp = comp, molFrac = compMolFrac[1, :], T = T);
-  Real dewLiqMolFrac[NOC], density[NOC];
-  Real resMolSpHeat[3] "residual specific heat", resMolEnth[3] "residual enthalpy", resMolEntr[3] "residual Entropy", K[NOC], gamma[NOC](each start = 1), gammaBubl[NOC](each start = 1), gammaDew[NOC](each start = 1);
-  Real liqfugcoeff_bubl[NOC], vapfugcoeff_dew[NOC], Psat[NOC];
-equation
-  gamma = Gamma.gamma;
-  for i in 1:NOC loop
-    dewLiqMolFrac[i] = compMolFrac[1, i] * Pdew / (gammaDew[i] * Psat[i]);
-    density[i] = Dens(comp[i].LiqDen, comp[i].Tc, T, P);
-  end for;
-  for i in 1:NOC loop
-    liqfugcoeff_bubl[i] = 1;
-    vapfugcoeff_dew[i] = 1;
-  end for;
-  for i in 1:NOC loop
-    gammaBubl[i] = bublGamma.gamma[i];
-    gammaDew[i] = dewGamma.gamma[i];
-  end for;
-  for i in 1:NOC loop
-    Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(comp[i].VP, T);
-  end for;
-  for i in 1:NOC loop
-    K[i] = gamma[i] * Psat[i] / P;
-  end for;
-  resMolSpHeat[:] = zeros(3);
-  resMolEnth[:] = zeros(3);
-  resMolEntr = zeros(3);
-end NRTL;
+  model NRTL
+    import Simulator.Files.Thermodynamic_Functions.*;
+    Simulator.Files.Models.gammaNRTL Gma(Nc = Nc, C = C, x_c = x_pc[2, :], T = T), GmaDew(Nc = Nc, C = C, x_c = xliqdew_c, T = T), GmaBubl(Nc = Nc, C = C, x_c = x_pc[1, :], T = T);
+    Real xliqdew_c[Nc], rho_c[Nc];
+    Real Cpres_p[3] "residual specific heat", Hres_p[3] "residual enthalpy", Sres_p[3] "residual Entropy", K_c[Nc], gma_c[Nc](each start = 1), gmabubl_c[Nc](each start = 1), gmadew_c[Nc](each start = 1);
+    Real philiqbubl_c[Nc], phivapdew_c[Nc], Pvap_c[Nc];
+  equation
+    gma_c= Gma.gma_c;
+    for i in 1:Nc loop
+      xliqdew_c[i] = x_pc[1, i] * Pdew / (gmadew_c[i] * Pvap_c[i]);
+      rho_c[i] = Dens(C[i].LiqDen, C[i].Tc, T, P);
+    end for;
+    for i in 1:Nc loop
+      philiqbubl_c[i] = 1;
+      phivapdew_c[i] = 1;
+    end for;
+    for i in 1:Nc loop
+      gmabubl_c[i] = GmaBubl.gma_c[i];
+      gmadew_c[i] = GmaDew.gma_c[i];
+    end for;
+    for i in 1:Nc loop
+      Pvap_c[i] = Simulator.Files.Thermodynamic_Functions.Psat(C[i].VP, T);
+    end for;
+    for i in 1:Nc loop
+      K_c[i] = gma_c[i] * Pvap_c[i] / P;
+    end for;
+    Cpres_p[:] = zeros(3);
+    Hres_p[:] = zeros(3);
+    Sres_p = zeros(3);
+  end NRTL;

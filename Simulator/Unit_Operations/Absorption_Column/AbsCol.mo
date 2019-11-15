@@ -1,44 +1,49 @@
 within Simulator.Unit_Operations.Absorption_Column;
 
 model AbsCol
-  import data = Simulator.Files.Chemsep_Database;
-  parameter Integer NOC "Number of Components";
-  parameter Integer noOfStages;
-  parameter data.General_Properties comp[NOC];
-  Simulator.Files.Connection.matConn top_feed(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn bottom_feed(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn top_product(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn bottom_product(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-equation
+    extends Simulator.Files.Icons.Absorption_Column;
+    import data = Simulator.Files.Chemsep_Database;
+    parameter Integer Nc "Number of Components";
+    parameter Integer Nt;
+    parameter data.General_Properties C[Nc];
+    Simulator.Files.Connection.matConn In_Top(Nc = Nc) annotation(
+      Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 302}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn In_Bot(Nc = Nc) annotation(
+      Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn Out_Top(Nc = Nc) annotation(
+      Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn Out_Bot(Nc = Nc) annotation(
+      Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  equation
 //connector equation
-  tray[1].liqMolFlo[1] = top_feed.mixMolFlo;
-  tray[1].liqCompMolFrac[1, :] = top_feed.mixMolFrac[1, :];
-  tray[1].liqMolEnth[1] = top_feed.mixMolEnth;
-  tray[1].vapMolFlo[2] = top_product.mixMolFlo;
-  tray[1].vapCompMolFrac[2, :] = top_product.mixMolFrac[1, :];
-//  tray[1].vapMolEnth[2] = top_product.mixMolEnth;
-  tray[1].T = top_product.T;
-  tray[noOfStages].liqMolFlo[2] = bottom_product.mixMolFlo;
-  tray[noOfStages].liqCompMolFrac[2, :] = bottom_product.mixMolFrac[1, :];
-//  tray[noOfStages].liqMolEnth[2] = bottom_product.mixMolEnth;
-  tray[noOfStages].T = bottom_product.T;
-  tray[noOfStages].vapMolFlo[1] = bottom_feed.mixMolFlo;
-  tray[noOfStages].vapCompMolFrac[1, :] = bottom_feed.mixMolFrac[1, :];
-  tray[noOfStages].vapMolEnth[1] = bottom_feed.mixMolEnth;
-  for i in 1:noOfStages - 1 loop
-    connect(tray[i].liquid_outlet, tray[i + 1].liquid_inlet);
-    connect(tray[i].vapor_inlet, tray[i + 1].vapor_outlet);
-  end for;
+    tray[1].Fliq_s[1] = In_Top.F;
+    tray[1].xliq_sc[1, :] = In_Top.x_pc[1, :];
+    tray[1].Hliq_s[1] = In_Top.H;
+    tray[1].Fvap_s[2] = Out_Top.F;
+    tray[1].xvap_sc[2, :] = Out_Top.x_pc[1, :];
+//  tray[1].vapMolEnth[2] = Out_Top.mixMolEnth;
+    tray[1].T = Out_Top.T;
+    tray[Nt].Fliq_s[2] = Out_Bot.F;
+    tray[Nt].xliq_sc[2, :] = Out_Bot.x_pc[1, :];
+//  tray[Nt].liqMolEnth[2] = Out_Bot.mixMolEnth;
+    tray[Nt].T = Out_Bot.T;
+    tray[Nt].Fvap_s[1] = In_Bot.F;
+    tray[Nt].xvap_sc[1, :] = In_Bot.x_pc[1, :];
+    tray[Nt].Hvap_s[1] = In_Bot.H;
+    for i in 1:Nt - 1 loop
+      connect(tray[i].Out_Liq, tray[i + 1].In_Liq);
+      connect(tray[i].In_Vap, tray[i + 1].Out_Vap);
+    end for;
 //tray pressures
-  for i in 2:noOfStages - 1 loop
-    tray[i].P = tray[1].P + i * (tray[noOfStages].P - tray[1].P) / (noOfStages - 1);
-  end for;
-  tray[1].P = top_feed.P;
-  tray[noOfStages].P = bottom_feed.P;
-  tray[1].P = top_product.P;
-  tray[noOfStages].P = bottom_product.P;
+    for i in 2:Nt - 1 loop
+      tray[i].P = tray[1].P + i * (tray[Nt].P - tray[1].P) / (Nt - 1);
+    end for;
+    tray[1].P = In_Top.P;
+    tray[Nt].P = In_Bot.P;
+    tray[1].P = Out_Top.P;
+    tray[Nt].P = Out_Bot.P;
+    annotation(
+      Icon(coordinateSystem(extent = {{-250, -450}, {250, 450}})),
+      Diagram(coordinateSystem(extent = {{-250, -450}, {250, 450}})),
+      __OpenModelica_commandLineOptions = "");
 end AbsCol;

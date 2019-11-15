@@ -1,86 +1,87 @@
 within Simulator.Unit_Operations.Distillation_Column;
 
-model Cond
-  import Simulator.Files.*;
-  parameter Integer NOC = 2;
-  parameter Boolean boolFeed = false;
-  parameter Chemsep_Database.General_Properties comp[NOC];
-  Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
-  Real feedMolFlo(min = 0, start = 100), sideDrawMolFlo(min = 0, start = 100), inVapMolFlo(min = 0, start = 100), outLiqMolFlo(min = 0, start = 100), feedMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), sideDrawMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), inVapCompMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), outLiqCompMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), feedMolEnth, inVapMolEnth, outLiqMolEnth, heatLoad, sideDrawMolEnth, outLiqCompMolEnth[NOC];
-  Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc) / NOC), Pbubl(min = 0, start = sum(comp[:].Pc) / NOC);
-  //String sideDrawType(start = "Null");
-  //L or V
-  parameter String condType "Partial or Total";
-  replaceable Simulator.Files.Connection.matConn feed(connNOC = NOC) if boolFeed annotation(
-    Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn dummy_feed(connNOC = NOC, P = 0, T = 0, mixMolFrac = zeros(3, NOC), mixMolFlo = 0, mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not boolFeed annotation(
-    Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn side_draw(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.trayConn liquid_outlet(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.trayConn vapor_inlet(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn heat_load annotation(
-    Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-equation
+  model Cond
+    import Simulator.Files.*;
+    parameter Integer Nc = 2;
+    parameter Boolean Bin = false;
+    parameter Chemsep_Database.General_Properties comp[Nc];
+    Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
+    Real Fin(min = 0, start = 100), Fout(min = 0, start = 100), Fvapin(min = 0, start = 100), Fliqout(min = 0, start = 100), xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xvapin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xliqout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Hin, Hvapin, Hliqout, Q, Hout, Hliqout_c[Nc];
+    Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Pdew(min = 0, start = sum(comp[:].Pc)/Nc), Pbubl(min = 0, start = sum(comp[:].Pc)/Nc);
+    //String sideDrawType(start = "Null");
+    //L or V
+    parameter String Ctype "Partial or Total";
+    replaceable Simulator.Files.Connection.matConn In(Nc = Nc) if Bin annotation(
+      Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn In_Dmy(Nc = Nc, P = 0, T = 0, mixMolFrac = zeros(3, Nc), mixMolFlo = 0, mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not Bin annotation(
+      Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn Out(Nc = Nc) annotation(
+      Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.trayConn Out_Liq(Nc = Nc) annotation(
+      Placement(visible = true, transformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.trayConn In_Vap(Nc = Nc) annotation(
+      Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.enConn En annotation(
+      Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  equation
 //connector equation
-  if boolFeed then
-    feed.mixMolFrac[1, :] = feedMolFrac[:];
-    feed.mixMolEnth = feedMolEnth;
-    feed.mixMolFlo = feedMolFlo;
-  else
-    dummy_feed.mixMolFrac[1, :] = feedMolFrac[:];
-    dummy_feed.mixMolEnth = feedMolEnth;
-    dummy_feed.mixMolFlo = feedMolFlo;
-  end if;
-  side_draw.P = P;
-  side_draw.T = T;
-  side_draw.mixMolFrac[1, :] = sideDrawMolFrac[:];
-  side_draw.mixMolFlo = sideDrawMolFlo;
-  side_draw.mixMolEnth = sideDrawMolEnth;
-  liquid_outlet.mixMolFlo = outLiqMolFlo;
-  liquid_outlet.mixMolEnth = outLiqMolEnth;
-  liquid_outlet.mixMolFrac[:] = outLiqCompMolFrac[:];
-  vapor_inlet.mixMolFlo = inVapMolFlo;
-  vapor_inlet.mixMolEnth = inVapMolEnth;
-  vapor_inlet.mixMolFrac[:] = inVapCompMolFrac[:];
-  heat_load.enFlo = heatLoad;
+    if Bin then
+      In.x_pc[1, :] = xin_c[:];
+      In.H = Hin;
+      In.F = Fin;
+    else
+      In_Dmy.x_pc[1, :] = xin_c[:];
+      In_Dmy.H = Hin;
+      In_Dmy.F = Fin;
+    end if;
+    
+    Out.P = P;
+    Out.T = T;
+    Out.x_pc[1, :] = xout_c[:];
+    Out.F = Fout;
+    Out.H = Hout;
+    Out_Liq.F = Fliqout;
+    Out_Liq.H = Hliqout;
+    Out_Liq.x_pc[:] = xliqout_c[:];
+    In_Vap.F = Fvapin;
+    In_Vap.H = Hvapin;
+    In_Vap.x_pc[:] = xvapin_c[:];
+    En.Q = Q;
 //Adjustment for thermodynamic packages
-  compMolFrac[1, :] = (sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:]) ./ (sideDrawMolFlo + outLiqMolFlo);
-  compMolFrac[2, :] = outLiqCompMolFrac[:];
-  compMolFrac[3, :] = K[:] .* compMolFrac[2, :];
+    x_pc[1, :] = (Fout .* xout_c[:] + Fliqout .* xliqout_c[:]) ./ (Fout + Fliqout);
+     x_pc[2, :] = xliqout_c[:];
+     x_pc[3, :] = K[:] .* x_pc[2, :];
 //Bubble point calculation
-  Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
 //Dew point calculation
-  Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
 //molar balance
-//feedMolFlo + inVapMolFlo = sideDrawMolFlo + outLiqMolFlo;
-  feedMolFlo .* feedMolFrac[:] + inVapMolFlo .* inVapCompMolFrac[:] = sideDrawMolFlo .* sideDrawMolFrac[:] + outLiqMolFlo .* outLiqCompMolFrac[:];
+//Fin + Fvapin = Fout + Fliqout;
+    Fin .* xin_c[:] + Fvapin .* xvapin_c[:] = Fout .* xout_c[:] + Fliqout .* xliqout_c[:];
 //equillibrium
-  if condType == "Partial" then
-    sideDrawMolFrac[:] = K[:] .* outLiqCompMolFrac[:];
-  elseif condType == "Total" then
-    sideDrawMolFrac[:] = outLiqCompMolFrac[:];
-  end if;
+    if Ctype == "Partial" then
+      xout_c[:] = K[:] .* xliqout_c[:];
+    elseif Ctype == "Total" then
+      xout_c[:] = xliqout_c[:];
+    end if;
 //summation equation
-//  sum(outLiqCompMolFrac[:]) = 1;
-  sum(sideDrawMolFrac[:]) = 1;
+//  sum(xliqout_c[:]) = 1;
+    sum(xout_c[:]) = 1;
 // Enthalpy balance
-  feedMolFlo * feedMolEnth + inVapMolFlo * inVapMolEnth = sideDrawMolFlo * sideDrawMolEnth + outLiqMolFlo * outLiqMolEnth + heatLoad;
+    Fin * Hin + Fvapin * Hvapin = Fout * Hout + Fliqout * Hliqout + Q;
 //Temperature calculation
-  if condType == "Total" then
-    P = sum(sideDrawMolFrac[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]));
-  elseif condType == "Partial" then
-    1 / P = sum(sideDrawMolFrac[:] ./ exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]));
-  end if;
+    if Ctype == "Total" then
+      P = sum(xout_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]));
+    elseif Ctype == "Partial" then
+      1 / P = sum(xout_c[:] ./ exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]));
+    end if;
 // outlet liquid molar enthalpy calculation
-  for i in 1:NOC loop
-    outLiqCompMolEnth[i] = Simulator.Files.Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
-  end for;
-  outLiqMolEnth = sum(outLiqCompMolFrac[:] .* outLiqCompMolEnth[:]) + resMolEnth[2];
-  annotation(
-    Diagram(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
-    Icon(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
-    __OpenModelica_commandLineOptions = "");
-end Cond;
+    for i in 1:Nc loop
+      Hliqout_c[i] = Simulator.Files.Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+    end for;
+    Hliqout = sum(xliqout_c[:] .* Hliqout_c[:]) + Hres_p[2];
+    annotation(
+      Diagram(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
+      Icon(coordinateSystem(extent = {{-100, -40}, {100, 40}})),
+      __OpenModelica_commandLineOptions = "");
+  end Cond;

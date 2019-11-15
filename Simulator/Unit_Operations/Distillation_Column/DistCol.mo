@@ -1,69 +1,75 @@
 within Simulator.Unit_Operations.Distillation_Column;
 
-model DistCol
-  parameter Integer NOC;
-  import data = Simulator.Files.Chemsep_Database;
-  parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-  parameter Boolean boolFeed[noOfStages] = Simulator.Files.Other_Functions.colBoolCalc(noOfStages, noOfFeeds, feedStages);
-  parameter Integer noOfStages = 4, noOfSideDraws = 0, noOfHeatLoads = 0, noOfFeeds = 1, feedStages[noOfFeeds];
-  parameter String condType = "Total";
-  //Total or Partial
-  Real refluxRatio(min = 0);
-  Simulator.Files.Connection.matConn feed[noOfFeeds](each connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-98, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn distillate(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {98, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn bottoms(connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, -74}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn condensor_duty annotation(
-    Placement(visible = true, transformation(origin = {60, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {60, 96}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn reboiler_duty annotation(
-    Placement(visible = true, transformation(origin = {60, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {72, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn side_draw[noOfSideDraws](each connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, 20}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 24}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn heat_load[noOfHeatLoads](each connNOC = NOC) annotation(
-    Placement(visible = true, transformation(origin = {100, -20}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {102, -22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-equation
-  for i in 1:noOfFeeds loop
-    if feedStages[i] == 1 then
-      connect(feed[i], condensor.feed);
-    elseif feedStages[i] == noOfStages then
-      connect(feed[i], reboiler.feed);
-    elseif feedStages[i] > 1 and feedStages[i] < noOfStages then
+  model DistCol
+    extends Simulator.Files.Icons.Distillation_Column;
+    parameter Integer Nc;
+    import data = Simulator.Files.Chemsep_Database;
+    parameter Simulator.Files.Chemsep_Database.General_Properties C[Nc];
+    parameter Boolean Bin_t[Nt] = Simulator.Files.Other_Functions.colBoolCalc(Nt, Ni, In_s);
+    parameter Integer Nt = 4, Nout = 0, NQ = 0, Ni = 1, InT_s[Ni];
+    parameter String Ctype = "Total";
+    //Total or Partial
+    Real RR(min = 0);
+    Simulator.Files.Connection.matConn In_s[Ni](each connNOC = Nc) annotation(
+      Placement(visible = true, transformation(origin = {-248, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn Dist(connNOC = Nc) annotation(
+      Placement(visible = true, transformation(origin = {250, 316}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 298}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn Bot(connNOC = Nc) annotation(
+      Placement(visible = true, transformation(origin = {250, -296}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {252, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.enConn Cduty annotation(
+      Placement(visible = true, transformation(origin = {246, 590}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.enConn Rduty annotation(
+      Placement(visible = true, transformation(origin = {252, -588}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -598}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.matConn Out_s[Nout](each connNOC = Nc) annotation(
+      Placement(visible = true, transformation(origin = {-36, 32}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-70, 60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Files.Connection.enConn En[NQ](each connNOC = Nc) annotation(
+      Placement(visible = true, transformation(origin = {-34, -54}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-70, -60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  equation
+  for i in 1:Ni loop
+      if InT_s[i] == 1 then
+        connect(In_s[i], condensor.In);
+      elseif InT_s[i] == Nt then
+        connect(In_s[i], reboiler.In);
+      elseif InT_s[i] > 1 and InT_s[i] < Nt then
 //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
-      feed[i].P = tray[feedStages[i] - 1].dummyP1;
-      feed[i].T = tray[feedStages[i] - 1].dummyT1;
-      feed[i].mixMolFlo = tray[feedStages[i] - 1].dummyMixMolFlo1;
-      feed[i].mixMolFrac = tray[feedStages[i] - 1].dummyMixMolFrac1;
-      feed[i].mixMolEnth = tray[feedStages[i] - 1].dummyMixMolEnth1;
-      feed[i].mixMolEntr = tray[feedStages[i] - 1].dummyMixMolEntr1;
-      feed[i].vapPhasMolFrac = tray[feedStages[i] - 1].dummyVapPhasMolFrac1;
-    end if;
-  end for;
-  connect(condensor.side_draw, distillate);
-  connect(reboiler.side_draw, bottoms);
-  connect(condensor.heat_load, condensor_duty);
-  connect(reboiler.heat_load, reboiler_duty);
-  for i in 1:noOfStages - 3 loop
-    connect(tray[i].liquid_outlet, tray[i + 1].liquid_inlet);
-    connect(tray[i].vapor_inlet, tray[i + 1].vapor_outlet);
-  end for;
-  connect(tray[1].vapor_outlet, condensor.vapor_inlet);
-  connect(condensor.liquid_outlet, tray[1].liquid_inlet);
-  connect(tray[noOfStages - 2].liquid_outlet, reboiler.liquid_inlet);
-  connect(reboiler.vapor_outlet, tray[noOfStages - 2].vapor_inlet);
+        In_s[i].P = tray[InT_s[i] - 1].Pdmy1;
+        In_s[i].T = tray[InT_s[i] - 1].Tdmy1;
+        In_s[i].mixMolFlo = tray[InT_s[i] - 1].Fdmy1;
+        In_s[i].mixMolFrac = tray[InT_s[i] - 1].xdmy_pc1;
+        In_s[i].mixMolEnth = tray[InT_s[i] - 1].Hdmy1;
+        In_s[i].mixMolEntr = tray[InT_s[i] - 1].Sdmy1;
+        In_s[i].vapPhasMolFrac = tray[InT_s[i] - 1].xvapdmy1;
+      end if;
+    end for;
+    connect(condensor.Out, Dist);
+    connect(reboiler.Out, Bot);
+    connect(condensor.En, Cduty);
+    connect(reboiler.En, Rduty);
+    for i in 1:Nt - 3 loop
+      connect(tray[i].Out_Liq, tray[i + 1].Out_Liq);
+      connect(tray[i].In_Vap, tray[i + 1].Out_Vap);
+    end for;
+    connect(tray[1].Out_Vap, condensor.In_Vap);
+    connect(condensor.Out_Liq, tray[1].In_Liq);
+    connect(tray[Nt - 2].Out_Liq, reboiler.In_Liq);
+    connect(reboiler.Out_Vap, tray[Nt - 2].In_Vap);
 //tray pressures
-  for i in 1:noOfStages - 2 loop
-    tray[i].P = condensor.P + i * (reboiler.P - condensor.P) / (noOfStages - 1);
-  end for;
-  for i in 2:noOfStages - 1 loop
-    tray[i - 1].sideDrawType = "Null";
-    tray[i - 1].side_draw.mixMolFrac = zeros(3, NOC);
-    tray[i - 1].side_draw.mixMolFlo = 0;
-    tray[i - 1].side_draw.mixMolEnth = 0;
-    tray[i - 1].side_draw.mixMolEntr = 0;
-    tray[i - 1].side_draw.vapPhasMolFrac = 0;
-    tray[i - 1].heatLoad = 0;
-  end for;
-  refluxRatio = condensor.outLiqMolFlo / condensor.side_draw.mixMolFlo;
-end DistCol;
+    for i in 1:Nt - 2 loop
+      tray[i].P = condensor.P + i * (reboiler.P - condensor.P) / (Nt - 1);
+    end for;
+    
+    for i in 2:Nt - 1 loop
+      tray[i - 1].OutType = "Null";
+      tray[i - 1].Out.x_pc = zeros(3, Nc);
+      tray[i - 1].Out.F = 0;
+      tray[i - 1].Out.H = 0;
+      tray[i - 1].Out.S = 0;
+      tray[i - 1].Out.xvap = 0;
+      tray[i - 1].Q = 0;
+    end for;
+    RR = condensor.Fliqout / condensor.Out.F;
+  annotation(
+      Icon(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
+      Diagram(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
+      __OpenModelica_commandLineOptions = "");
+  end DistCol;

@@ -1,18 +1,18 @@
 within Simulator.Files.Thermodynamic_Functions;
 
-function FindString
-  input String compound_array[:];
-  input String compound;
-  output Integer int;
-protected
-  Integer i, len = size(compound_array, 1);
-algorithm
-  int := -1;
-  i := 1;
-  while int == (-1) and i <= len loop
-    if compound_array[i] == compound then
-      int := i;
-    end if;
-    i := i + 1;
-  end while;
-end FindString;
+  function FindString
+    input String Comp_A[:];
+    input String Comp;
+    output Integer Int;
+  protected
+    Integer i, Len = size(Comp_A, 1);
+  algorithm
+    Int := -1;
+    i := 1;
+    while Int == (-1) and i <= Len loop
+      if Comp_A[i] == Comp then
+        Int := i;
+      end if;
+      i := i + 1;
+    end while;
+  end FindString;

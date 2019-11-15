@@ -1,179 +1,205 @@
 within Simulator.Unit_Operations;
 
 model Shortcut_Column
+//==============================================================================
+//Header Files and Parameters
   extends Simulator.Files.Icons.Distillation_Column;
   import data = Simulator.Files.Chemsep_Database;
-  parameter data.General_Properties comp[NOC];
-  parameter Integer NOC;
-  Real mixMolFlo[3](each min = 0, each start = 100), mixMolFrac[3, NOC](each start = 1 / (NOC + 1), each min = 0, each max = 1), mixMolEnth[3], mixMolEntr[3];
-  Real minN(min = 0, start = 10), minR(start = 1);
-  Real alpha[NOC], theta(start = 1);
-  Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
-  Real condT(start = max(comp[:].Tb), min = 0), condP(min = 0, start = 101325), rebP(min = 0, start = 101325), rebT(start = min(comp[:].Tb), min = 0);
-  parameter Integer HKey, LKey;
-  parameter String condType = "Total";
-  Real vapPhasMolFrac[3](each min = 0, each max = 1, each start = 0.5), condLiqMixMolEnth, condVapMixMolEnth, condVapCompMolEnth[NOC], condLiqCompMolEnth[NOC], condLiqMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), condVapMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1));
-  Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)), Pdew(min = 0, start = sum(comp[:].Pc) / NOC), Pbubl(min = 0, start = sum(comp[:].Pc) / NOC);
-  Real actR, actN, x, y, feedN;
-  Real rectLiq(min = 0, start = 100), rectVap(min = 0, start = 100), stripLiq(min = 0, start = 100), stripVap(min = 0, start = 100), rebDuty, condDuty;
-  Simulator.Files.Connection.matConn feed(connNOC = NOC) annotation(
+  parameter data.General_Properties C[Nc];
+  parameter Integer Nc "Number of Components";
+  parameter Integer HKey "Heavy Key Component", LKey "Light Key Component";
+  parameter String Ctype = "Total";
+  
+//==============================================================================
+//Model Variables
+  Real F_p[3](each min = 0, each start = 100) "Inlet Molar Flow", x_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Inlet Mole Fraction", H_p[3]"Inlet Molar Enthalpy ", S_p[3] "Inlet Molar Entropy";
+  Real Ntmin(min = 0, start = 10) "Minimum Number of trays", RRmin(start = 1) "Minimum Reflux Ratio";
+  Real alpha_c[Nc] "Relative Volatility", theta(start = 1) "Fraction";
+  Real Pin(min = 0, start = 101325) "Feed Pressure", Tin(min = 0, start = 273.15)"Feed Temperature";
+  Real Tcond(start = max(C[:].Tb), min = 0)"Condenser Temperature", Pcond(min = 0, start = 101325) "Condenser Pressure", Preb(min = 0, start = 101325)"Re-boiler Pressure", Treb(start = min(C[:].Tb), min = 0) "Re-boiler Temperature";
+  Real xvap_p[3](each min = 0, each max = 1, each start = 0.5) "Vapor Phase Mole Fraction", Hliqcond "Total Enthalpy of Liquid in Condenser", Hvapcond "Total Enthalpy of Vapor in Condenser", Hvapcond_c[Nc] "Component Enthalpy of Vapor in Condenser", Hliqcond_c[Nc] "Component Enthalpy of Vapor in Condenser", xliqcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Liquid Mole Fraction in Condenser", xvapcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Vapor Mole Fraction in Condenser";
+  Real xin_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Adjustment for Thermodynamics", Pdew(min = 0, start = sum(C[:].Pc) / Nc)"Dew Point Pressure", Pbubl(min = 0, start = sum(C[:].Pc) / Nc)"Bubble Point Pressure";
+  Real RR "Reflux Ratio", Nt "Number of Trays", x "Intermediate 1", y "Intermediate 1", Intray "Feed Tray";
+  Real Fliqrec(min = 0, start = 100) "Liquid Flow in Rectification Section", Fvaprec(min = 0, start = 100)"Vapor Flow in Rectification Section", Fliqstrip(min = 0, start = 100) "Liquid Flow in Stripping Section", Fvapstrip(min = 0, start = 100)"Vapor Flow in Stripping Section", Qr "Re-boiler Duty", Qc "Condenser Duty";
+
+//==============================================================================
+//Instantiation of Connections
+  Simulator.Files.Connection.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn distillate(connNOC = NOC) annotation(
+  Simulator.Files.Connection.matConn Out1(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {250, 336}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn bottoms(connNOC = NOC) annotation(
+  Simulator.Files.Connection.matConn Out2(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {250, -266}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn condenser_duty annotation(
+  Simulator.Files.Connection.enConn En1 annotation(
     Placement(visible = true, transformation(origin = {248, 594}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn reboiler_duty annotation(
+  Simulator.Files.Connection.enConn En2 annotation(
     Placement(visible = true, transformation(origin = {254, -592}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+
 equation
+//==============================================================================
 // Connector equations
-  feed.P = P;
-  feed.T = T;
-  feed.mixMolFlo = mixMolFlo[1];
-  feed.mixMolFrac[1, :] = mixMolFrac[1, :];
-  feed.mixMolEnth = mixMolEnth[1];
-  feed.mixMolEntr = mixMolEntr[1];
-  feed.vapPhasMolFrac = vapPhasMolFrac[1];
-  bottoms.P = rebP;
-  bottoms.T = rebT;
-  bottoms.mixMolFlo = mixMolFlo[2];
-  bottoms.mixMolFrac[1, :] = mixMolFrac[2, :];
-  bottoms.mixMolEnth = mixMolEnth[2];
-  bottoms.mixMolEntr = mixMolEntr[2];
-  bottoms.vapPhasMolFrac = vapPhasMolFrac[2];
-  distillate.P = condP;
-  distillate.T = condT;
-  distillate.mixMolFlo = mixMolFlo[3];
-  distillate.mixMolFrac[1, :] = mixMolFrac[3, :];
-  distillate.mixMolEnth = mixMolEnth[3];
-  distillate.mixMolEntr = mixMolEntr[3];
-  distillate.vapPhasMolFrac = vapPhasMolFrac[3];
-  reboiler_duty.enFlo = rebDuty;
-  condenser_duty.enFlo = condDuty;
-//adjustment for thermodynamic packages
-  compMolFrac[1, :] = mixMolFrac[1, :];
-  compMolFrac[2, :] = compMolFrac[1, :] ./ (1 .+ vapPhasMolFrac[1] .* (K[:] .- 1));
-  for i in 1:NOC loop
-    compMolFrac[3, i] = K[i] * compMolFrac[2, i];
+  In.P = Pin;
+  In.T = T;
+  In.F = F_p[1];
+  In.x_pc[1, :] = x_pc[1, :];
+  In.H = H_p[1];
+  In.S = S_p[1];
+  In.xvap = xvap_p[1];
+  Out2.P = Preb;
+  Out2.T = Treb;
+  Out2.F = F_p[2];
+  Out2.x_pc[1, :] = x_pc[2, :];
+  Out2.H = H_p[2];
+  Out2.S = S_p[2];
+  Out2.xvap = xvap_p[2];
+  Out1.P = Pcond;
+  Out1.T = Tcond;
+  Out1.F = F_p[3];
+  Out1.x_pc[1, :] = x_pc[3, :];
+  Out1.H = H_p[3];
+  Out1.S = S_p[3];
+  Out1.xvap = xvap_p[3];
+  En2.enFlo = Qr;
+  En1.enFlo = Qc;
+
+//==============================================================================
+//Adjustment for thermodynamic packages
+  xin_pc[1, :] = x_pc[1, :];
+  xin_pc[2, :] = xin_pc[1, :] ./ (1 .+ xvap_p[1] .* (K[:] .- 1));
+  for i in 1:Nc loop
+    xin_pc[3, i] = K[i] * xin_pc[2, i];
   end for;
-//  sum(compMolFrac[1,:] .* (K[:] .- 1) ./ (1 .+ vapPhasMolFrac[1] .* (K[:] .- 1))) = 0;
+//==============================================================================
 //Bubble point calculation
-  Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+  Pbubl = sum(gmabubl_c[:] .* xin_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
+  
+//==============================================================================
 //Dew point calculation
-  Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
-equation
-  for i in 1:NOC loop
-    if mixMolFrac[1, i] == 0 then
-      mixMolFrac[3, i] = 0;
+  Pdew = 1 / sum(xin_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
+  for i in 1:Nc loop
+    if x_pc[1, i] == 0 then
+      x_pc[3, i] = 0;
     else
-      mixMolFlo[1] .* mixMolFrac[1, i] = mixMolFlo[2] .* mixMolFrac[2, i] + mixMolFlo[3] .* mixMolFrac[3, i];
+      F_p[1] .* x_pc[1, i] = F_p[2] .* x_pc[2, i] + F_p[3] .* x_pc[3, i];
     end if;
   end for;
-  sum(mixMolFrac[3, :]) = 1;
-  sum(mixMolFrac[2, :]) = 1;
-  for i in 1:NOC loop
+  sum(x_pc[3, :]) = 1;
+  sum(x_pc[2, :]) = 1;
+  
+//==============================================================================
+//Distillate and Bottom composition
+  for i in 1:Nc loop
     if i <> HKey then
-      if condType == "Total" then
-        mixMolFrac[3, i] / mixMolFrac[3, HKey] = alpha[i] ^ minN * (mixMolFrac[2, i] / mixMolFrac[2, HKey]);
-      elseif condType == "Partial" then
-        mixMolFrac[3, i] / mixMolFrac[3, HKey] = alpha[i] ^ (minN + 1) * (mixMolFrac[2, i] / mixMolFrac[2, HKey]);
+      if Ctype == "Total" then
+        x_pc[3, i] / x_pc[3, HKey] = alpha_c[i] ^ Ntmin * (x_pc[2, i] / x_pc[2, HKey]);
+      elseif Ctype == "Partial" then
+        x_pc[3, i] / x_pc[3, HKey] = alpha_c[i] ^ (Ntmin + 1) * (x_pc[2, i] / x_pc[2, HKey]);
       end if;
     end if;
   end for;
-  alpha[:] = K[:] / K[HKey];
-  //Calculation of temperature at distillate and bottoms
-  if condT <= 0 and rebT <= 0 then
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-    
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
-    
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
-  end if;
+//==============================================================================
+//Relative Volatility
+  alpha_c[:] = K[:] / K[HKey];
   
-elseif condT<=0 then
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+//==============================================================================
+//Calculation of temperature at Distillate and Bottoms
+  if Tcond <= 0 and Treb <= 0 then
+  if Ctype == "Partial" then
+    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
     
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
     
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+  elseif Ctype == "Total" then
+    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
     
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
   end if;
-
-elseif rebT<=0 then
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+ //============================================================================== 
+elseif Tcond<=0 then
+  if Ctype == "Partial" then
+    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
     
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
     
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+  elseif Ctype == "Total" then
+    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
     
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / 1 + comp[:].VP[4] * 1 + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
   end if;
-
+//==============================================================================
+elseif Treb<=0 then
+  if Ctype == "Partial" then
+    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
+    
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+    
+  elseif Ctype == "Total" then
+    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
+    
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / 1 + C[:].VP[4] * 1 + C[:].VP[5] .* Treb .^ C[:].VP[6]));
+  end if;
+//==============================================================================
 else
-  if condType == "Partial" then
-    1 / condP = sum(mixMolFrac[3, :] ./ (gamma[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6])));
+  if Ctype == "Partial" then
+    1 / Pcond = sum(x_pc[3, :] ./ (gma[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6])));
     
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
     
-  elseif condType == "Total" then
-    condP = sum(gamma[:] .* mixMolFrac[3, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / condT + comp[:].VP[4] * log(condT) + comp[:].VP[5] .* condT .^ comp[:].VP[6]));
+  elseif Ctype == "Total" then
+    Pcond = sum(gma[:] .* x_pc[3, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tcond + C[:].VP[4] * log(Tcond) + C[:].VP[5] .* Tcond .^ C[:].VP[6]));
     
-    rebP = sum(gamma[:] .* mixMolFrac[2, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / rebT + comp[:].VP[4] * log(rebT) + comp[:].VP[5] .* rebT .^ comp[:].VP[6]));
+    Preb = sum(gma[:] .* x_pc[2, :] .* exp(C[:].VP[2] + C[:].VP[3] / Treb + C[:].VP[4] * log(Treb) + C[:].VP[5] .* Treb .^ C[:].VP[6]));
   end if;
-  
 end if;
+
+//==============================================================================
 //Minimum Reflux, Underwoods method
-if theta > alpha[LKey] or theta < alpha[HKey] then
-  0= sum((alpha[:] .* mixMolFrac[1, :])./ (alpha[:] .- theta));
-  //This is mathamatical adjustment for right convergence of theta
+if theta > alpha_c[LKey] or theta < alpha_c[HKey] then
+  0= sum((alpha_c[:] .* x_pc[1, :])./ (alpha_c[:] .- theta));
 else
-  vapPhasMolFrac[1] = sum((alpha[:] .* mixMolFrac[1, :])./ (alpha[:] .- theta));
+  xvap_p[1] = sum((alpha_c[:] .* x_pc[1, :])./ (alpha_c[:] .- theta));
 end if;
-  minR + 1 = sum(alpha[:] .* mixMolFrac[3, :] ./ (alpha[:] .- theta));
+  RRmin + 1 = sum(alpha_c[:] .* x_pc[3, :] ./ (alpha_c[:] .- theta));
+  
+//==============================================================================
 //Actual number of trays,Gillilands method
-  x = (actR - minR) / (actR + 1);
-  y = (actN - minN) / (actN + 1);
+  x = (RR - RRmin) / (RR + 1);
+  y = (Nt - Ntmin) / (Nt + 1);
   if x >= 0 then
     y = 0.75 * (1 - x ^ 0.5668);
   else
     y = -1;
   end if;
+//==============================================================================
 // Feed location, Fenske equation
-  feedN = actN / minN * log(mixMolFrac[1, LKey] / mixMolFrac[1, HKey] * (mixMolFrac[2, HKey] / mixMolFrac[2, LKey])) / log(K[LKey] / K[HKey]);
-//rectifying and stripping flows
-  rectLiq = actR * mixMolFlo[3];
-  stripLiq = (1 - vapPhasMolFrac[1]) * mixMolFlo[1] + rectLiq;
-  stripVap = stripLiq - mixMolFlo[2];
-  rectVap = vapPhasMolFrac[1] * mixMolFlo[1] + stripVap;
-  for i in 1:NOC loop
-    condVapCompMolEnth[i] = Simulator.Files.Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, condT);
-    condLiqCompMolEnth[i] = Simulator.Files.Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, condT);
+  Intray = Nt / Ntmin * log(x_pc[1, LKey] / x_pc[1, HKey] * (x_pc[2, HKey] / x_pc[2, LKey])) / log(K[LKey] / K[HKey]);
+  
+//==============================================================================
+//Rectifying and Stripping flows Calculation
+  Fliqrec = RR * F_p[3];
+  Fliqstrip = (1 - xvap_p[1]) * F_p[1] + Fliqrec;
+  Fvapstrip = Fliqstrip - F_p[2];
+  Fvaprec = xvap_p[1] * F_p[1] + Fvapstrip;
+  for i in 1:Nc loop
+    Hvapcond_c[i] = Simulator.Files.Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, Tcond);
+    Hliqcond_c[i] = Simulator.Files.Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, Tcond);
   end for;
-  if condType == "Total" then
-    condLiqMixMolEnth = mixMolEnth[3];
-  elseif condType == "Partial" then
-    condLiqMixMolEnth = sum(condLiqMolFrac[:] .* condLiqCompMolEnth[:]);
+  if Ctype == "Total" then
+    Hliqcond = H_p[3];
+  elseif Ctype == "Partial" then
+    Hliqcond = sum(xliqcond_c[:] .* Hliqcond_c[:]);
   end if;
-  condVapMixMolEnth = sum(condVapMolFrac[:] .* condVapCompMolEnth[:]);
-  rectVap .* condVapMolFrac[:] = rectLiq .* condLiqMolFrac[:] + mixMolFlo[3] .* mixMolFrac[3, :];
-  if condType == "Partial" then
-    mixMolFrac[3, :] = K[:] .* condLiqMolFrac[:];
-  elseif condType == "Total" then
-    mixMolFrac[3, :] = condLiqMolFrac[:];
+  Hvapcond = sum(xvapcond_c[:] .* Hvapcond_c[:]);
+  Fvaprec .* xvapcond_c[:] = Fliqrec .* xliqcond_c[:] + F_p[3] .* x_pc[3, :];
+  if Ctype == "Partial" then
+    x_pc[3, :] = K[:] .* xliqcond_c[:];
+  elseif Ctype == "Total" then
+    x_pc[3, :] = xliqcond_c[:];
   end if;
+//==============================================================================
 //Energy Balance
-  mixMolFlo[1] * mixMolEnth[1] + rebDuty - condDuty = mixMolFlo[2] * mixMolEnth[2] + mixMolFlo[3] * mixMolEnth[3];
-  rectVap * condVapMixMolEnth = condDuty + mixMolFlo[3] * mixMolEnth[3] + rectLiq * condLiqMixMolEnth;
+  F_p[1] * H_p[1] + Qr - Qc = F_p[2] * H_p[2] + F_p[3] * H_p[3];
+  Fvaprec * Hvapcond = Qc + F_p[3] * H_p[3] + Fliqrec * Hliqcond;
 annotation(
     Icon(coordinateSystem(extent = {{-250, -600}, {250, 600}})),
     Diagram(coordinateSystem(extent = {{-250, -600}, {250, 600}})),

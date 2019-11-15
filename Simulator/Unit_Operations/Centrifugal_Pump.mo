@@ -1,46 +1,62 @@
 within Simulator.Unit_Operations;
 
 model Centrifugal_Pump
+//===========================================================================
+//Header files and Parameters
   extends Simulator.Files.Icons.Centrifugal_Pump;
-  parameter Integer NOC = 2 "Number of Components";
-  parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC] "Component array";
-  Real inP(min = 0, start = 101325) "Inlet Pressure", outP(min = 0, start = 101325) "Outlet Pressure", inT(min = 0, start = 273.15) "Inlet Temperature", outT(min = 0, start = 273.15) "Outlet Temperature", tempInc "Temperature increase", pressInc "Pressure Increase", inMixMolEnth "Inlet Mixture Molar Enthalpy", outMixMolEnth "Outlet Mixture Molar Enthalpy", reqPow "Power required", compDens[NOC](each min = 0) "Component density", dens(min = 0) "Density", vapPress(min = 0, start = 101325) "Vapor pressure of Mixture at outlet Temperature", NPSH "NPSH", inMixMolFlo(min = 0, start = 100) "inlet Mixture Molar Flow", outMixMolFlo(min = 0, start = 100) "Outlet Mixture Molar flow", inMixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Inlet Mixuture Molar Fraction", outMixMolFrac[NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Outlet Mixture Molar Fraction";
-  parameter Real eff "efficiency";
-  Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
+  parameter Integer Nc = 2 "Number of Components";
+  parameter Simulator.Files.Chemsep_Database.General_Properties C[Nc] "Component array";
+  parameter Real Eff "Efficiency";
+  
+//===========================================================================
+//Model Variables
+  Real Pin(min = 0, start = 101325) "Inlet Pressure", Pout(min = 0, start = 101325) "Outlet Pressure", Tin(min = 0, start = 273.15) "Inlet Temperature", Tout(min = 0, start = 273.15) "Outlet Temperature", Tdel "Temperature increase", Pdel "Pressure Increase", Hin "Inlet Mixture Molar Enthalpy", Hout "Outlet Mixture Molar Enthalpy", Q "Power required", rho_c[Nc](each min = 0) "Component density", rho(min = 0) "Density", Pvap(min = 0, start = 101325) "Vapor pressure of Mixture at Outlet Temperature", NPSH "NPSH", Fin(min = 0, start = 100) "Inlet Mixture Molar Flow", Fout(min = 0, start = 100) "Outlet Mixture Molar flow", xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet Mixuture Molar Fraction", xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet Mixture Molar Fraction";
+
+//============================================================================
+//Instantiation of Connectors  
+  Simulator.Files.Connection.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
+  Simulator.Files.Connection.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn energy annotation(
+  Simulator.Files.Connection.enConn En annotation(
     Placement(visible = true, transformation(origin = {2, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+
 equation
+//============================================================================
 //Connector equation
-  inlet.P = inP;
-  inlet.T = inT;
-  inlet.mixMolFlo = inMixMolFlo;
-  inlet.mixMolEnth = inMixMolEnth;
-  inlet.mixMolFrac[1, :] = inMixMolFrac[:];
-  outlet.P = outP;
-  outlet.T = outT;
-  outlet.mixMolFlo = outMixMolFlo;
-  outlet.mixMolEnth = outMixMolEnth;
-  outlet.mixMolFrac[1, :] = outMixMolFrac[:];
-  energy.enFlo = reqPow;
+  In.P = Pin;
+  In.T = Tin;
+  In.F = Fin;
+  In.H = Hin;
+  In.x_pc[1, :] = xin_c[:];
+  Out.P = Pout;
+  Out.T = Tout;
+  Out.F = Fout;
+  Out.H = Hout;
+  Out.x_pc[1, :] = xout_c[:];
+  En.Q = Q;
+  
+//=============================================================================
 //Pump equations
-//balance
-  inMixMolFlo = outMixMolFlo;
-  inMixMolFrac = outMixMolFrac;
-  inP + pressInc = outP;
-  inT + tempInc = outT;
-//density
-  for i in 1:NOC loop
-    compDens[i] = Simulator.Files.Thermodynamic_Functions.Dens(comp[i].LiqDen, comp[i].Tc, inT, inP);
+  Fin = Fout;
+  xin_c = xout_c;
+  Pin + Pdel = Pout;
+  Tin + Tdel = Tout;
+  
+//=============================================================================
+//Calculation of Density
+  for i in 1:Nc loop
+    rho_c[i] = Simulator.Files.Thermodynamic_Functions.rho(C[i].LiqDen, C[i].Tc, Tin, Pin);
   end for;
-  dens = 1 / sum(inMixMolFrac ./ compDens);
-//energy balance
-  outMixMolEnth = inMixMolEnth + pressInc / dens;
-  reqPow = inMixMolFlo * (outMixMolEnth - inMixMolEnth) / eff;
-//NPSH
-  NPSH = (inP - vapPress) / dens;
-//vap pressure of mixture at outT
-  vapPress = sum(inMixMolFrac .* exp(comp[:].VP[2] + comp[:].VP[3] / outT + comp[:].VP[4] * log(outT) + comp[:].VP[5] .* outT .^ comp[:].VP[6]));
+  rho = 1 / sum(xin_c ./ rho_c);
+  
+//==============================================================================
+//Energy Balance and NPSH Calculation
+  Hout = Hin + Pdel / rho;
+  Q = Fin * (Hout - Hin) / Eff;
+  NPSH = (Pin - Pvap) / rho;
+  
+//===============================================================================
+//Vapor Pressure of mixture at Outlet Temperature
+  Pvap = sum(xin_c .* exp(C[:].VP[2] + C[:].VP[3] / Tout + C[:].VP[4] * log(Tout) + C[:].VP[5] .* Tout .^ C[:].VP[6]));
 end Centrifugal_Pump;

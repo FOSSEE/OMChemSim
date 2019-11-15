@@ -12,38 +12,44 @@ package adia_exp1
   end exp;
 
   model main
+  
+  //================================================================
+  //Header files and Parameters
     import data = Simulator.Files.Chemsep_Database;
-    //instantiation of chemsep database
     parameter data.Benzene ben;
-    //instantiation of methanol
     parameter data.Toluene tol;
-    //instantiation of ethanol
-    parameter Integer NOC = 2;
-    parameter data.General_Properties comp[NOC] = {ben, tol};
-    Simulator.Test.adia_exp1.exp exp1(NOC = NOC, comp = comp, eff = 0.75) annotation(
-      Placement(visible = true, transformation(origin = {-9, 7}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
-    Simulator.Test.adia_comp1.ms inlet(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms outlet(NOC = NOC, comp = comp, T(start = 374)) annotation(
-      Placement(visible = true, transformation(origin = {58, 6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Streams.Energy_Stream power annotation(
-      Placement(visible = true, transformation(origin = {-50, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    parameter Integer Nc = 2;
+    parameter data.General_Properties C[Nc] = {ben, tol};
+    
+  //================================================================
+  //Instantiation of Streams and Blocks
+    Simulator.Test.adia_comp1.ms S1(Nc = Nc, C = C) annotation(
+      Placement(visible = true, transformation(origin = {-82, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.adia_exp1.ms S2(Nc = Nc, C = C, T(start = 374)) annotation(
+      Placement(visible = true, transformation(origin = {62, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.adia_exp1.exp B1(Nc = Nc, C = C, eff = 0.75) annotation(
+      Placement(visible = true, transformation(origin = {-3, -1}, extent = {{-23, -23}, {23, 23}}, rotation = 0)));
+    Simulator.Streams.Energy_Stream E1 annotation(
+      Placement(visible = true, transformation(origin = {-30, -60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
   equation
-  connect(power.outlet, exp1.energy) annotation(
-      Line(points = {{-40, -56}, {-10, -56}, {-10, -16}, {-8, -16}}));
-  connect(exp1.outlet, outlet.inlet) annotation(
-      Line(points = {{14, 6}, {48, 6}, {48, 6}, {48, 6}}));
-  connect(inlet.outlet, exp1.inlet) annotation(
-      Line(points = {{-68, 8}, {-32, 8}}));
-    inlet.compMolFrac[1, :] = {0.5, 0.5};
-//mixture molar composition
-    inlet.P = 131325;
-//input pressure
-    inlet.T = 372;
-//input temperature
-    inlet.totMolFlo[1] = 100;
-//input molar flow
-    exp1.pressDrop = 10000;
-//pressure drop
+  
+  //================================================================
+  //Connections
+    connect(E1.outlet, B1.En) annotation(
+      Line(points = {{-20, -60}, {-2, -60}, {-2, -16}, {-2, -16}}, color = {255, 0, 0}));
+    connect(B1.Out, S2.inlet) annotation(
+      Line(points = {{20, 0}, {52, 0}, {52, 0}, {52, 0}}, color = {0, 70, 70}));
+    connect(S1.outlet, B1.In) annotation(
+      Line(points = {{-72, 0}, {-26, 0}, {-26, 0}, {-26, 0}}, color = {0, 70, 70}));
+  
+  //================================================================
+  //Inputs and Specifications
+    S1.x_pc[1, :] = {0.5, 0.5};
+    S1.P = 131325;
+    S1.T = 372;
+    S1.F_p[1] = 100;
+    B1.Pdel = 10000;
+
   end main;
 end adia_exp1;

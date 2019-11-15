@@ -7,32 +7,43 @@ package split
   end ms;
 
   model main
+  
+  //===============================================================
+  //Header Files and Parameters
     import data = Simulator.Files.Chemsep_Database;
     parameter data.Benzene benz;
     parameter data.Toluene tol;
-    parameter Integer NOC = 2;
-    parameter data.General_Properties comp[NOC] = {benz, tol};
-    ms inlet(NOC = NOC, comp = comp) annotation(
+    parameter Integer Nc = 2;
+    parameter data.General_Properties C[Nc] = {benz, tol};
+    
+  //===============================================================
+  //Instantiation of Streams and Blocks
+    ms S1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-80, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms outlet1(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {38, 56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms outlet2(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {38, -58}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Unit_Operations.Splitter split(NOC = NOC, comp = comp, NO = 2, calcType = "Molar_Flow") annotation(
-      Placement(visible = true, transformation(origin = {-30, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.split.ms S2(Nc = Nc, C = C) annotation(
+      Placement(visible = true, transformation(origin = {36, 30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Test.split.ms S3(Nc = Nc, C = C) annotation(
+      Placement(visible = true, transformation(origin = {40, -10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Unit_Operations.Splitter B1(Nc = Nc, C = C, NO = 2, CalcType = "Molar_Flow") annotation(
+      Placement(visible = true, transformation(origin = {-24, 10}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
   equation
-  connect(inlet.outlet, split.inlet) annotation(
-      Line(points = {{-70, 10}, {-40, 10}}));
-  connect(outlet1.inlet, split.outlet[1]) annotation(
-      Line(points = {{28, 56}, {12, 56}, {12, 10}, {-20, 10}}));
-  connect(outlet2.inlet, split.outlet[2]) annotation(
-      Line(points = {{28, -58}, {16, -58}, {16, 10}, {-20, 10}}));
-//  connect(split.outlet[1], outlet1.inlet);
-//  connect(split.outlet[2], outlet2.inlet);
-    inlet.P = 101325;
-    inlet.T = 300;
-    inlet.compMolFrac[1, :] = {0.5, 0.5};
-    inlet.totMolFlo[1] = 100;
-    split.specVal = {20, 80};
+  
+  //===============================================================
+  //Connections
+    connect(B1.Out[2], S3.inlet) annotation(
+      Line(points = {{-14, 10}, {0, 10}, {0, -10}, {30, -10}}, color = {0, 70, 70}));
+    connect(B1.Out[1], S2.inlet) annotation(
+      Line(points = {{-14, 10}, {0, 10}, {0, 30}, {26, 30}}, color = {0, 70, 70}));
+    connect(S1.outlet, B1.In) annotation(
+      Line(points = {{-70, 10}, {-34, 10}, {-34, 10}, {-34, 10}}, color = {0, 70, 70}));
+
+  //===============================================================
+  //Inputs and Specifications
+    S1.P = 101325;
+    S1.T = 300;
+    S1.x_pc[1, :] = {0.5, 0.5};
+    S1.F_c[1] = 100;
+    B1.SpecVal_s = {20, 80};
   end main;
 end split;

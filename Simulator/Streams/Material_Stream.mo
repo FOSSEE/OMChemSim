@@ -5,117 +5,118 @@ model Material_Stream
 //  extends Modelica.Icons.SourcesPackage;
   extends Simulator.Files.Icons.Material_Stream;
   import Simulator.Files.*;
-  parameter Integer NOC;
-  parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
+  parameter Integer Nc;
+  parameter Simulator.Files.Chemsep_Database.General_Properties C[Nc];
   Real P(min = 0, start = 101325) "Pressure", T(start = 273) "Temperature";
-  Real Pbubl(min = 0, start = sum(comp[:].Pc) / NOC) "Bubble point pressure", Pdew(min = 0, start = sum(comp[:].Pc) / NOC) "dew point pressure";
-  Real liqPhasMolFrac(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction", vapPhasMolFrac(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction", liqPhasMasFrac(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction", vapPhasMasFrac(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
-  Real totMolFlo[3](each min = 0, each start = 100) "Total molar flow", totMasFlo[3](each min = 0, each start = 100) "Total Mass Flow", MW[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
-  Real compMolFrac[3, NOC](each min = 0, each max = 1, each start = 1 / (NOC + 1)) "Component mole fraction", compMasFrac[3, NOC](each start = 1 / (NOC + 1), each min = 0, each max = 1) "Component Mass fraction", compMolFlo[3, NOC](each start = 100, each min = 0) "Component Molar flow", compMasFlo[3, NOC](each min = 0, each start = 100) "Component Mass Fraction";
-  Real phasMolSpHeat[3] "phase Molar Specific Heat", compMolSpHeat[3, NOC] "Component Molar Specific Heat";
-  Real phasMolEnth[3] "Phase Molar Enthalpy", compMolEnth[3, NOC] "Component Molar Enthalpy";
-  Real phasMolEntr[3] "Phase Molar Entropy", compMolEntr[3, NOC] "Component Molar Entropy";
-  Simulator.Files.Connection.matConn inlet(connNOC = NOC) annotation(
+  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure", Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
+  Real xliq(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction", xvap(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction", xmliq(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction", xmvap(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
+  Real F_p[3](each min = 0, each start = 100) "Total molar flow", Fm_p[3](each min = 0, each start = 100) "Total Mass Flow", MW_p[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
+  Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction", xm_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Component Mass fraction", F_pc[3, Nc](each start = 100, each min = 0) "Component Molar flow", Fm_pc[3, Nc](each min = 0, each start = 100) "Component Mass Fraction";
+  Real Cp_p[3] "phase Molar Specific Heat", Cp_pc[3, Nc] "Component Molar Specific Heat";
+  Real H_p[3] "Phase Molar Enthalpy", H_pc[3, Nc] "Component Molar Enthalpy";
+  Real S_p[3] "Phase Molar Entropy", S_pc[3, Nc] "Component Molar Entropy";
+  Simulator.Files.Connection.matConn inlet(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn outlet(connNOC = NOC) annotation(
+  Simulator.Files.Connection.matConn outlet(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //Connector equations
   inlet.P = P;
   inlet.T = T;
-  inlet.mixMolFlo = totMolFlo[1];
-  inlet.mixMolEnth = phasMolEnth[1];
-  inlet.mixMolEntr = phasMolEntr[1];
-  inlet.mixMolFrac = compMolFrac;
-  inlet.vapPhasMolFrac = vapPhasMolFrac;
+  inlet.F = F_p[1];
+  inlet.H = H_p[1];
+  inlet.S = S_p[1];
+  inlet.x_pc = x_pc;
+  inlet.xvap = xvap;
   outlet.P = P;
   outlet.T = T;
-  outlet.mixMolFlo = totMolFlo[1];
-  outlet.mixMolEnth = phasMolEnth[1];
-  outlet.mixMolEntr = phasMolEntr[1];
-  outlet.mixMolFrac = compMolFrac;
-  outlet.vapPhasMolFrac = vapPhasMolFrac;
+  outlet.F = F_p[1];
+  outlet.H = H_p[1];
+  outlet.S = S_p[1];
+  outlet.x_pc = x_pc;
+  outlet.xvap = xvap;
 //=====================================================================================
 //Mole Balance
-  totMolFlo[1] = totMolFlo[2] + totMolFlo[3];
-//  compMolFrac[1, :] .* totMolFlo[1] = compMolFrac[2, :] .* totMolFlo[2] + compMolFrac[3, :] .* totMolFlo[3];
+  F_p[1] = F_p[2] + F_p[3];
+//  x_pc[1, :] .* F_p[1] = x_pc[2, :] .* F_p[2] + x_pc[3, :] .* F_p[3];
 //component molar and mass flows
-  for i in 1:NOC loop
-    compMolFlo[:, i] = compMolFrac[:, i] .* totMolFlo[:];
+  for i in 1:Nc loop
+    F_pc[:, i] = x_pc[:, i] .* F_p[:];
   end for;
   if P >= Pbubl then
 //below bubble point region
-    compMasFrac[3, :] = zeros(NOC);
-    compMasFlo[1, :] = compMasFrac[1, :] .* totMasFlo[1];
-    compMasFrac[2, :] = compMasFrac[1, :];
+    xm_pc[3, :] = zeros(Nc);
+    Fm_pc[1, :] = xm_pc[1, :] .* Fm_p[1];
+    xm_pc[2, :] = xm_pc[1, :];
   elseif P >= Pdew then
-    for i in 1:NOC loop
-      compMasFlo[:, i] = compMasFrac[:, i] .* totMasFlo[:];
+    for i in 1:Nc loop
+      Fm_pc[:, i] = xm_pc[:, i] .* Fm_p[:];
     end for;
   else
 //above dew point region
-    compMasFrac[2, :] = zeros(NOC);
-    compMasFlo[1, :] = compMasFrac[1, :] .* totMasFlo[1];
-    compMasFrac[3, :] = compMasFrac[1, :];
+    xm_pc[2, :] = zeros(Nc);
+    Fm_pc[1, :] = xm_pc[1, :] .* Fm_p[1];
+    xm_pc[3, :] = xm_pc[1, :];
   end if;
 //phase molar and mass fractions
-  liqPhasMolFrac = totMolFlo[2] / totMolFlo[1];
-  vapPhasMolFrac = totMolFlo[3] / totMolFlo[1];
-  liqPhasMasFrac = totMasFlo[2] / totMasFlo[1];
-  vapPhasMasFrac = totMasFlo[3] / totMasFlo[1];
+  xliq = F_p[2] / F_p[1];
+  xvap = F_p[3] / F_p[1];
+  xmliq = Fm_p[2] / Fm_p[1];
+  xmvap = Fm_p[3] / Fm_p[1];
 //Conversion between mole and mass flow
-  for i in 1:NOC loop
-    compMasFlo[:, i] = compMolFlo[:, i] * comp[i].MW;
+  for i in 1:Nc loop
+    Fm_pc[:, i] = F_pc[:, i] * C[i].MW;
   end for;
-  totMasFlo[:] = totMolFlo[:] .* MW[:];
+  Fm_p[:] = F_p[:] .* MW_p[:];
 //Energy Balance
-  for i in 1:NOC loop
+  for i in 1:Nc loop
 //Specific Heat and Enthalpy calculation
-    compMolSpHeat[2, i] = Thermodynamic_Functions.LiqCpId(comp[i].LiqCp, T);
-    compMolSpHeat[3, i] = Thermodynamic_Functions.VapCpId(comp[i].VapCp, T);
-    compMolEnth[2, i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
-    compMolEnth[3, i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, T);
-    (compMolEntr[2, i], compMolEntr[3, i]) = Thermodynamic_Functions.SId(comp[i].AS, comp[i].VapCp, comp[i].HOV, comp[i].Tb, comp[i].Tc, T, P, compMolFrac[2, i], compMolFrac[3, i]);
+    Cp_pc[2, i] = Thermodynamic_Functions.LiqCpId(C[i].LiqCp, T);
+    Cp_pc[3, i] = Thermodynamic_Functions.VapCpId(C[i].VapCp, T);
+    H_pc[2, i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+    H_pc[3, i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+    (S_pc[2, i], S_pc[3, i]) = Thermodynamic_Functions.SId(C[i].AS, C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
   end for;
   for i in 2:3 loop
-    phasMolSpHeat[i] = sum(compMolFrac[i, :] .* compMolSpHeat[i, :]) + resMolSpHeat[i];
-    phasMolEnth[i] = sum(compMolFrac[i, :] .* compMolEnth[i, :]) + resMolEnth[i];
-    phasMolEntr[i] = sum(compMolFrac[i, :] .* compMolEntr[i, :]) + resMolEntr[i];
+    Cp_p[i] = sum(x_pc[i, :] .* Cp_pc[i, :]) + Cpres_p[i];
+    H_p[i] = sum(x_pc[i, :] .* H_pc[i, :]) + Hres_p[i];
+    S_p[i] = sum(x_pc[i, :] .* S_pc[i, :]) + Sres_p[i];
   end for;
-  phasMolSpHeat[1] = liqPhasMolFrac * phasMolSpHeat[2] + vapPhasMolFrac * phasMolSpHeat[3];
-  compMolSpHeat[1, :] = compMolFrac[1, :] .* phasMolSpHeat[1];
-  phasMolEnth[1] = liqPhasMolFrac * phasMolEnth[2] + vapPhasMolFrac * phasMolEnth[3];
-  compMolEnth[1, :] = compMolFrac[1, :] .* phasMolEnth[1];
-  phasMolEntr[1] = liqPhasMolFrac * phasMolEntr[2] + vapPhasMolFrac * phasMolEntr[3];
-  compMolEntr[1, :] = compMolFrac[1, :] * phasMolEntr[1];
+  Cp_p[1] = xliq * Cp_p[2] + xvap * Cp_p[3];
+  Cp_pc[1, :] = x_pc[1, :] .* Cp_p[1];
+  H_p[1] = xliq * H_p[2] + xvap * H_p[3];
+  H_pc[1, :] = x_pc[1, :] .* H_p[1];
+  S_p[1] = xliq * S_p[2] + xvap * S_p[3];
+  S_pc[1, :] = x_pc[1, :] * S_p[1];
 //Bubble point calculation
-  Pbubl = sum(gammaBubl[:] .* compMolFrac[1, :] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+  Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philbubl_c[:]);
 //Dew point calculation
-  Pdew = 1 / sum(compMolFrac[1, :] ./ (gammaDew[:] .* exp(comp[:].VP[2] + comp[:].VP[3] / T + comp[:].VP[4] * log(T) + comp[:].VP[5] .* T .^ comp[:].VP[6])) .* vapfugcoeff_dew[:]);
+  Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivdew_c[:]);
   if P >= Pbubl then
 //below bubble point region
-    compMolFrac[3, :] = zeros(NOC);
-//    sum(compMolFrac[2, :]) = 1;
-    totMolFlo[3] = 0;
-    compMolFrac[2,:] = compMolFrac[1,:];
+    x_pc[3, :] = zeros(Nc);
+//    sum(x_pc[2, :]) = 1;
+    F_p[3] = 0;
+    x_pc[2,:] = x_pc[1,:];
   elseif P >= Pdew then
 //VLE region
-    for i in 1:NOC loop
-      compMolFrac[3, i] = K[i] * compMolFrac[2, i];
-      compMolFrac[2, i] = compMolFrac[1, i] ./ (1 + vapPhasMolFrac * (K[i] - 1));
+    for i in 1:Nc loop
+      x_pc[3, i] = K_c[i] * x_pc[2, i];
+      x_pc[2, i] = x_pc[1, i] ./ (1 + xvap * (K_c[i] - 1));
     end for;
-    sum(compMolFrac[3, :]) = 1;
+    sum(x_pc[3, :]) = 1;
 //sum y = 1
   else
 //above dew point region
-    compMolFrac[2, :] = zeros(NOC);
-//    sum(compMolFrac[3, :]) = 1;
-    totMolFlo[2] = 0;
-    compMolFrac[3, :] = compMolFrac[1, :];
+    x_pc[2, :] = zeros(Nc);
+//    sum(x_pc[3, :]) = 1;
+    F_p[2] = 0;
+    x_pc[3, :] = x_pc[1, :];
   end if;
 algorithm
-  for i in 1:NOC loop
-    MW[:] := MW[:] + comp[i].MW * compMolFrac[:, i];
+  for i in 1:Nc loop
+    MW_p[:] := MW_p[:] + C[i].MW * x_pc[:, i];
   end for;
 
 end Material_Stream;
+

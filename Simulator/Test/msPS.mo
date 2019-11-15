@@ -10,7 +10,7 @@ model msPS
   //instantiation of ethanol
   parameter data.Water wat;
   //instantiation of water
-  extends Streams.Material_Stream(NOC = 3, comp = {meth, eth, wat}, totMolFlo(each start = 100), compMolFrac(each start = 0.33), T(start = sum(comp.Tb) / NOC));
+  extends Streams.Material_Stream(Nc = 3, comp = {meth, eth, wat}, F_p(each start = 100), x_pc(each start = 0.33), T(start = sum(comp.Tb) / Nc));
   //material stream model is extended and values of parameters NOC and comp are given. These parameters are declred in Material stream model. We are only giving them values here.
   //we need to give proper initialization values for converging, Initialization values are provided for totMolFlo, compMolFrac and T while extending.
   //NOC - number of components, comp -  component array.
@@ -19,9 +19,9 @@ model msPS
 equation
 //These are the values to be specified by user. In this P, mixture molar enthalpy, mixture mole fraction and mixture molar flow is specified. These variables are declared in Material stream model, only values are given here.
   P = 101325;
-  phasMolEntr[1] = -84.39;
-  compMolFrac[1, :] = {0.33, 0.33, 0.34};
+  S_p[1] = -84.39;
+  x_pc[1, :] = {0.33, 0.33, 0.34};
 //1 stands for mixture
-  totMolFlo[1] = 31.346262;
+  F_p[1] = 31.346262;
 //1 stands for mixture
 end msPS;

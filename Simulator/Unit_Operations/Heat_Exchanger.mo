@@ -4,186 +4,186 @@ model Heat_Exchanger
   extends Simulator.Files.Icons.Heat_Exchanger;
   //Heat-Exchanger Operates in various modes
   //Mode-I - Estimation of Hot Fluid Outlet Temperature
-  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,coutT,Flow Direction,Name of the calculation type,Area
+  //      Inputs : Pdelh,deltap_cold,Heat_Loss,Tcout,Flow Direction,Name of the calculation type,Area
   //Mode-II - Estimation of Cold Fluid Outlet Temperature
-  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,houtT,Flow Direction,Name of the calculation type,Area
+  //      Inputs : Pdelh,deltap_cold,Heat_Loss,Thout,Flow Direction,Name of the calculation type,Area
   //Mode-III - Estimation of Both the fluid outlet temperature
-  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,Qactual,Flow Direction,Name of the calculation type,Area
+  //      Inputs : Pdelh,deltap_cold,Heat_Loss,Qact,Flow Direction,Name of the calculation type,Area
   //Mode-IV - Estimation of both the fluid outlet temperature-NTU Method
-  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type,Area
+  //      Inputs : Pdelh,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type,Area
   //Mode-V-Estimation of Heat Transfer Area
-  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type
-  //Mode-VI-Estimation of all parameters given the heat transfer efficiency
-  //      Inputs : deltap_hot,deltap_cold,Heat_Loss,U,Efficiency,Flow Direction,Name of the calculation type
+  //      Inputs : Pdelh,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type
+  //Mode-VI-Estimation of all parameters given the heat transfer Eff
+  //      Inputs : Pdelh,deltap_cold,Heat_Loss,U,Eff,Flow Direction,Name of the calculation type
   import Simulator.Files.*;
   import Simulator.Files.Thermodynamic_Functions.*;
-  parameter Simulator.Files.Chemsep_Database.General_Properties comp[NOC];
-  parameter Integer NOC "number of compounds ";
-  Simulator.Files.Connection.matConn Hot_In(connNOC = NOC) annotation(
+  parameter Simulator.Files.Chemsep_Database.General_Properties C[Nc];
+  parameter Integer Nc "number of compounds ";
+  Simulator.Files.Connection.matConn Hot_In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Hot_Out(connNOC = NOC) annotation(
+  Simulator.Files.Connection.matConn Hot_Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {80, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Cold_In(connNOC = NOC) annotation(
+  Simulator.Files.Connection.matConn Cold_In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Cold_Out(connNOC = NOC) annotation(
+  Simulator.Files.Connection.matConn Cold_Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //Parameters
   //Mode-I -Outlet Temperature-Hot Stream Calculaions
-  parameter Real Heat_Loss;
-  parameter Real deltap_hot;
-  parameter Real deltap_cold;
+  parameter Real Qloss;
+  parameter Real Pdelh;
+  parameter Real Pdelc;
   parameter String Mode"''CoCurrent'',''CounterCurrent''";
-  parameter String Calculation_Method"''BothOutletTemp(UA)''";
+  parameter String Cmode"''BothOutletTemp(UA)''";
   //Variables
   //Hot Stream Inlet
-  Real hinP, hinT, hintotMolFlow[1], hinEnth, hinEntr, hincompMolFrac[2, NOC], hinVapfrac;
+  Real Phin, Thin, Fhin[1], Hhin, Shin, xhin_pc[2, Nc], xvaphin;
   //Hot Stream Outlet
-  Real houtP, houtT, houttotMolFlow[1], houtEnth, houtEntr, houtcompMolFrac[2, NOC], houtVapfrac;
+  Real Phout, Thout, Fhout[1], Hhout, Shout, xhout_pc[2, Nc], xvaphout;
   //Cold Stream Inlet
-  Real cinP, cinT, cintotMolFlow[1], cinEnth, cinEntr, cincompMolFrac[2, NOC], cinVapfrac;
+  Real Pcin, Tcin, Fcin[1], Hcin, Scin, xcin_pc[2, Nc], xvapcin;
   //Cold Stream Outlet
-  Real coutP, coutT, couttT, couttotMolFlow[1], coutEnth, coutEntr, coutcompMolFrac[2, NOC], coutVapfrac;
-  Real Qactual(start = 2000) "Actual Heat Load";
-  Real Qmax, Qmax_hot, Qmax_cold;
+  Real Pcout, Tcout, couttT, Fcout[1], Hcout, Scout, xcout_pc[2, Nc], xvapcout;
+  Real Qact(start = 2000) "Actual Heat Load";
+  Real Qmax, Qmaxh, Qmaxc;
   //Hot Stream Enthalpy at Cold Stream Inlet Temperature
-  Real hinCompMolEnth[2, NOC];
-  Real hinPhasMolEnth[3];
+  Real Hhin_pc[2, Nc];
+  Real Hhin_p[3];
   //Cold Stream Enthalpy at Hot Stream Inlet Temperature
-  Real cinCompMolEnth[2, NOC];
-  Real cinPhasMolEnth[3];
-  Real deltaH;
+  Real Hcin_pc[2, Nc];
+  Real Hcin_p[3];
+  Real Hdel;
   //Heat Exchanger Effeciency
-  Real Efficiency;
+  Real Eff;
   //LMTD
-  Real delta_T1(start = 20), delta_T2(start = 10);
+  Real Tdel1(start = 20), Tdel2(start = 10);
   Real LMTD "Log Mean Temperature Difference";
   //Global Heat Transfer Coefficient
   Real U;
-  //Heat Transfer Area
-  Real Area;
+  //Heat Transfer A
+  Real A;
   //==================================================================================================================
   //Mode-4-NTU Method-when both the outlet temperatures are unknown
   //Heat Capacity Rate for hot and cold fluid
-  Real C_cold, C_hot;
+  Real Cc, Ch;
   //Number of Transfer Units for Hot Side and Cold Side
-  Real NTU_cold, NTU_hot;
+  Real Ntuc, Ntuh;
   //Heat Capacity Ratio for hot and cold side
-  Real R_cold, R_hot;
+  Real Rc, Rh;
   //Effectiveness Factor
-  Real Eff_cold, Eff_hot;
+  Real Effc, Effh;
 equation
 //Hot Stream Inlet
-  Hot_In.P = hinP;
-  Hot_In.T = hinT;
-  Hot_In.mixMolFlo = hintotMolFlow[1];
-  Hot_In.mixMolEnth = hinEnth;
-  Hot_In.mixMolEntr = hinEntr;
-  Hot_In.mixMolFrac[1, :] = hincompMolFrac[1, :];
-  Hot_In.mixMolFrac[2, :] = hincompMolFrac[2, :];
-  Hot_In.vapPhasMolFrac = hinVapfrac;
+  Hot_In.P = Phin;
+  Hot_In.T = Thin;
+  Hot_In.F = Fhin[1];
+  Hot_In.H = Hhin;
+  Hot_In.S = Shin;
+  Hot_In.x_pc[1, :] = xhin_pc[1, :];
+  Hot_In.x_pc[2, :] = xhin_pc[2, :];
+  Hot_In.xvap = xvaphin;
 //Hot Stream Outlet
-  Hot_Out.P = houtP;
-  Hot_Out.T = houtT;
-  Hot_Out.mixMolFlo = houttotMolFlow[1];
-  Hot_Out.mixMolEnth = houtEnth;
-  Hot_Out.mixMolEntr = houtEntr;
-  Hot_Out.mixMolFrac[1, :] = houtcompMolFrac[1, :];
-  Hot_Out.mixMolFrac[2, :] = houtcompMolFrac[2, :];
-  Hot_Out.vapPhasMolFrac = houtVapfrac;
+  Hot_Out.P = Phout;
+  Hot_Out.T = Thout;
+  Hot_Out.F = Fhout[1];
+  Hot_Out.H = Hhout;
+  Hot_Out.S = Shout;
+  Hot_Out.x_pc[1, :] = xhout_pc[1, :];
+  Hot_Out.x_pc[2, :] = xhout_pc[2, :];
+  Hot_Out.xvap = xvaphout;
 //Cold Stream In
-  Cold_In.P = cinP;
-  Cold_In.T = cinT;
-  Cold_In.mixMolFlo = cintotMolFlow[1];
-  Cold_In.mixMolEnth = cinEnth;
-  Cold_In.mixMolEntr = cinEntr;
-  Cold_In.mixMolFrac[1, :] = cincompMolFrac[1, :];
-  Cold_In.mixMolFrac[2, :] = cincompMolFrac[2, :];
-  Cold_In.vapPhasMolFrac = cinVapfrac;
+  Cold_In.P = Pcin;
+  Cold_In.T = Tcin;
+  Cold_In.F = Fcin[1];
+  Cold_In.H = Hcin;
+  Cold_In.S = Scin;
+  Cold_In.x_pc[1, :] = xcin_pc[1, :];
+  Cold_In.x_pc[2, :] = xcin_pc[2, :];
+  Cold_In.xvap = xvapcin;
 //Cold Stream Out
-  Cold_Out.P = coutP;
+  Cold_Out.P = Pcout;
   Cold_Out.T = couttT;
-  Cold_Out.mixMolFlo = couttotMolFlow[1];
-  Cold_Out.mixMolEnth = coutEnth;
-  Cold_Out.mixMolEntr = coutEntr;
-  Cold_Out.mixMolFrac[1, :] = coutcompMolFrac[1, :];
-  Cold_Out.mixMolFrac[2, :] = coutcompMolFrac[2, :];
-  Cold_Out.vapPhasMolFrac = coutVapfrac;
+  Cold_Out.F = Fcout[1];
+  Cold_Out.H = Hcout;
+  Cold_Out.S = Scout;
+  Cold_Out.x_pc[1, :] = xcout_pc[1, :];
+  Cold_Out.x_pc[2, :] = xcout_pc[2, :];
+  Cold_Out.xvap = xvapcout;
 equation
-  hintotMolFlow[1] = houttotMolFlow[1];
-  cintotMolFlow[1] = couttotMolFlow[1];
-  hincompMolFrac[1] = houtcompMolFrac[1];
-  cincompMolFrac[1] = coutcompMolFrac[1];
-  houtP = hinP - deltap_hot;
-  coutP = cinP - deltap_cold;
-  Qactual = cintotMolFlow[1] * (coutEnth - cinEnth);
-  deltaH = -(Qactual + Heat_Loss * 1000) / hintotMolFlow[1];
-  if Calculation_Method == "BothOutletTemp(UA)" then
-    houtEnth = hinEnth - Qactual / hintotMolFlow[1] - Heat_Loss * 1000 / hintotMolFlow[1];
-    coutT = cinT + Eff_cold * (hinT - cinT);
+  Fhin[1] = Fhout[1];
+  Fcin[1] = Fcout[1];
+  xhin_pc[1] = xhout_pc[1];
+  xcin_pc[1] = xcout_pc[1];
+  Phout = Phin - Pdelh;
+  Pcout = Pcin - Pdelc;
+  Qact = Fcin[1] * (Hcout - Hcin);
+  Hdel = -(Qact + Qloss * 1000) / Fhin[1];
+  if Cmode == "BothOutletTemp(UA)" then
+    Hhout = Hhin - Qact / Fhin[1] - Qloss * 1000 / Fhin[1];
+    Tcout = Tcin + Effc * (Thin - Tcin);
   else
-    coutT = couttT;
-    houtEnth = hinEnth + deltaH;
+    Tcout = couttT;
+    Hhout = Hhin + Hdel;
   end if;
 //==========================================================================================================
 //Calculation of Hot Stream Enthalpy at  Cold Stream Inlet Temperature
-  for i in 1:NOC loop
-    hinCompMolEnth[1, i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, cinT);
-    hinCompMolEnth[2, i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, cinT);
+  for i in 1:Nc loop
+    Hhin_pc[1, i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, Tcin);
+    Hhin_pc[2, i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, Tcin);
   end for;
   for i in 1:2 loop
-    hinPhasMolEnth[i] = sum(hincompMolFrac[i, :] .* hinCompMolEnth[i, :]);
+    Hhin_p[i] = sum(xhin_pc[i, :] .* Hhin_pc[i, :]);
 /*+ inResMolEnth[2, i]*/
   end for;
-  hinPhasMolEnth[3] = (1 - hinVapfrac) * hinPhasMolEnth[1] + hinVapfrac * hinPhasMolEnth[2];
+  Hhin_p[3] = (1 - xvaphin) * Hhin_p[1] + xvaphin * Hhin_p[2];
 //Maximum Theoritical Heat Exchange-Hot Fluid
-  Qmax_hot = hintotMolFlow[1] * (hinEnth - hinPhasMolEnth[3]);
+  Qmaxh = Fhin[1] * (Hhin - Hhin_p[3]);
 //===========================================================================================================
 //Enthalpy of Cold Stream Enthalpy at Hot Fluid Inlet Temperature
-  for i in 1:NOC loop
-    cinCompMolEnth[1, i] = Thermodynamic_Functions.HLiqId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, hinT);
-    cinCompMolEnth[2, i] = Thermodynamic_Functions.HVapId(comp[i].SH, comp[i].VapCp, comp[i].HOV, comp[i].Tc, hinT);
+  for i in 1:Nc loop
+    Hcin_pc[1, i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, Thin);
+    Hcin_pc[2, i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, Thin);
   end for;
   for i in 1:2 loop
-    cinPhasMolEnth[i] = sum(cincompMolFrac[i, :] .* cinCompMolEnth[i, :]);
+    Hcin_p[i] = sum(xcin_pc[i, :] .* Hcin_pc[i, :]);
 /*+ inResMolEnth[1, i]*/
   end for;
-  cinPhasMolEnth[3] = (1 - cinVapfrac) * cinPhasMolEnth[1] + cinVapfrac * cinPhasMolEnth[2];
+  Hcin_p[3] = (1 - xvapcin) * Hcin_p[1] + xvapcin * Hcin_p[2];
 //Maximum Theoritical Heat Exchange- Cold Fluid
-  Qmax_cold = cintotMolFlow[1] * abs(cinEnth - cinPhasMolEnth[3]);
+  Qmaxc = Fcin[1] * abs(Hcin - Hcin_p[3]);
 //Maximum Heat Exchange
-  Qmax = min(Qmax_hot, Qmax_cold);
-  Efficiency = (Qactual - Heat_Loss * 1000) / Qmax * 100;
+  Qmax = min(Qmaxh, Qmaxc);
+  Eff = (Qact - Qloss * 1000) / Qmax * 100;
 //Log Mean Temperature Difference
   if(Mode=="CoCurrent") then
-    delta_T1 =hinT-cinT;
-    delta_T2 =houtT-coutT;  
+    Tdel1 =Thin-Tcin;
+    Tdel2 =Thout-Tcout;  
   elseif Mode=="CounterCurrent" then
-    delta_T1 =hinT-coutT;
-    delta_T2 =houtT-cinT;
+    Tdel1 =Thin-Tcout;
+    Tdel2 =Thout-Tcin;
   end if;
   
-  if delta_T1 <= 0 or delta_T2 <= 0 then
+  if Tdel1 <= 0 or Tdel2 <= 0 then
     LMTD = 1;
   else
-    LMTD = (delta_T1 - delta_T2) / log(delta_T1 / delta_T2);
+    LMTD = (Tdel1 - Tdel2) / log(Tdel1 / Tdel2);
   end if;
-  U = Qactual / (Area * LMTD);
+  U = Qact / (A * LMTD);
 //===========================================================================================================
 //==========================================================================================================
 //NTU-Method
-  C_cold = cintotMolFlow[1] * ((coutEnth - cinEnth) / (coutT - cinT));
-  C_hot = hintotMolFlow[1] * ((houtEnth - hinEnth) / (houtT - hinT));
+  Cc = Fcin[1] * ((Hcout - Hcin) / (Tcout - Tcin));
+  Ch = Fhin[1] * ((Hhout - Hhin) / (Thout - Thin));
 //Number of Transfer Units
-  NTU_cold = U * Area / C_cold;
-  NTU_hot = U * Area / C_hot;
+  Ntuc = U * A / Cc;
+  Ntuh = U * A / Ch;
 //Heat Capacity Ratio for Hot and Cold Side
-  R_cold = C_cold / C_hot;
-  R_hot = C_hot / C_cold;
+  Rc = Cc / Ch;
+  Rh = Ch / Cc;
   if Mode=="CoCurrent" then
-    Eff_cold = (1- exp(-NTU_cold * (1+R_cold)))/(1+R_cold);
-    Eff_hot =  (1- exp(-NTU_hot * (1+R_hot)))/(1+R_hot);
+    Effc = (1- exp(-Ntuc * (1+Rc)))/(1+Rc);
+    Effh =  (1- exp(-Ntuh * (1+Rh)))/(1+Rh);
   elseif Mode=="CounterCurrent" then
-    Eff_cold = (1-exp((R_cold-1)*NTU_cold))/(1 -R_cold*  exp((R_cold-1)*NTU_cold));
-    Eff_hot =  (1-exp((R_hot-1) *NTU_hot ))/(1 -R_hot *  exp((R_hot-1)*NTU_hot));
+    Effc = (1-exp((Rc-1)*Ntuc))/(1 -Rc*  exp((Rc-1)*Ntuc));
+    Effh =  (1-exp((Rh-1) *Ntuh ))/(1 -Rh *  exp((Rh-1)*Ntuh));
   end if;
 end Heat_Exchanger;

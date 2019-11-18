@@ -15,26 +15,26 @@ model MaterialStream
   Real Cp_p[3] "phase Molar Specific Heat", Cp_pc[3, Nc] "Component Molar Specific Heat";
   Real H_p[3] "Phase Molar Enthalpy", H_pc[3, Nc] "Component Molar Enthalpy";
   Real S_p[3] "Phase Molar Entropy", S_pc[3, Nc] "Component Molar Entropy";
-  Simulator.Files.Connection.matConn inlet(Nc = Nc) annotation(
+  Simulator.Files.Connection.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn outlet(Nc = Nc) annotation(
+  Simulator.Files.Connection.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //Connector equations
-  inlet.P = P;
-  inlet.T = T;
-  inlet.F = F_p[1];
-  inlet.H = H_p[1];
-  inlet.S = S_p[1];
-  inlet.x_pc = x_pc;
-  inlet.xvap = xvap;
-  outlet.P = P;
-  outlet.T = T;
-  outlet.F = F_p[1];
-  outlet.H = H_p[1];
-  outlet.S = S_p[1];
-  outlet.x_pc = x_pc;
-  outlet.xvap = xvap;
+  In.P = P;
+  In.T = T;
+  In.F = F_p[1];
+  In.H = H_p[1];
+  In.S = S_p[1];
+  In.x_pc = x_pc;
+  In.xvap = xvap;
+  Out.P = P;
+  Out.T = T;
+  Out.F = F_p[1];
+  Out.H = H_p[1];
+  Out.S = S_p[1];
+  Out.x_pc = x_pc;
+  Out.xvap = xvap;
 //=====================================================================================
 //Mole Balance
   F_p[1] = F_p[2] + F_p[3];

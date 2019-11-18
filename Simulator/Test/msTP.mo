@@ -2,7 +2,7 @@ within Simulator.Test;
 
 model msTP
   //we have to first instance components to give to material stream model.
-  import data = Simulator.Files.Chemsep_Database;
+  import data = Simulator.Files.ChemsepDatabase;
   //instantiation of chemsep database
   parameter data.Methanol meth;
   //instantiation of methanol

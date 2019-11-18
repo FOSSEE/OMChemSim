@@ -23,16 +23,16 @@ equation
 //connector equations
   In.P = Pin;
   In.T = Tin;
-  In.mixMolFlo = Fin;
-  In.mixMolEnth = Hin;
-  In.x_c[1, :] = x_c[:];
-  In.vapPhasMolFrac = xvapin;
+  In.F = Fin;
+  In.H = Hin;
+  In.x_pc[1, :] = x_c[:];
+  In.xvap = xvapin;
   Out.P = Pout;
   Out.T = Tout;
-  Out.mixMolFlo = Fout;
-  Out.mixMolEnth = Hout;
-  Out.x_c[1, :] = x_c[:];
-  Out.vapPhasMolFrac = xvapout;
+  Out.F = Fout;
+  Out.H = Hout;
+  Out.x_pc[1, :] = x_c[:];
+  Out.xvap = xvapout;
   En.Q = Q;
 //=============================================================================================
   Fin = Fout;

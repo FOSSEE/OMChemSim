@@ -1,7 +1,7 @@
 within Simulator.Test;
 
 model msPVF
-  import data = Simulator.Files.Chemsep_Database;
+  import data = Simulator.Files.ChemsepDatabase;
   parameter data.Methanol meth;
   parameter data.Ethanol eth;
   parameter data.Water wat;

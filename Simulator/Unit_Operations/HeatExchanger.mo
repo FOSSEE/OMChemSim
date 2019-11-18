@@ -19,26 +19,26 @@ model HeatExchanger
   import Simulator.Files.Thermodynamic_Functions.*;
   parameter Simulator.Files.Chemsep_Database.General_Properties C[Nc];
   parameter Integer Nc "number of compounds ";
-  Simulator.Files.Connection.matConn Hot_In(Nc = Nc) annotation(
+  Simulator.Files.Connection.matConn In_Hot(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Hot_Out(Nc = Nc) annotation(
+  Simulator.Files.Connection.matConn Out_Hot(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {80, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Cold_In(Nc = Nc) annotation(
+  Simulator.Files.Connection.matConn In_Cold(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Cold_Out(Nc = Nc) annotation(
+  Simulator.Files.Connection.matConn Out_Cold(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //Parameters
   //Mode-I -Outlet Temperature-Hot Stream Calculaions
-  parameter Real Qloss;
-  parameter Real Pdelh;
-  parameter Real Pdelc;
+  parameter Real Qloss = 0;
+  parameter Real Pdelh = 0;
+  parameter Real Pdelc = 0;
   parameter String Mode"''CoCurrent'',''CounterCurrent''";
   parameter String Cmode"''BothOutletTemp(UA)''";
   //Variables
   //Hot Stream Inlet
-  Real Phin, Thin, Fhin[1], Hhin, Shin, xhin_pc[2, Nc], xvaphin;
+  Real Phin, Thin, Fhin, Hhin, Shin, xhin_pc[2, Nc], xvaphin;
   //Hot Stream Outlet
-  Real Phout, Thout, Fhout[1], Hhout, Shout, xhout_pc[2, Nc], xvaphout;
+  Real Phout, Thout, Fhout, Hhout, Shout, xhout_pc[2, Nc], xvaphout;
   //Cold Stream Inlet
   Real Pcin, Tcin, Fcin[1], Hcin, Scin, xcin_pc[2, Nc], xvapcin;
   //Cold Stream Outlet
@@ -73,52 +73,52 @@ model HeatExchanger
   Real Effc, Effh;
 equation
 //Hot Stream Inlet
-  Hot_In.P = Phin;
-  Hot_In.T = Thin;
-  Hot_In.F = Fhin[1];
-  Hot_In.H = Hhin;
-  Hot_In.S = Shin;
-  Hot_In.x_pc[1, :] = xhin_pc[1, :];
-  Hot_In.x_pc[2, :] = xhin_pc[2, :];
-  Hot_In.xvap = xvaphin;
+  In_Hot.P = Phin;
+  In_Hot.T = Thin;
+  In_Hot.F = Fhin;
+  In_Hot.H = Hhin;
+  In_Hot.S = Shin;
+  In_Hot.x_pc[1, :] = xhin_pc[1, :];
+  In_Hot.x_pc[2, :] = xhin_pc[2, :];
+  In_Hot.xvap = xvaphin;
 //Hot Stream Outlet
-  Hot_Out.P = Phout;
-  Hot_Out.T = Thout;
-  Hot_Out.F = Fhout[1];
-  Hot_Out.H = Hhout;
-  Hot_Out.S = Shout;
-  Hot_Out.x_pc[1, :] = xhout_pc[1, :];
-  Hot_Out.x_pc[2, :] = xhout_pc[2, :];
-  Hot_Out.xvap = xvaphout;
+  Out_Hot.P = Phout;
+  Out_Hot.T = Thout;
+  Out_Hot.F = Fhout;
+  Out_Hot.H = Hhout;
+  Out_Hot.S = Shout;
+  Out_Hot.x_pc[1, :] = xhout_pc[1, :];
+  Out_Hot.x_pc[2, :] = xhout_pc[2, :];
+  Out_Hot.xvap = xvaphout;
 //Cold Stream In
-  Cold_In.P = Pcin;
-  Cold_In.T = Tcin;
-  Cold_In.F = Fcin[1];
-  Cold_In.H = Hcin;
-  Cold_In.S = Scin;
-  Cold_In.x_pc[1, :] = xcin_pc[1, :];
-  Cold_In.x_pc[2, :] = xcin_pc[2, :];
-  Cold_In.xvap = xvapcin;
+  In_Cold.P = Pcin;
+  In_Cold.T = Tcin;
+  In_Cold.F = Fcin[1];
+  In_Cold.H = Hcin;
+  In_Cold.S = Scin;
+  In_Cold.x_pc[1, :] = xcin_pc[1, :];
+  In_Cold.x_pc[2, :] = xcin_pc[2, :];
+  In_Cold.xvap = xvapcin;
 //Cold Stream Out
-  Cold_Out.P = Pcout;
-  Cold_Out.T = couttT;
-  Cold_Out.F = Fcout[1];
-  Cold_Out.H = Hcout;
-  Cold_Out.S = Scout;
-  Cold_Out.x_pc[1, :] = xcout_pc[1, :];
-  Cold_Out.x_pc[2, :] = xcout_pc[2, :];
-  Cold_Out.xvap = xvapcout;
+  Out_Cold.P = Pcout;
+  Out_Cold.T = couttT;
+  Out_Cold.F = Fcout[1];
+  Out_Cold.H = Hcout;
+  Out_Cold.S = Scout;
+  Out_Cold.x_pc[1, :] = xcout_pc[1, :];
+  Out_Cold.x_pc[2, :] = xcout_pc[2, :];
+  Out_Cold.xvap = xvapcout;
 equation
-  Fhin[1] = Fhout[1];
+  Fhin = Fhout;
   Fcin[1] = Fcout[1];
   xhin_pc[1] = xhout_pc[1];
   xcin_pc[1] = xcout_pc[1];
   Phout = Phin - Pdelh;
   Pcout = Pcin - Pdelc;
   Qact = Fcin[1] * (Hcout - Hcin);
-  Hdel = -(Qact + Qloss * 1000) / Fhin[1];
+  Hdel = -(Qact + Qloss * 1000) / Fhin;
   if Cmode == "BothOutletTemp(UA)" then
-    Hhout = Hhin - Qact / Fhin[1] - Qloss * 1000 / Fhin[1];
+    Hhout = Hhin - Qact / Fhin - Qloss * 1000 / Fhin;
     Tcout = Tcin + Effc * (Thin - Tcin);
   else
     Tcout = couttT;
@@ -136,7 +136,7 @@ equation
   end for;
   Hhin_p[3] = (1 - xvaphin) * Hhin_p[1] + xvaphin * Hhin_p[2];
 //Maximum Theoritical Heat Exchange-Hot Fluid
-  Qmaxh = Fhin[1] * (Hhin - Hhin_p[3]);
+  Qmaxh = Fhin * (Hhin - Hhin_p[3]);
 //===========================================================================================================
 //Enthalpy of Cold Stream Enthalpy at Hot Fluid Inlet Temperature
   for i in 1:Nc loop
@@ -172,7 +172,7 @@ equation
 //==========================================================================================================
 //NTU-Method
   Cc = Fcin[1] * ((Hcout - Hcin) / (Tcout - Tcin));
-  Ch = Fhin[1] * ((Hhout - Hhin) / (Thout - Thin));
+  Ch = Fhin * ((Hhout - Hhin) / (Thout - Thin));
 //Number of Transfer Units
   Ntuc = U * A / Cc;
   Ntuh = U * A / Ch;

@@ -3,7 +3,7 @@ within Simulator.Test;
 
 model msTVF
   // database and components are instantiated, material stream and thermodynamic package extended
-  Simulator.Files.Chemsep_Database data;
+  Simulator.Files.ChemsepDatabase data;
   parameter data.Methanol meth;
   parameter data.Ethanol eth;
   parameter data.Water wat;

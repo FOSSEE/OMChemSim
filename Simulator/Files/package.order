@@ -1,8 +1,8 @@
 ChemsepDatabase
-Thermodynamic_Packages
-Transport_Properties
-Thermodynamic_Functions
+TransportProperties
+ThermodynamicFunctions
 Connection
 Models
-Other_Functions
+OtherFunctions
 Icons
+ThermodynamicPackages

@@ -3,10 +3,10 @@ within Simulator.Streams;
 model MaterialStream
   //1 -  Mixture, 2 - Liquid phase, 3 - Gas Phase
 //  extends Modelica.Icons.SourcesPackage;
-  extends Simulator.Files.Icons.Material_Stream;
+  extends Simulator.Files.Icons.MaterialStream;
   import Simulator.Files.*;
   parameter Integer Nc;
-  parameter Simulator.Files.Chemsep_Database.General_Properties C[Nc];
+  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
   Real P(min = 0, start = 101325) "Pressure", T(start = 273) "Temperature";
   Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure", Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
   Real xliq(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction", xvap(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction", xmliq(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction", xmvap(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
@@ -71,11 +71,11 @@ equation
 //Energy Balance
   for i in 1:Nc loop
 //Specific Heat and Enthalpy calculation
-    Cp_pc[2, i] = Thermodynamic_Functions.LiqCpId(C[i].LiqCp, T);
-    Cp_pc[3, i] = Thermodynamic_Functions.VapCpId(C[i].VapCp, T);
-    H_pc[2, i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
-    H_pc[3, i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
-    (S_pc[2, i], S_pc[3, i]) = Thermodynamic_Functions.SId(C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
+    Cp_pc[2, i] = ThermodynamicFunctions.LiqCpId(C[i].LiqCp, T);
+    Cp_pc[3, i] = ThermodynamicFunctions.VapCpId(C[i].VapCp, T);
+    H_pc[2, i] = ThermodynamicFunctions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+    H_pc[3, i] = ThermodynamicFunctions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+    (S_pc[2, i], S_pc[3, i]) = ThermodynamicFunctions.SId(C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
   end for;
   for i in 2:3 loop
     Cp_p[i] = sum(x_pc[i, :] .* Cp_pc[i, :]) + Cpres_p[i];

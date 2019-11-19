@@ -5,7 +5,7 @@ within Simulator.Files.Models.ReactionManager;
     import Simulator.Files.*;
     import data = Simulator.Files.Chemsep_Database;
     
-    parameter Chemsep_Database.General_Properties C[Nc];
+    parameter ChemsepDatabase.GeneralProperties C[Nc];
     
     parameter Integer Nc;
     parameter Integer Nr;   //Number of Reactions involved in the process

@@ -35,11 +35,11 @@ within Simulator.Files.Models;
   //Energy Balance
     for i in 1:Nc loop
 //Specific Heat and Enthalpy calculation
-      Cp_pc[2, i] = Thermodynamic_Functions.LiqCpId(C[i].LiqCp, T);
-      Cp_pc[3, i] = Thermodynamic_Functions.VapCpId(C[i].VapCp, T);
-      H_pc[2, i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
-      H_pc[3, i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
-      (S_pc[2, i], S_pc[3, i]) = Thermodynamic_Functions.SId(C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
+      Cp_pc[2, i] = ThermodynamicFunctions.LiqCpId(C[i].LiqCp, T);
+      Cp_pc[3, i] = ThermodynamicFunctions.VapCpId(C[i].VapCp, T);
+      H_pc[2, i] = ThermodynamicFunctions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      H_pc[3, i] = ThermodynamicFunctions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      (S_pc[2, i], S_pc[3, i]) = ThermodynamicFunctions.SId(C[i].VapCp, C[i].HOV, C[i].Tb, C[i].Tc, T, P, x_pc[2, i], x_pc[3, i]);
     end for;
     for i in 2:3 loop
       Cp_p[i] = sum(x_pc[i, :] .* Cp_pc[i, :]) + Cpres_p[i];

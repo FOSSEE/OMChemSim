@@ -1,4 +1,4 @@
-within Simulator.Files.Connection;
+within Simulator.Files.Interfaces;
 
 connector enConn
   Real Q;

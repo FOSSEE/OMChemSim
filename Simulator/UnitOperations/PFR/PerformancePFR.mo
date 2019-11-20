@@ -1,7 +1,7 @@
 within Simulator.UnitOperations.PFR;
 
   function PerformancePFR
-  
+  extends Modelica.Icons.Function;
   input Integer n;
   input Real C;
   input Real F;

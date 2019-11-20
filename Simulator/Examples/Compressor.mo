@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package Compressor
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     //This model will be instantiated in adia_comp model as outlet stream of heater. Dont run this model. Run adia_comp model for test
     extends Simulator.Streams.MaterialStream;
@@ -13,6 +14,7 @@ package Compressor
   end compres;
 
   model main
+    extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     //instantiation of chemsep database
     parameter data.Benzene ben;

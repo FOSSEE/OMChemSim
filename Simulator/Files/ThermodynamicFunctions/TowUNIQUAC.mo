@@ -1,7 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
  function TowUNIQUAC 
-
+  extends Modelica.Icons.Function;
   input Integer Nc;
   input  Real a_cc[Nc,Nc];
   input Real T;

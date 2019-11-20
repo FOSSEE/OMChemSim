@@ -3,6 +3,7 @@ within Simulator.Files.ThermodynamicFunctions;
   function Dens
     //This function is developed by swaroop katta
     //this function calculates density of pure componets as a function of temperature using chemsep database.
+    extends Modelica.Icons.Function;
     input Real LiqDen[6], Tc, T, P;
     output Real rho "units kmol/m3";
   protected

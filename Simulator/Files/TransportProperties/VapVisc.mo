@@ -1,6 +1,7 @@
 within Simulator.Files.TransportProperties;
 
  function VapVisc
+    extends Modelica.Icons.Function;
     input Real VapVis[6] "from chemsep database";
     input Real T(unit = "K") "Temperature";
     output Real vapvisc;

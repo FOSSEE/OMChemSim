@@ -28,11 +28,11 @@ model ConversionReactor
   
 //=============================================================================
 //Instanstiation of Connectors
-  Simulator.Files.Connection.matConn In(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Out(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn energy annotation(
+  Simulator.Files.Interfaces.enConn energy annotation(
     Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -130}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 
 equation

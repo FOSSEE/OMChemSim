@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package Distillation
+  extends Modelica.Icons.ExamplesPackage;
   model Condenser
     extends Simulator.UnitOperations.DistillationColumn.Cond;
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
@@ -29,12 +30,13 @@ package Distillation
   end ms;
 
   model Test
+    extends Modelica.Icons.Example;
     parameter Integer Nc = 2;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Benzene benz;
     parameter data.Toluene tol;
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] = {benz, tol};
-    Simulator.Examples.Distillation.DistColumn distCol(Nc = Nc, C = C, Nt = 4, Ni = 1, InT_s = {3}) annotation(
+    Simulator.Examples.Distillation.DistColumn distCol(Nc = Nc, C = C, Nt = 4, Ni = 1, InT_s = {3}, Ctype = "Partial") annotation(
       Placement(visible = true, transformation(origin = {-22, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms feed(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -55,7 +57,7 @@ package Distillation
       Line(points = {{3, -22}, {29.5, -22}, {29.5, -16}, {58, -16}}));
   connect(distCol.Dist, distillate.In) annotation(
       Line(points = {{3, 38}, {26.5, 38}, {26.5, 22}, {54, 22}}));
-  connect(feed.Out, distCol.In[1]) annotation(
+  connect(feed.Out, distCol.In_s[1]) annotation(
       Line(points = {{-66, 2}, {-57.5, 2}, {-57.5, 8}, {-47, 8}}));
     feed.P = 101325;
     feed.T = 298.15;
@@ -68,6 +70,7 @@ package Distillation
   end Test;
 
   model Test2
+    extends Modelica.Icons.Example;
     parameter Integer Nc = 2;
     import data = Simulator.Files.Chemsep_Database;
     parameter data.Benzene benz;
@@ -107,6 +110,7 @@ package Distillation
   end Test2;
 
   model Test3
+    extends Modelica.Icons.Example;
     parameter Integer Nc = 2;
     import data = Simulator.Files.Chemsep_Database;
     parameter data.Benzene benz;
@@ -146,6 +150,7 @@ package Distillation
   end Test3;
 
   model Test4
+    extends Modelica.Icons.Example;
     parameter Integer Nc = 2;
     import data = Simulator.Files.Chemsep_Database;
     parameter data.Benzene benz;
@@ -185,6 +190,7 @@ package Distillation
   end Test4;
 
   model multiFeedTest
+    extends Modelica.Icons.Example;
     parameter Integer Nc = 2;
     import data = Simulator.Files.Chemsep_Database;
     parameter data.Benzene benz;

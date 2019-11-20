@@ -1,12 +1,14 @@
 within Simulator.Examples;
 
 package CompositeMS
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   end ms;
 
   model main
+    extends Modelica.Icons.Example;
     //instance of database
     import data = Simulator.Files.ChemsepDatabase;
     //instance of components

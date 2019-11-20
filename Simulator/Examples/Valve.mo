@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package Valve
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     //This model will be instantiated in maintest model as outlet stream of valve. Dont run this model. Run maintest model for valve test
     extends Simulator.Streams.MaterialStream;
@@ -10,6 +11,7 @@ package Valve
   end ms;
 
   model valve
+    extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     //instantiation of chemsep database
     parameter data.Methanol meth;

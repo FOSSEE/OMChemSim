@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package CR
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.ThermodynamicPackages.NRTL;

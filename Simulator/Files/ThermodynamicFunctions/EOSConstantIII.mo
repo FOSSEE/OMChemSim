@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
 function EOSConstantIII
+  extends Modelica.Icons.Function;
   input Integer NOC;
   input Real a[NOC];
   output Real a_ij[NOC, NOC];

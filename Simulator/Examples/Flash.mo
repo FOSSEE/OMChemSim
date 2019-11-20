@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package Flash
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
@@ -12,7 +13,7 @@ package Flash
   end fls;
 
   model test
-  
+  extends Modelica.Icons.Example;
   //=====================================================================
   //Header Files and Parameters
     import data = Simulator.Files.ChemsepDatabase;

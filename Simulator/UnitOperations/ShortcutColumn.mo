@@ -24,15 +24,15 @@ model ShortcutColumn
 
 //==============================================================================
 //Instantiation of Connections
-  Simulator.Files.Connection.matConn In(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Out1(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out1(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {250, 336}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Out2(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out2(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {250, -266}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn En1 annotation(
+  Simulator.Files.Interfaces.enConn En1 annotation(
     Placement(visible = true, transformation(origin = {248, 594}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn En2 annotation(
+  Simulator.Files.Interfaces.enConn En2 annotation(
     Placement(visible = true, transformation(origin = {254, -592}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 
 equation

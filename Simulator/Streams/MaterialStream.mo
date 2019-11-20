@@ -15,9 +15,9 @@ model MaterialStream
   Real Cp_p[3] "phase Molar Specific Heat", Cp_pc[3, Nc] "Component Molar Specific Heat";
   Real H_p[3] "Phase Molar Enthalpy", H_pc[3, Nc] "Component Molar Enthalpy";
   Real S_p[3] "Phase Molar Entropy", S_pc[3, Nc] "Component Molar Entropy";
-  Simulator.Files.Connection.matConn In(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Out(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //Connector equations

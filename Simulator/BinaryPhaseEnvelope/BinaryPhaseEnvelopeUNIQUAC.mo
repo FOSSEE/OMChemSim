@@ -1,9 +1,11 @@
 within Simulator.BinaryPhaseEnvelope;
 
 package BinaryPhaseEnvelopeUNIQUAC
+  extends Modelica.Icons.ExamplesPackage;
   //==============================================================================================================
 
   function GammaUNIQUAC
+  extends Modelica.Icons.Function;
   input Integer Choice "Enter if choice of VLE curve is Pxy or Txy";
     //Note : Choice = 1 = P-x-y-Envelope
     //       Choice = 2 = T-x-y-Envelope
@@ -81,6 +83,7 @@ package BinaryPhaseEnvelopeUNIQUAC
   //========================================================================================
 
   model PxyUNIQUAC
+    extends Modelica.Icons.Example;
     //Libraries
     import Simulator.*;
     //Extension of Chemsep Database
@@ -163,6 +166,7 @@ package BinaryPhaseEnvelopeUNIQUAC
   //=====================================================================================================
 
   model TxyUNIQUAC
+    extends Modelica.Icons.Example;
     //Libraries
     import Simulator.*;
     //Extension of Chemsep database

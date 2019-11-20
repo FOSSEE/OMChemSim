@@ -19,13 +19,13 @@ model HeatExchanger
   import Simulator.Files.Thermodynamic_Functions.*;
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
   parameter Integer Nc "number of compounds ";
-  Simulator.Files.Connection.matConn In_Hot(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn In_Hot(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Out_Hot(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out_Hot(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {80, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn In_Cold(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn In_Cold(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-74, -28}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Out_Cold(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out_Cold(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //Parameters
   //Mode-I -Outlet Temperature-Hot Stream Calculaions

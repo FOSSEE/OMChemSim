@@ -1,6 +1,7 @@
 within Simulator.Files.TransportProperties;
 
   function LiqK
+    extends Modelica.Icons.Function;
     input Real LiqK[6] "from chemsep database";
     input Real T(unit = "K") "Temperature";
     output Real kliq;

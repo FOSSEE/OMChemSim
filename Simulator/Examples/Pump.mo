@@ -1,12 +1,14 @@
 within Simulator.Examples;
 
 package Pump
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   end ms;
 
   model main
+    extends Modelica.Icons.Example;
   //=====================================================================
   //Header Files and Parameters
     import data = Simulator.Files.ChemsepDatabase;

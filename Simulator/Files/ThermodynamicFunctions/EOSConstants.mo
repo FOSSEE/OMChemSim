@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
 function EOSConstants
+  extends Modelica.Icons.Function;
   parameter Real R_gas = 8.314;
   input Integer NOC;
   input Real Tc[NOC], Pc[NOC];

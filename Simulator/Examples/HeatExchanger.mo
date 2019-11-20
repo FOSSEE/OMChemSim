@@ -1,9 +1,9 @@
 within Simulator.Examples;
-
+  
 package HeatExchanger
   //Model of a General Purpouse Heat Exchanger operating with multiple modes
   //================================================================================================================
-
+  extends Modelica.Icons.ExamplesPackage;
   model MS
     extends Simulator.Streams.MaterialStream;
     //material stream extended
@@ -12,6 +12,7 @@ package HeatExchanger
   end MS;
 
   model HX_Test
+  extends Modelica.Icons.Example;
   import data = Simulator.Files.ChemsepDatabase;
     //instantiation of ethanol
     parameter data.Styrene sty;

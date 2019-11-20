@@ -2,10 +2,10 @@ within Simulator.UnitOperations.AbsorptionColumn;
 
 model AbsCol
     extends Simulator.Files.Icons.AbsorptionColumn;
-    import data = Simulator.Files.Chemsep_Database;
+    import data = Simulator.Files.ChemsepDatabase;
     parameter Integer Nc "Number of Components";
     parameter Integer Nt;
-    parameter data.General_Properties C[Nc];
+    parameter data.GeneralProperties C[Nc];
     Simulator.Files.Connection.matConn In_Top(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 302}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Connection.matConn In_Bot(Nc = Nc) annotation(

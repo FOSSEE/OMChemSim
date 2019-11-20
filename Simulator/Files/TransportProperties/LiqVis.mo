@@ -1,6 +1,7 @@
 within Simulator.Files.TransportProperties;
 
  function LiqVis
+    extends Modelica.Icons.Function;
     //This function calculates the liquid viscocity of the stream
     input Real LiqVis[6];
     input Real T;

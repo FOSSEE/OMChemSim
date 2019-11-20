@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
   function FindString
+    extends Modelica.Icons.Function;
     input String Comp_A[:];
     input String Comp;
     output Integer Int;

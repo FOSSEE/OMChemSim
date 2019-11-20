@@ -3,9 +3,9 @@ within Simulator.Streams;
 model EnergyStream
   extends Simulator.Files.Icons.EnergyStream;
   Real Q;
-  Simulator.Files.Connection.enConn In annotation(
+  Simulator.Files.Interfaces.enConn In annotation(
     Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Files.Connection.enConn Out annotation(
+  Files.Interfaces.enConn Out annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //connector equation

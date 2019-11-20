@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
   function DensityRacket
+  extends Modelica.Icons.Function;
   input Integer Nc;
   input Real T;
   input Real P;

@@ -1,12 +1,14 @@
 within Simulator.Examples;
 
 package CompoundSeparator
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream(Nc = 2, C = {benz, tol});
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   end ms;
 
   model main
+    extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Benzene benz;
     parameter data.Toluene tol;

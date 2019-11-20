@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
    function LiquidFugacityCoeffcient
+   extends Modelica.Icons.Function;
    
    input Integer Nc;
    input Real Tc[Nc];

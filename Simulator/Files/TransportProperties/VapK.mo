@@ -1,6 +1,7 @@
 within Simulator.Files.TransportProperties;
 
  function VapK
+    extends Modelica.Icons.Function;
     input Real VapK[6] "from chemsep database";
     input Real T(unit = "K") "Temperature";
     output Real kvap;

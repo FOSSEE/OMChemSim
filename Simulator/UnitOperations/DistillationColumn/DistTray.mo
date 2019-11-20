@@ -12,21 +12,21 @@ within Simulator.UnitOperations.DistillationColumn;
   //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
     String OutType(start = "Null");
     //L or V
-    replaceable Simulator.Files.Connection.matConn In(Nc = Nc) if Bin annotation(
+    replaceable Simulator.Files.Interfaces.matConn In(Nc = Nc) if Bin annotation(
       Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    replaceable Simulator.Files.Connection.matConn In_Dmy(Nc = Nc, P = 0, T = 0, mixMolFlo = 0, mixMolFrac = zeros(3, Nc), mixMolEnth = 0, mixMolEntr = 0, vapPhasMolFrac = 0) if not Bin annotation(
+    replaceable Simulator.Files.Interfaces.matConn In_Dmy(Nc = Nc, P = 0, T = 0, F = 0, x_pc = zeros(3, Nc), H = 0, S = 0, xvap = 0) if not Bin annotation(
       Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.matConn Out(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.trayConn In_Liq(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn In_Liq(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.trayConn Out_Liq(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn Out_Liq(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.trayConn Out_Vap(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn Out_Vap(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.trayConn In_Vap(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn In_Vap(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.enConn En annotation(
+    Simulator.Files.Interfaces.enConn En annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
 //connector equation
@@ -75,14 +75,14 @@ within Simulator.UnitOperations.DistillationColumn;
    x_pc[2, :] = xliq_sc[2,:];
    x_pc[3, :] = xvap_sc[2,:];
 //Bubble point calculation
-    Pbubl = sum(gammaBubl[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ liqfugcoeff_bubl[:]);
+    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
 //Dew point calculation
-    Pdew = 1 / sum(x_pc[1, :] ./ (gammaDew[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* vapfugcoeff_dew[:]);
+    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
 //molar balance
 //Fin + Fvap_s[1] + Fliq_s[1] = Fout + Fvap_s[2] + Fliq_s[2];
     Fin .* xin_c[:] + Fvap_s[1] .* xvap_sc[1, :] + Fliq_s[1] .* xliq_sc[1, :] = Fout .* xout_c[:] + Fvap_s[2] .* xvap_sc[2, :] + Fliq_s[2] .* xliq_sc[2, :];
 //equillibrium
-    xvap_sc[2, :] = K[:] .* xliq_sc[2, :];
+    xvap_sc[2, :] = K_c[:] .* xliq_sc[2, :];
 //raschford rice
 //    xliq_sc[2,:] = ((Fin .* xin_c[:] + Fvap_s[1] .* xvap_sc[1, :] + Fliq_s[1] .* xliq_sc[1, :])./(Fin + Fvap_s[1] + Fliq_s[1])) ./(1 .+ (Fvap_s[2]/ (Fvap_s[2] + Fliq_s[2])) * (K[:] .- 1));
 //  for i in 1:Nc loop
@@ -95,8 +95,8 @@ within Simulator.UnitOperations.DistillationColumn;
     Fin * Hin + Fvap_s[1] * Hvap_s[1] + Fliq_s[1] * Hliq_s[1] = Fout * Hout + Fvap_s[2] * Hvap_s[2] + Fliq_s[2] * Hliq_s[2] + Q;
 //enthalpy calculation
     for i in 1:Nc loop
-      Hliqout_c[i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
-      Hvapout_c[i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      Hliqout_c[i] = ThermodynamicFunctions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      Hvapout_c[i] = ThermodynamicFunctions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
     end for;
     Hliq_s[2] = sum(xliq_sc[2, :] .* Hliqout_c[:]) + Hres_p[2];
     Hvap_s[2] = sum(xvap_sc[2, :] .* Hvapout_c[:]) + Hres_p[3];

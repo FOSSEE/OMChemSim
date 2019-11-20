@@ -12,11 +12,11 @@ model AdiabaticCompressor
   parameter Integer Nc "number of components";
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
   //========================================================================================
-  Files.Connection.matConn In(Nc = Nc) annotation(
+  Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn Out(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.enConn En annotation(
+  Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -66}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
 equation

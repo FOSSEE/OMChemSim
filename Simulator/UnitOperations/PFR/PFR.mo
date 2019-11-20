@@ -63,11 +63,11 @@ within Simulator.UnitOperations.PFR;
     //Instantiation of Connectors
         Real Q "The total energy given out/taken in due to the reactions";
         
-      Simulator.Files.Connection.enConn En annotation(
+      Simulator.Files.Interfaces.enConn En annotation(
           Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      Files.Connection.matConn In(Nc = Nc) annotation(
+      Files.Interfaces.matConn In(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-348, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-348, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      Files.Connection.matConn Out(Nc = Nc) annotation(
+      Files.Interfaces.matConn Out(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
         //============================================================================================================
       equation

@@ -1,7 +1,9 @@
 within Simulator.BinaryPhaseEnvelope;
 
 package BinaryPhaseEnvelopePR
+  extends Modelica.Icons.ExamplesPackage;
   function CompresseblityFactor
+    extends Modelica.Icons.Function;
     input Real b[NOC];
     input Real aij[NOC, NOC];
     input Real P;
@@ -114,6 +116,7 @@ package BinaryPhaseEnvelopePR
   end PhaseEquilibria;
 
   model PengRobinsonPxy
+    extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Ethane eth;
     parameter data.Propane prop;
@@ -141,6 +144,7 @@ package BinaryPhaseEnvelopePR
   end PengRobinsonPxy;
 
   model PengRobinsonTxy
+    extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Ethane eth;
     parameter data.Propane prop;

@@ -2,6 +2,7 @@ within Simulator.Files.ThermodynamicFunctions;
 
   function HV
     /*Returns Heat of Vaporization*/
+    extends Modelica.Icons.Function;
     input Real HOV[6] "from chemsep database";
     input Real Tc(unit = "K") "Critical Temperature";
     input Real T(unit = "K") "Temperature";

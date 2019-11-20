@@ -1,37 +1,39 @@
 within Simulator.Examples;
 
 package Absorption
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream;
-    extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+    extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   end ms;
 
   model Tray
-    extends Simulator.Unit_Operations.Absorption_Column.AbsTray;
-    extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+    extends Simulator.UnitOperations.AbsorptionColumn.AbsTray;
+    extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   end Tray;
 
   model AbsColumn
-    extends Simulator.Unit_Operations.Absorption_Column.AbsCol;
+    extends Simulator.UnitOperations.AbsorptionColumn.AbsCol;
     Tray tray[Nt](each Nc = Nc, each C = C, each Fliq_s(each start = 30), each Fvap_s(each start = 30), each T(start = 300));
   end AbsColumn;
 
   model Test
-    import data = Simulator.Files.Chemsep_Database;
+    extends Modelica.Icons.Example;
+    import data = Simulator.Files.ChemsepDatabase;
     parameter Integer Nc = 3;
     parameter data.Acetone acet;
     parameter data.Air air;
     parameter data.Water wat;
-    parameter data.General_Properties C[Nc] = {acet, air, wat};
-    Simulator.Test.rigAbs.ms water(Nc = Nc, C = C) annotation(
+    parameter data.GeneralProperties C[Nc] = {acet, air, wat};
+    Simulator.Examples.Absorption.ms water(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-90, 66}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Test.rigAbs.ms air_acetone(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Absorption.ms air_acetone(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-88, -84}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Test.rigAbs.AbsColumn abs(Nc = Nc, C = C, noOfStages = 10) annotation(
+    Simulator.Examples.Absorption.AbsColumn abs(Nc = Nc, C = C, Nt = 10) annotation(
       Placement(visible = true, transformation(origin = {-20, -6}, extent = {{-16, -16}, {16, 16}}, rotation = 0)));
-    Simulator.Test.rigAbs.ms top(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Absorption.ms top(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {62, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Test.rigAbs.ms bottom(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Absorption.ms bottom(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {70, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
   connect(air_acetone.Out, abs.In_Bot) annotation(

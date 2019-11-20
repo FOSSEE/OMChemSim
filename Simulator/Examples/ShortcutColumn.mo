@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package ShortcutColumn
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
@@ -12,6 +13,7 @@ package ShortcutColumn
   end Shortcut;
 
   model main
+    extends Modelica.Icons.Example;
   
   //******Use Non-Linear Solver "Homotopy" for Solving this Model******\\
   //============================================================================

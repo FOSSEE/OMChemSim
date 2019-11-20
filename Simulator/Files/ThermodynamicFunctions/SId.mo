@@ -1,7 +1,9 @@
 within Simulator.Files.ThermodynamicFunctions;
 
   function SId
+    extends Modelica.Icons.Function;
     import Modelica.Constants.*;
+    
     
     input Real VapCp[6];
     input Real HOV[6];

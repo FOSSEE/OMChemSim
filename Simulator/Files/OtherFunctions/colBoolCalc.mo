@@ -1,6 +1,7 @@
 within Simulator.Files.OtherFunctions;
 
 function colBoolCalc
+  extends Modelica.Icons.Function;
   //column boolean calculator
   input Integer noOfStages, noOfExCons, exConStages[noOfExCons];
   output Boolean bool[noOfStages];

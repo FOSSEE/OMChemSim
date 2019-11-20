@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
 function BIPUNIQUAC
+  extends Modelica.Icons.Function;
     input Integer Nc;
     input String C[Nc];
     output Real BIP[Nc, Nc];

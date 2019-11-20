@@ -1,6 +1,7 @@
 within Simulator.BinaryPhaseEnvelope;
 
 package BinaryPhaseEnvelopeNRTL
+  extends Modelica.Icons.ExamplesPackage;
   model NRTLmodel
     import Simulator.Files.ThermodynamicFunctions.*;
     gammaNRTLmodel Gamma(NOC = NOC, comp = comp, molFrac = x[:], T = T);
@@ -43,10 +44,10 @@ package BinaryPhaseEnvelopeNRTL
   end gammaNRTLmodel;
 
   model base
-    import data = Simulator.Files.Chemsep_Database;
+    import data = Simulator.Files.ChemsepDatabase;
     parameter Integer NOC;
     parameter Real BIP[NOC, NOC, 2];
-    parameter data.General_Properties comp[NOC];
+    parameter data.GeneralProperties comp[NOC];
     extends NRTLmodel(BIPS = BIP);
     Real P, T(start = 300), gamma[NOC], K[NOC], x[NOC](each start = 0.5), y[NOC];
   equation
@@ -56,12 +57,13 @@ package BinaryPhaseEnvelopeNRTL
   end base;
 
   model OnehexeneAcetoneTxy
-    import data = Simulator.Files.Chemsep_Database;
+    extends Modelica.Icons.Example;
+    import data = Simulator.Files.ChemsepDatabase;
     parameter data.Onehexene ohex;
     parameter data.Acetone acet;
     parameter Integer NOC = 2;
-    parameter Real BIP[NOC, NOC, 2] = Simulator.Files.Thermodynamic_Functions.BIPNRTL(NOC, comp.CAS);
-    parameter data.General_Properties comp[NOC] = {ohex, acet};
+    parameter Real BIP[NOC, NOC, 2] = Simulator.Files.ThermodynamicFunctions.BIPNRTL(NOC, comp.CAS);
+    parameter data.GeneralProperties comp[NOC] = {ohex, acet};
     base points[41](each P = 1013250, each NOC = NOC, each comp = comp, each BIP = BIP);
     Real x[41, NOC], y[41, NOC], T[41];
   equation
@@ -74,12 +76,13 @@ package BinaryPhaseEnvelopeNRTL
   end OnehexeneAcetoneTxy;
 
   model OnehexeneAcetonePxy
-    import data = Simulator.Files.Chemsep_Database;
+    extends Modelica.Icons.Example;
+    import data = Simulator.Files.ChemsepDatabase;
     parameter data.Onehexene ohex;
     parameter data.Acetone acet;
     parameter Integer NOC = 2;
-    parameter Real BIP[NOC, NOC, 2] = Simulator.Files.Thermodynamic_Functions.BIPNRTL(NOC, comp.CAS);
-    parameter data.General_Properties comp[NOC] = {ohex, acet};
+    parameter Real BIP[NOC, NOC, 2] = Simulator.Files.ThermodynamicFunctions.BIPNRTL(NOC, comp.CAS);
+    parameter data.GeneralProperties comp[NOC] = {ohex, acet};
     base points[41](each T = 424, each NOC = NOC, each comp = comp, each BIP = BIP);
     Real x[41, NOC], y[41, NOC], P[41];
   equation

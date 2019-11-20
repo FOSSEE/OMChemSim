@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package Cooler
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     //This model will be instantiated in maintest model as outlet stream of cooler. Dont run this model. Run maintest model for cooler test
     extends Simulator.Streams.MaterialStream(Nc = 2);
@@ -10,6 +11,7 @@ package Cooler
   end ms;
 
   model cool
+    extends Modelica.Icons.Example;
     //use non linear solver hybrid to simulate this model
     import data = Simulator.Files.ChemsepDatabase;
     //instantiation of chemsep database

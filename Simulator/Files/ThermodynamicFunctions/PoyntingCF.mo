@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
 function PoyntingCF
+  extends Modelica.Icons.Function;
   import Simulator.Files.Thermodynamic_Functions.*;
   input Integer Nc;
   input Real Pc, Tc, RP, AF, MW;

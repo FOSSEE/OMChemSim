@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
 function BIPNRTL
+extends Modelica.Icons.Function;
 input Integer Nc;
 input String CAS[Nc];
 output Real BIP[Nc, Nc, 2];

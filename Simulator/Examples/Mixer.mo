@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package Mixer
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     //This model will be instantiated in maintest model as material streams
     extends Simulator.Streams.MaterialStream;
@@ -10,6 +11,7 @@ package Mixer
   end ms;
 
   model mix
+    extends Modelica.Icons.Example;
     import data = Simulator.Files.Chemsep_Database;
     parameter data.Ethanol eth;
     parameter data.Methanol meth;

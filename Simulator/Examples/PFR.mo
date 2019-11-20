@@ -1,12 +1,14 @@
 within Simulator.Examples;
 
 package PFR
+  extends Modelica.Icons.ExamplesPackage;
   model MS
     extends Simulator.Streams.MaterialStream;
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   end MS;
 
   model PFR_Test_II
+    extends Modelica.Icons.Example;
   //*****Advicable to Select the First Component as the Base Component*****\\
   //========================================================================
   //Header Files and Packages

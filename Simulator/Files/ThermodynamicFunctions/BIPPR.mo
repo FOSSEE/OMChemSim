@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
  function BIPPR
+ extends Modelica.Icons.Function;
     input Integer Nc;
     input String C[Nc];
     output Real Kij_cc[Nc, Nc];

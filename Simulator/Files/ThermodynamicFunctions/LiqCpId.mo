@@ -2,6 +2,7 @@ within Simulator.Files.ThermodynamicFunctions;
 
   function LiqCpId
     /*Calculates specific heat of liquid at given Temperature*/
+    extends Modelica.Icons.Function;
     input Real LiqCp[6] "from chemsep database";
     input Real T(unit = "K") "Temperature";
     output Real Cpliq(unit = "J/mol") "Specific heat of liquid";

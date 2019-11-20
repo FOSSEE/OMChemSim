@@ -3,18 +3,18 @@ within Simulator.UnitOperations.AbsorptionColumn;
 model AbsTray
     import Simulator.Files.*;
     parameter Integer Nc;
-    parameter Chemsep_Database.General_Properties C[Nc];
+    parameter ChemsepDatabase.GeneralProperties C[Nc];
     Real P(min = 0, start = 101325), T(min = 0, start = sum(C[:].Tb) / Nc);
     Real Fvap_s[2](each min = 0, each start = 100), Fliq_s[2](each min = 0, each start = 100), xvap_sc[2, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)), xliq_sc[2, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)), Hvap_s[2], Hliq_s[2], Hvapout_c[Nc], Hliqout_c[Nc];
     Real x_pc[3, Nc](each min =0, each max = 0, each start = 1/(Nc + 1)), Pdew(min = 0, start = sum(C[:].Pc)/Nc), Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
   
-    Simulator.Files.Connection.trayConn In_Liq(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn In_Liq(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.trayConn Out_Liq(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn Out_Liq(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.trayConn Out_Vap(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn Out_Vap(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.trayConn In_Vap(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.trayConn In_Vap(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
 //connector equation
@@ -41,7 +41,7 @@ model AbsTray
 //molar balance
     Fvap_s[1] .* xvap_sc[1, :] + Fliq_s[1] .* xliq_sc[1, :] = Fvap_s[2] .* xvap_sc[2, :] + Fliq_s[2] .* xliq_sc[2, :];
 //equillibrium
-    xvap_sc[2, :] = K[:] .* xliq_sc[2, :];
+    xvap_sc[2, :] = K_c[:] .* xliq_sc[2, :];
 //raschford rice
 //  xliq_sc[2, :] = ((Fvap_s[1] .* xvap_sc[1, :] + Fliq_s[1] .* xliq_sc[1, :])/(Fvap_s[1] + Fliq_s[1]))./(1 .+ (Fvap_s[1]/(Fliq_s[1] + Fvap_s[1])) .* (K[:] .- 1));
 //  for i in 1:Nc loop
@@ -54,8 +54,8 @@ model AbsTray
     Fvap_s[1] * Hvap_s[1] + Fliq_s[1] * Hliq_s[1] = Fvap_s[2] * Hvap_s[2] + Fliq_s[2] * Hliq_s[2];
 //enthalpy calculation
     for i in 1:Nc loop
-      Hliqout_c[i] = Thermodynamic_Functions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
-      Hvapout_c[i] = Thermodynamic_Functions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      Hliqout_c[i] = ThermodynamicFunctions.HLiqId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
+      Hvapout_c[i] = ThermodynamicFunctions.HVapId(C[i].SH, C[i].VapCp, C[i].HOV, C[i].Tc, T);
     end for;
     Hliq_s[2] = sum(xliq_sc[2, :] .* Hliqout_c[:]) + Hres_p[2];
     Hvap_s[2] = sum(xvap_sc[2, :] .* Hvapout_c[:]) + Hres_p[3];

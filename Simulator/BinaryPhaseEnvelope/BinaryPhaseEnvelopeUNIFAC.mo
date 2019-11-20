@@ -1,7 +1,9 @@
 within Simulator.BinaryPhaseEnvelope;
 
 package BinaryPhaseEnvelopeUNIFAC
+    extends Modelica.Icons.ExamplesPackage;
   model PxyUNIFAC
+    extends Modelica.Icons.Example;
   //Libraries
     import Simulator.*;
     //Extension of Chemsep Database
@@ -129,6 +131,7 @@ package BinaryPhaseEnvelopeUNIFAC
   //====================================================================================================
 
   model TxyUNIFAC
+    extends Modelica.Icons.Example;
     //Libraries
     import Simulator.*;
     //Extension of Chemsep Database

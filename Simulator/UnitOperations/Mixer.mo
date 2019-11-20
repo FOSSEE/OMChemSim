@@ -12,10 +12,10 @@ model Mixer
   Real Hin_s[NI] "Inlet molar enthalpy of each stream", Hout "Outlet molar enthalpy";
   Real Tin_s[NI](each min = 0, each start = 273.15) "Temperature of each stream", Tout(each min = 0, each start = 273.15) "Temperature of outlet stream", Sin_s[NI] "Inlet molar enthalpy of each stream", Sout "Outlet molar entropy", Bin_s[NI](each min = 0, each max = 1, each start = 0.5) "Inlet vapor phase mol fraction", Bout(min = 0, max = 1, start = 0.5) "Outlet vapor phase mol fraction";
   //================================================================================
-  //  Files.Connection.matConn inlet[NI](each Nc = Nc);
-  Simulator.Files.Connection.matConn outlet(Nc = Nc) annotation(
+  //  Files.Interfaces.matConn inlet[NI](each Nc = Nc);
+  Simulator.Files.Interfaces.matConn outlet(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Connection.matConn inlet[NI](each Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn inlet[NI](each Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
 //Connector equation

@@ -1,6 +1,7 @@
 within Simulator.Files.Models.ReactionManager;
 
 function Stoichiometrycheck
+    extends Modelica.Icons.Function;
     //This functions checks the stoichiometry of the reaction we have given and returns "1" as output if the stoichiometry is okay and returns 0 otherwise.
     input Integer Nr"No. of Reactions";
     input Integer Nc"Nomber of components in the required reactions";

@@ -1,6 +1,7 @@
 within Simulator.Files.ChemsepDatabase;
 
 model GeneralProperties
+    extends Modelica.Icons.Record;
   parameter Integer SN;
   parameter String name;
   parameter String CAS;

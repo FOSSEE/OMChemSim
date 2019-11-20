@@ -3,7 +3,7 @@ within Simulator.Files.ThermodynamicPackages;
  model UNIFAC
     //Libraries
     import Simulator.Files.*;
-    extends Simulator.Files.Thermodynamic_Functions;
+    import Simulator.Files.ThermodynamicFunctions;
     //Parameter Section
     parameter Integer m = 4 "substitue of number of different group";
     parameter Integer k = 4 "number of different group in component i";
@@ -61,7 +61,7 @@ within Simulator.Files.ThermodynamicPackages;
     Hres_c[:] = zeros(3);
     Sres_c[:] = zeros(3);
     for i in 1:Nc loop
-      Psat[i] = Simulator.Files.Thermodynamic_Functions.Psat(C[i].VP[:], T);
+      Psat[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP[:], T);
     end for;
     for i in 1:Nc loop
       philbubl_c[i] = 1;

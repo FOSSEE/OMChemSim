@@ -1,6 +1,7 @@
 within Simulator.Files.ThermodynamicFunctions;
 
   function Psat
+    extends Modelica.Icons.Function;
     /*Returns vapor pressure at given temperature*/
     input Real VP[6] "from chemsep database";
     input Real T(unit = "K") "Temperature";

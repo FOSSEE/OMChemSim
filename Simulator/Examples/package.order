@@ -1,12 +1,4 @@
-msTP
-msTVF
-msPVF
-msPH
-msPS
-msTPbbp
-msTPUNIQUAC
-msTPNRTL
-msTPGrayson
+MaterialStream
 CompositeMS
 Heater
 HeatExchanger
@@ -24,3 +16,4 @@ Distillation
 PFR
 CR
 Absorption
+

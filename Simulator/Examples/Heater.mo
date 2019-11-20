@@ -1,6 +1,7 @@
 within Simulator.Examples;
 
 package Heater
+  extends Modelica.Icons.ExamplesPackage;
   model ms
     extends Simulator.Streams.MaterialStream;
     //material stream extended
@@ -9,6 +10,7 @@ package Heater
   end ms;
 
   model heat
+    extends Modelica.Icons.Example;
     //instance of chemsep database
     import data = Simulator.Files.ChemsepDatabase;
     //instance of methanol

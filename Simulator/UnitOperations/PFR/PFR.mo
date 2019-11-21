@@ -132,7 +132,7 @@ within Simulator.UnitOperations.PFR;
         xm_pc[3, i] = 0;
       end for;
 //rholiq
-      rholiq_c = ThermodynamicFunctions.DensityRacket(Nc, Tin, Pin, C[:].Pc, C[:].Tc, C[:].Racketparam, C[:].AF, C[:].MW, Psat_c[:]);
+      rholiq_c = ThermodynamicFunctions.DensityRacket(Nc, Tin, Pin, C[:].Pc, C[:].Tc, C[:].Racketparam, C[:].AF, C[:].MW, Pvap_c[:]);
       rholiq = 1 / sum(xm_pc[2, :] ./ rholiq_c[:]) / MW_p[2];
 //Vapour Phase Density
       for i in 1:Nc loop
@@ -183,7 +183,7 @@ within Simulator.UnitOperations.PFR;
   //=========================================================================
 //Calculation of Phase Densities
 //Liquid Phase Density-Inlet Conditions
-      rholiq_c = ThermodynamicFunctions.DensityRacket(Nc, Tin, Pin, C[:].Pc, C[:].Tc, C[:].Racketparam, C[:].AF, C[:].MW, Psat_c[:]);
+      rholiq_c = ThermodynamicFunctions.DensityRacket(Nc, Tin, Pin, C[:].Pc, C[:].Tc, C[:].Racketparam, C[:].AF, C[:].MW, Pvap_c[:]);
       rholiq = 1 / sum(xm_pc[2, :] ./ rholiq_c[:]) / MW_p[2];
 //Vapour Phase Density
       for i in 1:Nc loop

@@ -50,9 +50,9 @@ within Simulator.UnitOperations.DistillationColumn;
 //This equation is temporarily valid since this is only "partial" reboiler. Rewrite equation when "total" reboiler functionality is added
     x_pc[3, :] = xvapout_c[:];
 //Bubble point calculation
-    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
+    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* Pvap_c[:] ./ philiqbubl_c[:]);
 //Dew point calculation
-    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
+    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* Pvap_c[:]) .* phivapdew_c[:]);
 //molar balance
 //  Fin + Fliqin = Fout + Fvapout;
     for i in 1:Nc loop

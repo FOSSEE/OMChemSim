@@ -52,9 +52,9 @@ within Simulator.UnitOperations.DistillationColumn;
      x_pc[2, :] = xliqout_c[:];
      x_pc[3, :] = K_c[:] .* x_pc[2, :];
 //Bubble point calculation
-    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
+    Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* Pvap_c[:] ./ philiqbubl_c[:]);
 //Dew point calculation
-    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
+    Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* Pvap_c[:]) .* phivapdew_c[:]);
 //molar balance
 //Fin + Fvapin = Fout + Fliqout;
     Fin .* xin_c[:] + Fvapin .* xvapin_c[:] = Fout .* xout_c[:] + Fliqout .* xliqout_c[:];
@@ -71,9 +71,9 @@ within Simulator.UnitOperations.DistillationColumn;
     Fin * Hin + Fvapin * Hvapin = Fout * Hout + Fliqout * Hliqout + Q;
 //Temperature calculation
     if Ctype == "Total" then
-      P = sum(xout_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]));
+      P = sum(xout_c[:] .* Pvap_c[:]);
     elseif Ctype == "Partial" then
-      1 / P = sum(xout_c[:] ./ exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]));
+      1 / P = sum(xout_c[:] ./ Pvap_c[:]);
     end if;
 // outlet liquid molar enthalpy calculation
     for i in 1:Nc loop

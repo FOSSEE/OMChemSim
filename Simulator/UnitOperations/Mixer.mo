@@ -4,7 +4,7 @@ model Mixer
   extends Simulator.Files.Icons.Mixer;
   import Simulator.Files.*;
   parameter Integer Nc "Number of Components", NI = 6 "Number of Input streams";
-  parameter Chemsep_Database.General_Properties C[Nc];
+  parameter ChemsepDatabase.GeneralProperties C[Nc];
   parameter String outPress;
   Real Pout(min = 0, start = 101325), Pin[NI](min = 0, start = 101325);
   Real xin_sc[NI, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Input stream component mol fraction", Fin_s[NI](each min = 0, each start = 100) "Input stream Molar Flow";

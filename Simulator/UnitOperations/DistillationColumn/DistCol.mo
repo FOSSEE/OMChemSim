@@ -10,19 +10,19 @@ within Simulator.UnitOperations.DistillationColumn;
     parameter String Ctype = "Total";
     //Total or Partial
     Real RR(min = 0);
-    Simulator.Files.Connection.matConn In_s[Ni](each Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn In_s[Ni](each Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-248, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.matConn Dist(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn Dist(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {250, 316}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 298}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.matConn Bot(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn Bot(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {250, -296}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {252, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.enConn Cduty annotation(
+    Simulator.Files.Interfaces.enConn Cduty annotation(
       Placement(visible = true, transformation(origin = {246, 590}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.enConn Rduty annotation(
+    Simulator.Files.Interfaces.enConn Rduty annotation(
       Placement(visible = true, transformation(origin = {252, -588}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -598}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.matConn Out_s[Nout](each Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn Out_s[Nout](each Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-36, 32}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-70, 60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.enConn En[NQ](each Nc = Nc) annotation(
+    Simulator.Files.Interfaces.enConn En[NQ](each Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-34, -54}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-70, -60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
   for i in 1:Ni loop
@@ -46,7 +46,7 @@ within Simulator.UnitOperations.DistillationColumn;
     connect(condenser.En, Cduty);
     connect(reboiler.En, Rduty);
     for i in 1:Nt - 3 loop
-      connect(tray[i].Out_Liq, tray[i + 1].Out_Liq);
+      connect(tray[i].Out_Liq, tray[i + 1].In_Liq);
       connect(tray[i].In_Vap, tray[i + 1].Out_Vap);
     end for;
     connect(tray[1].Out_Vap, condenser.In_Vap);

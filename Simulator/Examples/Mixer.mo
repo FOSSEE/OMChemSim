@@ -6,18 +6,18 @@ package Mixer
     //This model will be instantiated in maintest model as material streams
     extends Simulator.Streams.MaterialStream;
     //material stream extended
-    extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+    extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
     //thermodynamic package Raoults law is extended
   end ms;
 
   model mix
     extends Modelica.Icons.Example;
-    import data = Simulator.Files.Chemsep_Database;
+    import data = Simulator.Files.ChemsepDatabase;
     parameter data.Ethanol eth;
     parameter data.Methanol meth;
     parameter data.Water wat;
     parameter Integer Nc = 3;
-    parameter data.General_Properties C[Nc] = {meth, eth, wat};
+    parameter data.GeneralProperties C[Nc] = {meth, eth, wat};
     ms ms1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-84, 88}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms ms2(Nc = Nc, C = C) annotation(
@@ -30,26 +30,27 @@ package Mixer
       Placement(visible = true, transformation(origin = {-84, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms ms6(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-82, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Unit_Operations.Mixer mixer1(Nc = Nc, NI = 6, C = C, outPress = "Inlet_Average") annotation(
+    Simulator.UnitOperations.Mixer mixer1(Nc = Nc, NI = 6, C = C, outPress = "Inlet_Average") annotation(
       Placement(visible = true, transformation(origin = {-8, 2}, extent = {{-20, -20}, {20, 20}}, rotation = 0)));
     ms out1(Nc = Nc, C = C, T(start = 354), F_p(start = 1600)) annotation(
       Placement(visible = true, transformation(origin = {62, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
+  
   equation
-  connect(mixer1.outlet, out1.inlet) annotation(
-      Line(points = {{12, 2}, {52, 2}}));
-  connect(ms6.outlet, mixer1.inlet[6]) annotation(
-      Line(points = {{-72, -86}, {-28, -86}, {-28, 2}}));
-  connect(ms5.outlet, mixer1.inlet[5]) annotation(
-      Line(points = {{-74, -52}, {-44, -52}, {-44, 2}, {-28, 2}}));
-  connect(ms4.outlet, mixer1.inlet[4]) annotation(
-      Line(points = {{-74, -16}, {-50, -16}, {-50, 2}, {-28, 2}}));
-  connect(ms3.outlet, mixer1.inlet[3]) annotation(
-      Line(points = {{-76, 24}, {-50, 24}, {-50, 2}, {-28, 2}}));
-  connect(ms2.outlet, mixer1.inlet[2]) annotation(
-      Line(points = {{-74, 58}, {-44, 58}, {-44, 2}, {-28, 2}}));
-  connect(ms1.outlet, mixer1.inlet[1]) annotation(
-      Line(points = {{-74, 88}, {-28, 88}, {-28, 2}}));
-  equation
+    connect(mixer1.outlet, out1.In) annotation(
+      Line(points = {{12, 2}, {52, 2}, {52, 2}, {52, 2}}, color = {0, 70, 70}));
+    connect(ms6.Out, mixer1.inlet[6]) annotation(
+      Line(points = {{-72, -86}, {-28, -86}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
+    connect(ms5.Out, mixer1.inlet[5]) annotation(
+      Line(points = {{-74, -52}, {-28, -52}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
+    connect(ms4.Out, mixer1.inlet[4]) annotation(
+      Line(points = {{-74, -16}, {-28, -16}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
+    connect(ms3.Out, mixer1.inlet[3]) annotation(
+      Line(points = {{-76, 24}, {-28, 24}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
+    connect(ms2.Out, mixer1.inlet[2]) annotation(
+      Line(points = {{-74, 58}, {-28, 58}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
+    connect(ms1.Out, mixer1.inlet[1]) annotation(
+      Line(points = {{-74, 88}, {-28, 88}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
     ms1.P = 101325;
     ms2.P = 202650;
     ms3.P = 126523;

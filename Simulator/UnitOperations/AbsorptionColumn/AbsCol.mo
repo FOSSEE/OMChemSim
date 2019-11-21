@@ -6,13 +6,13 @@ model AbsCol
     parameter Integer Nc "Number of Components";
     parameter Integer Nt;
     parameter data.GeneralProperties C[Nc];
-    Simulator.Files.Connection.matConn In_Top(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn In_Top(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 302}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.matConn In_Bot(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn In_Bot(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.matConn Out_Top(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn Out_Top(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Files.Connection.matConn Out_Bot(Nc = Nc) annotation(
+    Simulator.Files.Interfaces.matConn Out_Bot(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
 //connector equation

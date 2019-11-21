@@ -3,14 +3,27 @@ within Simulator.UnitOperations;
 model Mixer
   extends Simulator.Files.Icons.Mixer;
   import Simulator.Files.*;
-  parameter Integer Nc "Number of Components", NI = 6 "Number of Input streams";
   parameter ChemsepDatabase.GeneralProperties C[Nc];
-  parameter String outPress;
-  Real Pout(min = 0, start = 101325), Pin[NI](min = 0, start = 101325);
-  Real xin_sc[NI, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Input stream component mol fraction", Fin_s[NI](each min = 0, each start = 100) "Input stream Molar Flow";
-  Real xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Output Stream component mol fraction", Fout(each min = 0, each start = 100) "Output stream Molar Flow";
-  Real Hin_s[NI] "Inlet molar enthalpy of each stream", Hout "Outlet molar enthalpy";
-  Real Tin_s[NI](each min = 0, each start = 273.15) "Temperature of each stream", Tout(each min = 0, each start = 273.15) "Temperature of outlet stream", Sin_s[NI] "Inlet molar enthalpy of each stream", Sout "Outlet molar entropy", Bin_s[NI](each min = 0, each max = 1, each start = 0.5) "Inlet vapor phase mol fraction", Bout(min = 0, max = 1, start = 0.5) "Outlet vapor phase mol fraction";
+  parameter Integer Nc "Number of Components", NI = 6 "Number of Input streams";
+  
+  Real Pin[NI](min = 0, start = 101325);
+  Real xin_sc[NI, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Input stream component mol fraction";
+  Real Fin_s[NI](each min = 0, each start = 100) "Input stream Molar Flow";
+  Real Hin_s[NI] "Inlet molar enthalpy of each stream";
+  Real Tin_s[NI](each min = 0, each start = 273.15) "Temperature of each stream";
+  Real Sin_s[NI] "Inlet molar enthalpy of each stream";
+  Real Bin_s[NI](each min = 0, each max = 1, each start = 0.5) "Inlet vapor phase mol fraction";
+  
+ parameter String outPress;
+  
+  Real Fout(each min = 0, each start = 100) "Output stream Molar Flow";
+  Real Pout(min = 0, start = 101325);
+  Real Hout "Outlet molar enthalpy";
+  Real Tout(each min = 0, each start = 273.15) "Temperature of outlet stream";
+  Real Sout "Outlet molar entropy";
+  Real Bout(min = 0, max = 1, start = 0.5) "Outlet vapor phase mol fraction";
+  Real xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Output Stream component mol fraction";
+ 
   //================================================================================
   //  Files.Interfaces.matConn inlet[NI](each Nc = Nc);
   Simulator.Files.Interfaces.matConn outlet(Nc = Nc) annotation(

@@ -5,9 +5,29 @@ within Simulator.UnitOperations.DistillationColumn;
     parameter Integer Nc = 2;
     parameter Boolean Bin = true;
     parameter ChemsepDatabase.GeneralProperties C[Nc];
-    Real P(min = 0, start = 101325), T(min = 0, start = (min(C[:].Tb) + max(C[:].Tb)) / 2);
-    Real Fin(min = 0, start = 100), Fout(min = 0, start = 100), Fvap_s[2](each min = 0, each start = 100), Fliq_s[2](each min = 0, each start = 100), xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xvap_sc[2, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xliq_sc[2, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Hin, Hvap_s[2], Hliq_s[2], Q, Hout, Hvapout_c[Nc], Hliqout_c[Nc];
-    Real x_pc[3, Nc](each min =0, each max = 0, each start = 1/(Nc + 1)), Pdew(min = 0, start = sum(C[:].Pc)/Nc), Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+    Real P(min = 0, start = 101325);
+    Real T(min = 0, start = (min(C[:].Tb) + max(C[:].Tb)) / 2);
+    Real Fin(min = 0, start = 100);
+    Real xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)); 
+    Real Hin; 
+    
+    Real Fout(min = 0, start = 100);
+    Real Fvap_s[2](each min = 0, each start = 100);
+    Real Fliq_s[2](each min = 0, each start = 100);  
+    Real xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    Real xvap_sc[2, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    Real xliq_sc[2, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+ 
+    Real Hvap_s[2];
+    Real Hliq_s[2];
+    Real Q;
+    Real Hout;
+    Real Hvapout_c[Nc];
+    Real Hliqout_c[Nc];
+    Real x_pc[3, Nc](each min =0, each max = 0, each start = 1/(Nc + 1));
+    
+    Real Pdew(min = 0, start = sum(C[:].Pc)/Nc);
+    Real Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
     Real Pdmy1, Tdmy1, xdmy1_pc[3,Nc], Fdmy1,Hdmy1, Sdmy1, xvapdmy1;
   //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
     String OutType(start = "Null");

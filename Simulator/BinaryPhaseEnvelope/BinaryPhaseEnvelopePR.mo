@@ -149,7 +149,7 @@ package BinaryPhaseEnvelopePR
     parameter data.Ethane eth;
     parameter data.Propane prop;
     parameter Integer NOC = 2;
-    parameter Integer N = 1;
+    parameter Integer N = 10;
     parameter data.GeneralProperties comp[NOC] = {eth, prop};
     PhaseEquilibria points[N](each P = 101325, each NOC = NOC, each comp = comp, each T(start = 273), each Tbubl(start = 273), each x(each start = 0.5), each y(each start = 0.5));
     Real x[N, NOC], y[N, NOC], T[N], Tbubl[N], T_PR[N];

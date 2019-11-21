@@ -3,13 +3,28 @@ within Simulator.UnitOperations;
 model Valve
   extends Simulator.Files.Icons.Valve;
   // This is generic valve model. For using this model we need to extend this model and incorporte ouput material stream since this model is not doing any flash calculations. Refer valve model in Test section for this.
+    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
+    parameter Integer Nc = 3 "number of components";
   //====================================================================================
-  Real Fin(min = 0, start = 100) "inlet mixture molar flow rate", Fout(min = 0, start = 100) "outlet mixture molar flow rate", Pin(min = 0, start = 101325) "Inlet pressure", Pout(min = 0, start = 101325) "Outlet pressure", Pdel "Pressure drop", Tin(min = 0, start = 273.15) "Inlet Temperature", Tout(min = 0, start = 273.15) "Outlet Temperature", Tdel "Temperature Increase";
-  Real Hin "inlet mixture molar enthalpy", Hout "outlet mixture molar enthalpy";
-  Real Sin "inlet mixture molar entropy", Sout "outlet mixture molar entropy", x_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "mixture mole fraction", xvapin(min = 0, max = 1, start = 0.5) "Inlet vapor phase mole fraction", xvapout(min = 0, max = 1, start = 0.5) "Outlet vapor phase mole fraction";
+  Real Fin(min = 0, start = 100) "inlet mixture molar flow rate";
+  Real Pin(min = 0, start = 101325) "Inlet pressure"; 
+  Real Tin(min = 0, start = 273.15) "Inlet Temperature";
+  Real Hin "inlet mixture molar enthalpy"; 
+  Real Sin "inlet mixture molar entropy";
+  Real xvapin(min = 0, max = 1, start = 0.5) "Inlet vapor phase mole fraction"; 
+  
+  Real Tdel "Temperature Increase";
+  Real Pdel "Pressure drop"; 
+ 
+  Real Fout(min = 0, start = 100) "outlet mixture molar flow rate";
+  Real Pout(min = 0, start = 101325) "Outlet pressure";
+  Real Tout(min = 0, start = 273.15) "Outlet Temperature";
+  Real Hout "outlet mixture molar enthalpy";
+  Real Sout "outlet mixture molar entropy";
+  Real x_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "mixture mole fraction";
+  Real xvapout(min = 0, max = 1, start = 0.5) "Outlet vapor phase mole fraction";
   //========================================================================================
-  parameter Integer Nc = 3 "number of components";
-  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
+
   //========================================================================================
   Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

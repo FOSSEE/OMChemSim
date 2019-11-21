@@ -2,9 +2,9 @@ within Simulator.UnitOperations.DistillationColumn;
 
   model DistCol
     extends Simulator.Files.Icons.DistillationColumn;
+     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
     parameter Integer Nc;
     import data = Simulator.Files.ChemsepDatabase;
-    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
     parameter Boolean Bin_t[Nt] = Simulator.Files.OtherFunctions.colBoolCalc(Nt, Ni, InT_s);
     parameter Integer Nt = 4, Nout = 0, NQ = 0, Ni = 1, InT_s[Ni];
     parameter String Ctype = "Total";

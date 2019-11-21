@@ -5,9 +5,29 @@ within Simulator.UnitOperations.DistillationColumn;
     parameter Integer Nc = 2;
     parameter Boolean Bin = false;
     parameter ChemsepDatabase.GeneralProperties C[Nc];
-    Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
-    Real Fin(min = 0, start = 100), Fout(min = 0, start = 100), Fvapin(min = 0, start = 100), Fliqout(min = 0, start = 100), xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xvapin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xliqout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Hin, Hvapin, Hliqout, Q, Hout, Hliqout_c[Nc];
-    Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Pdew(min = 0, start = sum(C[:].Pc)/Nc), Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+    Real P(min = 0, start = 101325);
+    Real T(min = 0, start = 273.15);
+    Real Fin(min = 0, start = 100);
+    Real xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)); 
+    Real xvapin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)); 
+    Real Hin;
+   
+    Real Fout(min = 0, start = 100);
+    Real Fvapin(min = 0, start = 100);
+    Real Fliqout(min = 0, start = 100);
+    Real xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    Real xliqout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    
+    Real Hvapin;
+    Real Hliqout;
+    Real Q;
+    Real Hout;
+    Real Hliqout_c[Nc];
+    Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    
+    Real Pdew(min = 0, start = sum(C[:].Pc)/Nc);
+    Real Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+    
     //String sideDrawType(start = "Null");
     //L or V
     parameter String Ctype "Partial or Total";
@@ -23,6 +43,7 @@ within Simulator.UnitOperations.DistillationColumn;
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Interfaces.enConn En annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
   equation
 //connector equation
     if Bin then

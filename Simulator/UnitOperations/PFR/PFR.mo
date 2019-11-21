@@ -7,11 +7,12 @@ within Simulator.UnitOperations.PFR;
         extends Simulator.Files.Icons.PFR;
         import Simulator.Files.*;
         import Simulator.Files.Thermodynamic_Functions.*; 
+         parameter Integer Nc "number of Cin_cunds ";
         parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
         parameter Real Pdel  "Pressure Drop";
         extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
         parameter Real Zv = 1 "Cressiblity Factor";
-        parameter Integer Nc "number of Cin_cunds ";
+   
         parameter Integer Nr "Number of reactions";
         parameter Integer Phase;
         parameter Integer Mode;
@@ -24,7 +25,10 @@ within Simulator.UnitOperations.PFR;
         Real Fin_pc[3, Nc](each min = 0, each start = 100) "Total molar flow rates of respective phases";
         Real Fin_p[3](each min = 0, each start = 100) "Total inlet molar flow rate";
         Real xin_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)) "Mole Fraction at inlet ";
-        Real Hin "Inlet Enthalpy", Sin "Inlet Entropy", xvapin(min = 0, max = 1, start = 0.5) "Vapor Fraction";
+        Real Hin "Inlet Enthalpy", Sin "Inlet Entropy";
+        Real xvapin(min = 0, max = 1, start = 0.5) "Vapor Fraction";
+        Real Cin_c[Nc] "Inlet Concentration";
+        Real Fin_c[Nc](each min = 0, each start = 100) "Inlet Mole Flow";
         Real Tout(min = 0, start = 273.15) "Outlet Temperature";
         Real Pout(min  = 0, start = 101325) "Outlet Pressure";
         Real Fout_p[3](each min = 0, each start = 50) "Total Outlet Molar Flow Rate";
@@ -47,8 +51,7 @@ within Simulator.UnitOperations.PFR;
         Real rhovap_c[Nc](unit = "kg/m^3") "Vapor Density";
         Real rhovap "Vapor Phase Density";
         Real rho "Mixture Density";
-        Real Cin_c[Nc] "Inlet Concentration";
-        Real Fin_c[Nc](each min = 0, each start = 100) "Inlet Mole Flow";
+ 
         Real Fout_c[Nc](each min = 0, each start = 100) "Outlet Mole Flow";      
         Integer n "Order of the Reaction";
         Real k_r[Nr] "Rate constant";
@@ -58,7 +61,7 @@ within Simulator.UnitOperations.PFR;
         Real V(min = 0, start = 1) "Volume of the reactor";
         
         
-       extends Simulator.Files.Models.ReactionManager.ReactionManager(Nc = Nc, C = C, Nr = 1,BC_r = {1}, Coef_cr = {{-1}, {-1}, {1}}, DO_cr = {{1}, {0}, {0}}, RO_cr = {{0}, {0}, {0}}, Af_r = {0.005}, Ef_r = {0}, Ab_r = {0}, Eb_r = {0});
+       extends Simulator.Files.Models.ReactionManager.KineticReaction( Nr = 1,BC_r = {1}, Coef_cr = {{-1}, {-1}, {1}}, DO_cr = {{1}, {0}, {0}}, RO_cr = {{0}, {0}, {0}}, Af_r = {0.005}, Ef_r = {0}, Ab_r = {0}, Eb_r = {0});
         //===========================================================================================================
     //Instantiation of Connectors
         Real Q "The total energy given out/taken in due to the reactions";

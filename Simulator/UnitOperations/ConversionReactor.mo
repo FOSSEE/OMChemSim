@@ -5,24 +5,25 @@ model ConversionReactor
 //=============================================================================
 //Header Files and Parameters
   extends Simulator.Files.Icons.ConversionReactor;
-  parameter Real X_r[Nr] = fill(0.4, Nr) "Conversion of base component";
-  parameter Integer Nc "Number of components";
-  parameter Real Pdel = 0 "Pressure drop";
+   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
+   parameter Integer Nc "Number of components";
+   parameter String CalcMode = "Isothermal" "Isothermal, Define_Out_Temperature, Adiabatic; choose the required mode of operation";
   parameter Real Tdef = 300 "Defined Out temperature, only applicable if define Out temperature mode is chosen";
-  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-  parameter String CalcMode = "Isothermal" "Isothermal, Define_Out_Temperature, Adiabatic; choose the required mode of operation";
+  parameter Real Pdel = 0 "Pressure drop";
+  parameter Real X_r[Nr] = fill(0.4, Nr) "Conversion of base component";
  
 //=============================================================================
 //Model Variables
   Real Fin(min = 0, start = 100) "Inlet Molar Flowrate";
-  Real Fout(min = 0, start = 100) "Outlet Molar Flowrate";
-  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet component Mole Fraction";
-  Real xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet component Mole Fraction";
-  Real Hin "Inlet Molar Enthalpy";
-  Real Hout "Outlet Molar Enthalpy";
-  Real Pin(min = 0, start = 101325) "Inlet pressure";
-  Real Pout(min = 0, start = 101325) "Outlet pressure";
+  Real Hin "Inlet Molar Enthalpy"; 
+  Real Pin(min = 0, start = 101325) "Inlet pressure"; 
   Real Tin(min = 0, start = 273.15) "Inlet Temperature";
+  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet component Mole Fraction"; 
+ 
+  Real Fout(min = 0, start = 100) "Outlet Molar Flowrate";   
+  Real Hout "Outlet Molar Enthalpy";
+  Real xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet component Mole Fraction";  
+  Real Pout(min = 0, start = 101325) "Outlet pressure";
   Real Tout(min = 0, start = 273.15) "Outlet Temperature";
   Real Fout_cr[Nc, Nr] "Number of moles of components after reactions";
   

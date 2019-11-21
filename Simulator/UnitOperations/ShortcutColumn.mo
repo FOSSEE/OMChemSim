@@ -12,15 +12,44 @@ model ShortcutColumn
   
 //==============================================================================
 //Model Variables
-  Real F_p[3](each min = 0, each start = 100) "Inlet Molar Flow", x_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Inlet Mole Fraction", H_p[3]"Inlet Molar Enthalpy ", S_p[3] "Inlet Molar Entropy";
-  Real Ntmin(min = 0, start = 10) "Minimum Number of trays", RRmin(start = 1) "Minimum Reflux Ratio";
-  Real alpha_c[Nc] "Relative Volatility", theta(start = 1) "Fraction";
-  Real Pin(min = 0, start = 101325) "Feed Pressure", Tin(min = 0, start = 273.15)"Feed Temperature",T "Thermodynamic Adjustment", P "Thermodynamic Adjustment";
-  Real Tcond(start = max(C[:].Tb), min = 0)"Condenser Temperature", Pcond(min = 0, start = 101325) "Condenser Pressure", Preb(min = 0, start = 101325)"Re-boiler Pressure", Treb(start = min(C[:].Tb), min = 0) "Re-boiler Temperature";
-  Real xvap_p[3](each min = 0, each max = 1, each start = 0.5) "Vapor Phase Mole Fraction", Hliqcond "Total Enthalpy of Liquid in Condenser", Hvapcond "Total Enthalpy of Vapor in Condenser", Hvapcond_c[Nc] "Component Enthalpy of Vapor in Condenser", Hliqcond_c[Nc] "Component Enthalpy of Vapor in Condenser", xliqcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Liquid Mole Fraction in Condenser", xvapcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Vapor Mole Fraction in Condenser";
-  Real xin_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Adjustment for Thermodynamics", Pdew(min = 0, start = sum(C[:].Pc) / Nc)"Dew Point Pressure", Pbubl(min = 0, start = sum(C[:].Pc) / Nc)"Bubble Point Pressure";
-  Real RR "Reflux Ratio", Nt "Number of Trays", x "Intermediate 1", y "Intermediate 1", Intray "Feed Tray";
-  Real Fliqrec(min = 0, start = 100) "Liquid Flow in Rectification Section", Fvaprec(min = 0, start = 100)"Vapor Flow in Rectification Section", Fliqstrip(min = 0, start = 100) "Liquid Flow in Stripping Section", Fvapstrip(min = 0, start = 100)"Vapor Flow in Stripping Section", Qr "Re-boiler Duty", Qc "Condenser Duty";
+  Real F_p[3](each min = 0, each start = 100) "Inlet Molar Flow";
+  Real x_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Inlet Mole Fraction";
+  Real H_p[3]"Inlet Molar Enthalpy ";
+  Real S_p[3] "Inlet Molar Entropy";
+  Real Pin(min = 0, start = 101325) "Feed Pressure";
+  Real Tin(min = 0, start = 273.15)"Feed Temperature";
+  Real xin_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Adjustment for Thermodynamics";
+  
+  Real Ntmin(min = 0, start = 10) "Minimum Number of trays";
+  Real RRmin(start = 1) "Minimum Reflux Ratio";
+  Real alpha_c[Nc] "Relative Volatility";
+  Real theta(start = 1) "Fraction";
+  Real T "Thermodynamic Adjustment", P "Thermodynamic Adjustment";
+  Real Tcond(start = max(C[:].Tb), min = 0)"Condenser Temperature";
+  Real Pcond(min = 0, start = 101325) "Condenser Pressure";
+  Real Preb(min = 0, start = 101325)"Re-boiler Pressure";
+  Real Treb(start = min(C[:].Tb), min = 0) "Re-boiler Temperature";
+  Real xvap_p[3](each min = 0, each max = 1, each start = 0.5) "Vapor Phase Mole Fraction";
+  Real Hliqcond "Total Enthalpy of Liquid in Condenser";
+  Real Hvapcond "Total Enthalpy of Vapor in Condenser";
+  Real Hvapcond_c[Nc] "Component Enthalpy of Vapor in Condenser";
+  Real Hliqcond_c[Nc] "Component Enthalpy of Vapor in Condenser";
+  Real xliqcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Liquid Mole Fraction in Condenser";
+  Real xvapcond_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1))"Vapor Mole Fraction in Condenser";
+  
+  Real Pdew(min = 0, start = sum(C[:].Pc) / Nc)"Dew Point Pressure";
+  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc)"Bubble Point Pressure";
+  Real RR "Reflux Ratio";
+  Real Nt "Number of Trays";
+  Real x "Intermediate 1";
+  Real y "Intermediate 1";
+  Real Intray "Feed Tray";
+  Real Fliqrec(min = 0, start = 100) "Liquid Flow in Rectification Section";
+  Real Fvaprec(min = 0, start = 100)"Vapor Flow in Rectification Section";
+  Real Fliqstrip(min = 0, start = 100) "Liquid Flow in Stripping Section";
+  Real Fvapstrip(min = 0, start = 100)"Vapor Flow in Stripping Section";
+  Real Qr "Re-boiler Duty";
+  Real Qc "Condenser Duty";
 
 //==============================================================================
 //Instantiation of Connections

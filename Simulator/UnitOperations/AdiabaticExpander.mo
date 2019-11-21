@@ -4,16 +4,31 @@ model AdiabaticExpander
 //Header Files and Parameters
   extends Simulator.Files.Icons.AdiabaticExpander;
   extends Simulator.Files.Models.Flash;
-  parameter Real Eff "Efficiency";
+ parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
   parameter Integer Nc "Number of Components";
-  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-  
+  parameter Real Eff "Efficiency";
 //====================================================================================
 //Model Variables
-  Real Fin(min = 0, start = 100) "Inlet mixture molar flow rate", Fout(min = 0, start = 100) "Outlet mixture molar flow rate", Q "Generated Power", Pin(min = 0, start = 101325) "Inlet pressure", Pout(min = 0, start = 101325) "Outlet pressure", Pdel "Pressure Drop", Tin(min = 0, start = 273.15) "Inlet Temperature", Tout(min = 0, start = 273.15) "Outlet Temperature", Tdel "Temperature increase";
-  Real Hin "Inlet mixture molar enthalpy", Hout "Outlet mixture molar enthalpy", Sin "Inlet mixture molar entropy", Sout "Outlet mixture molar entropy";
-  Real xvapin(min = 0, max = 1, start = 0.5) "In vapor mol fraction", xvapout(min = 0, max = 1, start = 0.5) "Out Vapor Mole fraction", xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "mixture mole fraction";
+  Real Fin(min = 0, start = 100) "Inlet mixture molar flow rate";
+  Real Tin(min = 0, start = 273.15) "Inlet Temperature"; 
+  Real Hin "Inlet mixture molar enthalpy";
+  Real xvapin(min = 0, max = 1, start = 0.5) "In vapor mol fraction";
+  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "mixture mole fraction";
+  Real Sin "Inlet mixture molar entropy"; 
+  Real Pin(min = 0, start = 101325) "Inlet pressure"; 
+  
 
+  Real Q "Generated Power";
+  Real Pdel "Pressure Drop"; 
+  Real Tdel "Temperature increase";
+
+  Real Pout(min = 0, start = 101325) "Outlet pressure";
+  Real Fout(min = 0, start = 100) "Outlet mixture molar flow rate";
+  Real Tout(min = 0, start = 273.15) "Outlet Temperature";
+  Real Hout "Outlet mixture molar enthalpy";
+  Real Sout "Outlet mixture molar entropy";
+  Real xvapout(min = 0, max = 1, start = 0.5) "Out Vapor Mole fraction";
+ 
 //========================================================================================
 //Instantiation of connectors
   Files.Interfaces.matConn In(Nc = Nc) annotation(

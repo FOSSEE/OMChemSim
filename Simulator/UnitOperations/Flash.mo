@@ -5,16 +5,27 @@ model Flash
 //Header Files and Parameters
   extends Simulator.Files.Icons.Flash;
   import Simulator.Files.*;
-  parameter Integer Nc;
   parameter ChemsepDatabase.GeneralProperties C[Nc];
+  parameter Integer Nc;
   parameter Boolean BTdef = false, BPdef = false;
   parameter Real Tdef = 298.15 "Default Temperature", Pdef = 101325 "Default Pressure";
   
 //==============================================================================
 //Model Variables
-  Real T(start = 298.15, min = 0) "Flash Temperature", P(start = 101325, min = 0) "Flash Pressure";
-  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure", Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
-  Real F_p[3](each min = 0, each start = 100)"Mole Flow", x_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component Mole Fraction", Cp_pc[3, Nc]"Component Molar Specific Heat", H_pc[3, Nc]"Comopent Molar Enthalpy", S_pc[3, Nc]"Component Molar Entropy", Cp_p[3]"Phase Molar Specific Heat", H_p[3]"Phase Mole Enthalpy", S_p[3]"Phase Mole Entropy", xliq(min = 0, max = 1, start = 0.5)"Liqiud Fraction", xvap(min = 0, max = 1, start = 0.5) "Vapor Fraction";
+  Real T(start = 298.15, min = 0) "Flash Temperature";
+  Real P(start = 101325, min = 0) "Flash Pressure";
+  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
+  Real Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
+  Real F_p[3](each min = 0, each start = 100)"Mole Flow";
+  Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component Mole Fraction";
+  Real Cp_pc[3, Nc]"Component Molar Specific Heat";
+  Real H_pc[3, Nc]"Comopent Molar Enthalpy";
+  Real S_pc[3, Nc]"Component Molar Entropy";
+  Real Cp_p[3]"Phase Molar Specific Heat";
+  Real H_p[3]"Phase Mole Enthalpy";
+  Real S_p[3]"Phase Mole Entropy";
+  Real xliq(min = 0, max = 1, start = 0.5)"Liqiud Fraction";
+  Real xvap(min = 0, max = 1, start = 0.5) "Vapor Fraction";
   
 //===============================================================================
 //Instantiation of Connectors

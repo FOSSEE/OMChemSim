@@ -47,6 +47,6 @@ package CR
 
   model conv_react
     extends Simulator.UnitOperations.ConversionReactor;
-    extends Simulator.Files.Models.ReactionManager.ReactionManager;
+    extends Simulator.Files.Models.ReactionManager.ConversionReaction;
   end conv_react;
 end CR;

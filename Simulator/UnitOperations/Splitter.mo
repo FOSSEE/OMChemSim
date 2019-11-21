@@ -4,13 +4,27 @@ model Splitter
 //============================================================================
 //Header Files and Parameters
   extends Simulator.Files.Icons.Splitter;
-  parameter Integer Nc = 2 "Number of Components", No = 2 "Number of outlet streams";
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
+  parameter Integer Nc = 2 "Number of Components", No = 2 "Number of outlet streams";
   parameter String CalcType "Split_Ratio, Mass_Flow or Molar_Flow";
   
 //=============================================================================
 //Model Variables
-  Real Pin(min = 0, start = 101325) "Inlet pressure", Tin(min = 0, start = 273.15) "Inlet Temperature", Pout_s[No](each min = 0, each start = 101325) "Outlet Pressure", Tout_s[No](each min = 0, each start = 273.15) "Outlet Temperature", xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet Mixture Mole Fraction", xout_sc[No, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet Mixture Molar Fraction", SplRat_s[No](each min = 0, each max = 1) "Split ratio", MW(each min = 0) "Average molecular weight", Fin(min = 0, start = 100) "Inlet Mixture Molar Flow", Fout_c[No](each min = 0, each start = 100) "Outlet Mixture Molar Flow", Fmout_c[No](each min = 0, each start = 100) "Outlet Mixture Mass Flow", SpecVal_s[No] "Specification value";
+  Real Pin(min = 0, start = 101325) "Inlet pressure";
+  Real Tin(min = 0, start = 273.15) "Inlet Temperature";
+  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet Mixture Mole Fraction";
+  Real Fin(min = 0, start = 100) "Inlet Mixture Molar Flow";
+  
+  Real SplRat_s[No](each min = 0, each max = 1) "Split ratio";
+  Real MW(each min = 0) "Average molecular weight";
+  Real SpecVal_s[No] "Specification value"; 
+  
+  Real Pout_s[No](each min = 0, each start = 101325) "Outlet Pressure";
+  Real Tout_s[No](each min = 0, each start = 273.15) "Outlet Temperature";
+  Real xout_sc[No, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet Mixture Molar Fraction";
+  Real Fout_c[No](each min = 0, each start = 100) "Outlet Mixture Molar Flow";
+  Real Fmout_c[No](each min = 0, each start = 100) "Outlet Mixture Mass Flow";
+  
 
 //==============================================================================
 //Instantiation of Connectors

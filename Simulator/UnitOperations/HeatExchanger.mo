@@ -36,13 +36,39 @@ model HeatExchanger
   parameter String Cmode"''BothOutletTemp(UA)''";
   //Variables
   //Hot Stream Inlet
-  Real Phin, Thin, Fhin, Hhin, Shin, xhin_pc[2, Nc], xvaphin;
+  Real Phin;
+  Real Thin;
+  Real Fhin;
+  Real Hhin;
+  Real Shin;
+  Real xhin_pc[2, Nc];
+  Real xvaphin;
   //Hot Stream Outlet
-  Real Phout, Thout, Fhout, Hhout, Shout, xhout_pc[2, Nc], xvaphout;
+  Real Phout;
+  Real Thout;
+  Real Fhout;
+  Real Hhout;
+  Real Shout;
+  Real xhout_pc[2, Nc];
+  Real xvaphout;
   //Cold Stream Inlet
-  Real Pcin, Tcin, Fcin[1], Hcin, Scin, xcin_pc[2, Nc], xvapcin;
+  Real Pcin;
+  Real Tcin;
+  Real Fcin[1];
+  Real Hcin;
+  Real Scin;
+  Real xcin_pc[2, Nc];
+  Real  xvapcin;
   //Cold Stream Outlet
-  Real Pcout, Tcout, couttT, Fcout[1], Hcout, Scout, xcout_pc[2, Nc], xvapcout;
+  Real Pcout;
+  Real Tcout;
+  Real couttT;
+  Real Fcout[1];
+  Real Hcout;
+  Real Scout;
+  Real xcout_pc[2, Nc];
+  Real xvapcout;
+  
   Real Qact(start = 2000) "Actual Heat Load";
   Real Qmax, Qmaxh, Qmaxc;
   //Hot Stream Enthalpy at Cold Stream Inlet Temperature
@@ -61,7 +87,7 @@ model HeatExchanger
   Real U;
   //Heat Transfer A
   Real A;
-  //==================================================================================================================
+  //==========================================================================================================
   //Mode-4-NTU Method-when both the outlet temperatures are unknown
   //Heat Capacity Rate for hot and cold fluid
   Real Cc, Ch;

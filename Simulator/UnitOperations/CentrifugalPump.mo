@@ -4,13 +4,31 @@ model CentrifugalPump
 //===========================================================================
 //Header files and Parameters
   extends Simulator.Files.Icons.CentrifugalPump;
+    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component array";
   parameter Integer Nc = 2 "Number of Components";
-  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component array";
   parameter Real Eff "Efficiency";
   
 //===========================================================================
 //Model Variables
-  Real Pin(min = 0, start = 101325) "Inlet Pressure", Pout(min = 0, start = 101325) "Outlet Pressure", Tin(min = 0, start = 273.15) "Inlet Temperature", Tout(min = 0, start = 273.15) "Outlet Temperature", Tdel "Temperature increase", Pdel "Pressure Increase", Hin "Inlet Mixture Molar Enthalpy", Hout "Outlet Mixture Molar Enthalpy", Q "Power required", rho_c[Nc](each min = 0) "Component density", rho(min = 0) "Density", Pvap(min = 0, start = 101325) "Vapor pressure of Mixture at Outlet Temperature", NPSH "NPSH", Fin(min = 0, start = 100) "Inlet Mixture Molar Flow", Fout(min = 0, start = 100) "Outlet Mixture Molar flow", xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet Mixuture Molar Fraction", xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet Mixture Molar Fraction";
+  Real Pin(min = 0, start = 101325) "Inlet Pressure";
+  Real Tin(min = 0, start = 273.15) "Inlet Temperature"; 
+  Real Hin "Inlet Mixture Molar Enthalpy"; 
+  Real Fin(min = 0, start = 100) "Inlet Mixture Molar Flow";
+  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet Mixuture Molar Fraction";  
+
+  Real Tdel "Temperature increase";
+  Real Pdel "Pressure Increase";
+  Real Q "Power required";
+  Real rho_c[Nc](each min = 0) "Component density";
+  Real rho(min = 0) "Density";
+  Real Pvap(min = 0, start = 101325) "Vapor pressure of Mixture at Outlet Temperature";
+  Real NPSH "NPSH"; 
+  
+  Real Pout(min = 0, start = 101325) "Outlet Pressure";
+  Real Tout(min = 0, start = 273.15) "Outlet Temperature"; 
+  Real Hout "Outlet Mixture Molar Enthalpy";
+  Real Fout(min = 0, start = 100) "Outlet Mixture Molar flow";
+  Real xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet Mixture Molar Fraction";
 
 //============================================================================
 //Instantiation of Connectors  

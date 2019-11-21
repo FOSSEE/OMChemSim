@@ -5,10 +5,27 @@ within Simulator.UnitOperations.DistillationColumn;
     parameter Integer Nc = 2;
     parameter Boolean Bin = false;
     parameter ChemsepDatabase.GeneralProperties C[Nc];
-    Real P(min = 0, start = 101325), T(min = 0, start = 273.15);
-    Real Fin(min = 0, start = 100), Fout(min = 0, start = 100), Fvapout(min = 0, start = 100), Fliqin(min = 0, start = 100), xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xvapout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), xliqin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Hin, Hvapout, Hliqin,
-   Hvapout_c[Nc], Q, Hout;
-   Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Pdew(min = 0, start = sum(C[:].Pc)/Nc), Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+    Real P(min = 0, start = 101325);
+    Real T(min = 0, start = 273.15);
+    Real Fin(min = 0, start = 100);
+    Real Hin;
+    Real Hliqin;
+    Real xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)); 
+    Real Fliqin(min = 0, start = 100);
+    Real xliqin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+   
+    Real Fout(min = 0, start = 100);
+    Real Fvapout(min = 0, start = 100);
+    Real xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    Real xvapout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    Real Hvapout;
+    Real Hvapout_c[Nc];
+    Real Q;
+    Real Hout;
+    Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    Real Pdew(min = 0, start = sum(C[:].Pc)/Nc);
+    Real Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+   
     replaceable Simulator.Files.Interfaces.matConn In(Nc = Nc) if Bin annotation(
       Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     replaceable Simulator.Files.Interfaces.matConn In_Dmy(Nc = Nc, P = 0, T = 0, x_pc = zeros(3, Nc), F = 0, H = 0, S = 0, xvap = 0) if not Bin annotation(
@@ -21,6 +38,7 @@ within Simulator.UnitOperations.DistillationColumn;
       Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Interfaces.enConn En annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
   equation
 //connector equation
     if Bin then

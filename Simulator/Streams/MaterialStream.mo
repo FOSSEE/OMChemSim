@@ -7,14 +7,27 @@ model MaterialStream
   import Simulator.Files.*;
   parameter Integer Nc;
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-  Real P(min = 0, start = 101325) "Pressure", T(start = 273) "Temperature";
-  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure", Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
-  Real xliq(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction", xvap(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction", xmliq(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction", xmvap(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
-  Real F_p[3](each min = 0, each start = 100) "Total molar flow", Fm_p[3](each min = 0, each start = 100) "Total Mass Flow", MW_p[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
-  Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction", xm_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Component Mass fraction", F_pc[3, Nc](each start = 100, each min = 0) "Component Molar flow", Fm_pc[3, Nc](each min = 0, each start = 100) "Component Mass Fraction";
-  Real Cp_p[3] "phase Molar Specific Heat", Cp_pc[3, Nc] "Component Molar Specific Heat";
-  Real H_p[3] "Phase Molar Enthalpy", H_pc[3, Nc] "Component Molar Enthalpy";
-  Real S_p[3] "Phase Molar Entropy", S_pc[3, Nc] "Component Molar Entropy";
+  Real P(min = 0, start = 101325) "Pressure";
+  Real T(start = 273) "Temperature";
+  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
+  Real Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
+  Real xliq(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction";
+  Real xvap(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction";
+  Real xmliq(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction";
+  Real xmvap(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
+  Real F_p[3](each min = 0, each start = 100) "Total molar flow";
+  Real Fm_p[3](each min = 0, each start = 100) "Total Mass Flow";
+  Real MW_p[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
+  Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
+  Real xm_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Component Mass fraction";
+  Real F_pc[3, Nc](each start = 100, each min = 0) "Component Molar flow";
+  Real Fm_pc[3, Nc](each min = 0, each start = 100) "Component Mass Fraction";
+  Real Cp_p[3] "phase Molar Specific Heat";
+  Real Cp_pc[3, Nc] "Component Molar Specific Heat";
+  Real H_p[3] "Phase Molar Enthalpy";
+  Real H_pc[3, Nc] "Component Molar Enthalpy";
+  Real S_p[3] "Phase Molar Entropy";
+  Real S_pc[3, Nc] "Component Molar Entropy";
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(

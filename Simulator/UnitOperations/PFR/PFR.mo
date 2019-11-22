@@ -312,17 +312,17 @@ within Simulator.UnitOperations.PFR;
     if Mode == 1 then
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Tout = Tin;
-      Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MW_p[1] * Fmin_p[1];
+      Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MWout_p[1] * Fmin_p[1];
 //Outlet temperature defined
     elseif Mode == 2 then
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Tout = Tdef;
-      Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MW_p[1] * Fmin_p[1];
+      Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MWout_p[1] * Fmin_p[1];
 //Adiabatic Mode
     else
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Q = 0;
-      Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MW_p[1] * Fmin_p[1];
+      Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MWout_p[1] * Fmin_p[1];
     end if;
 //===========================================================================================================
 //Calculation of Outlet Pressure

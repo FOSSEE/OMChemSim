@@ -26,7 +26,7 @@ model ConversionReactor
   Real Pout(min = 0, start = 101325) "Outlet pressure";
   Real Tout(min = 0, start = 273.15) "Outlet Temperature";
   Real Fout_cr[Nc, Nr] "Number of moles of components after reactions";
-  
+  Real Hr_r[Nr];
 //=============================================================================
 //Instanstiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -76,13 +76,13 @@ equation
 //Energy Balance
   if CalcMode == "Isothermal" then
     Tin = Tout;
-    energy.Q = Hout * Fout - Hin * Fin;
+    energy.Q = Hout * Fout - Hin * Fin + sum(Hr_r .* Fin .* xin_c[BC_r] .* X_r );
   elseif CalcMode == "Adiabatic" then
-    Hout * Fout = Hin * Fin;
+    Hout * Fout + sum(Hr_r .* Fin .* xin_c[BC_r] .* X_r ) = Hin * Fin;
     energy.Q = 0;
   elseif CalcMode == "Define_Outlet_Temperature" then
     Tout = Tdef;
-    energy.Q = Hout * Fout - Hin * Fin;
+    energy.Q = Hout * Fout - Hin * Fin + sum(Hr_r .* Fin .* xin_c[BC_r] .* X_r );
   end if;
 annotation(
     Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),

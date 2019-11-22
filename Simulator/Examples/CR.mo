@@ -8,7 +8,7 @@ package CR
   end ms;
 
   model test
-  
+    extends Modelica.Icons.Example;
   //=================================================================
   //Header Files and Parameters
     import data = Simulator.Files.ChemsepDatabase;
@@ -25,7 +25,7 @@ package CR
       Placement(visible = true, transformation(origin = {-89, -1}, extent = {{-11, -11}, {11, 11}}, rotation = 0)));
     Simulator.Examples.CR.ms S2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {90, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.CR.conv_react B1(Nc = Nc, C = C, Nr = 1, BC_r = {3}, Coef_cr = {{1}, {1}, {-1}, {-1}}, X_r = {0.3},  CalcMode = "Define_Outlet_Temperature", Tdef = 300) annotation(
+    Simulator.Examples.CR.conv_react B1(Nc = Nc, C = C, Nr = 1, BC_r = {3}, Coef_cr = {{1}, {1}, {-1}, {-1}}, X_r = {0.3},  CalcMode = "Isothermal", Tdef = 300) annotation(
       Placement(visible = true, transformation(origin = {7, -1}, extent = {{-29, -29}, {29, 29}}, rotation = 0)));
     
   equation

@@ -6,7 +6,7 @@ within Simulator.UnitOperations.PFR;
   //Header Files and Parameters
         extends Simulator.Files.Icons.PFR;
         import Simulator.Files.*;
-        import Simulator.Files.Thermodynamic_Functions.*; 
+        import Simulator.Files.ThermodynamicFunctions.*; 
          parameter Integer Nc "number of Cin_cunds ";
         parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
         parameter Real Pdel  "Pressure Drop";
@@ -322,7 +322,7 @@ within Simulator.UnitOperations.PFR;
     else
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Q = 0;
-      Hout / MWout_p[1] = Hin / MW_p[1] - Hr;
+      Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MW_p[1] * Fmin_p[1];
     end if;
 //===========================================================================================================
 //Calculation of Outlet Pressure

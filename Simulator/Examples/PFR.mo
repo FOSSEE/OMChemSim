@@ -25,7 +25,7 @@ package PFR
       Placement(visible = true, transformation(origin = {-70, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
    Simulator.Examples.PFR.MS S2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {90, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-   Simulator.UnitOperations.PFR.PFR B1(Nc = 3, Nr = 1, C = {eth, wat, eg}, Mode = 2, Phase = 3,  Tdef = 410) annotation(
+   Simulator.UnitOperations.PFR.PFR B1(Nc = 3, Nr = 1, C = {eth, wat, eg}, Mode = 3, Phase = 3,  Tdef = 410) annotation(
       Placement(visible = true, transformation(origin = { 3, -1}, extent = {{-33, -33}, {33, 33}}, rotation = 0)));
    Simulator.Streams.EnergyStream Energy annotation(
       Placement(visible = true, transformation(origin = {-14, -54}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -44,9 +44,9 @@ package PFR
   //========================================================================
   //Inputs and Specifications
     S1.x_pc[1, :] = {0.2, 0.8, 0};
-    S1.P = 101325;
-    S1.T = 395;
+    S1.P = 100000;
+    S1.T = 390;
     S1.F_p[1] = 100;
-    B1.X_r[1] = 0.0741;
+    B1.X_r[1] = 0.3645;
   end PFR_Test_II;
 end PFR;

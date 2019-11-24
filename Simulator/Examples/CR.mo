@@ -10,7 +10,7 @@ package CR
   model test
     extends Modelica.Icons.Example;
   //=================================================================
-  //Header Files and Parameters
+    //Header Files and Parameters
     import data = Simulator.Files.ChemsepDatabase;
     parameter Integer Nc = 4;
     parameter data.Ethylacetate etac;
@@ -18,9 +18,8 @@ package CR
     parameter data.Aceticacid aa;
     parameter data.Ethanol eth;
     parameter data.GeneralProperties C[Nc] = {etac, wat, aa, eth};
-    
-  //==================================================================
-  //Instantiation of Streams and Blocks
+    //==================================================================
+    //Instantiation of Streams and Blocks
     Simulator.Examples.CR.ms S1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-89, -1}, extent = {{-11, -11}, {11, 11}}, rotation = 0)));
     Simulator.Examples.CR.ms S2(Nc = Nc, C = C) annotation(
@@ -29,16 +28,14 @@ package CR
       Placement(visible = true, transformation(origin = {7, -1}, extent = {{-29, -29}, {29, 29}}, rotation = 0)));
     
   equation
-  
-  //==================================================================
-  //Connections
+//==================================================================
+//Connections
     connect(B1.Out, S2.In) annotation(
       Line(points = {{36, 0}, {80, 0}, {80, 0}, {80, 0}}, color = {0, 70, 70}));
     connect(S1.Out, B1.In) annotation(
       Line(points = {{-78, 0}, {-22, 0}, {-22, 0}, {-22, 0}}, color = {0, 70, 70}));
-  
-  //==================================================================
-  //Inputs and Specifications
+//==================================================================
+//Inputs and Specifications
     S1.P = 101325;
     S1.T = 300;
     S1.x_pc[1, :] = {0, 0, 0.4, 0.6};

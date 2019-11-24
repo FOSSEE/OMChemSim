@@ -1,32 +1,32 @@
 within Simulator.UnitOperations;
 
-model ConversionReactor
+model ConversionReactor "Model of a conversion reactor to calculate the outlet stream mole fraction of components"
 
 //=============================================================================
 //Header Files and Parameters
   extends Simulator.Files.Icons.ConversionReactor;
    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
    parameter Integer Nc "Number of components";
-   parameter String CalcMode = "Isothermal" "Isothermal, Define_Out_Temperature, Adiabatic; choose the required mode of operation";
-  parameter Real Tdef = 300 "Defined Out temperature, only applicable if define Out temperature mode is chosen";
-  parameter Real Pdel = 0 "Pressure drop";
+   parameter String CalcMode = "Isothermal" "Required mode of operation: Isothermal, Define_Out_Temperature, Adiabatic";
+  parameter Real Tdef(unit = "K") = 300 "Defined outlet temperature, applicable if Define_Out_Temperature mode is chosen";
+  parameter Real Pdel(unit = "Pa") = 0 "Pressure drop";
   parameter Real X_r[Nr] = fill(0.4, Nr) "Conversion of base component";
  
 //=============================================================================
 //Model Variables
-  Real Fin(min = 0, start = 100) "Inlet Molar Flowrate";
-  Real Hin "Inlet Molar Enthalpy"; 
-  Real Pin(min = 0, start = 101325) "Inlet pressure"; 
-  Real Tin(min = 0, start = 273.15) "Inlet Temperature";
-  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet component Mole Fraction"; 
+  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
+  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy"; 
+  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure"; 
+  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
+  Real xin_c[Nc](each unit = "K", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet stream component mole fraction"; 
  
-  Real Fout(min = 0, start = 100) "Outlet Molar Flowrate";   
-  Real Hout "Outlet Molar Enthalpy";
-  Real xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet component Mole Fraction";  
-  Real Pout(min = 0, start = 101325) "Outlet pressure";
-  Real Tout(min = 0, start = 273.15) "Outlet Temperature";
-  Real Fout_cr[Nc, Nr] "Number of moles of components after reactions";
-  Real Hr_r[Nr];
+  Real Fout(unit = "mol/s", min = 0, start = 100) "Outlet stream molar flow rate";   
+  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
+  Real xout_c[Nc](each unit = "=", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet stream component mole fraction";  
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
+  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
+  Real Fout_cr[Nc, Nr](each unit = "mol/s") "Molar flor rate of components after each reaction";
+  Real Hr_r[Nr](each unit = "kJ/kmol") "Heat of reaction";
 //=============================================================================
 //Instanstiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -87,4 +87,6 @@ equation
 annotation(
     Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
     Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
-    __OpenModelica_commandLineOptions = "");end ConversionReactor;
+    __OpenModelica_commandLineOptions = "",
+ Documentation(info = "<html><head></head><body><div>Conversion Reactor is used to calculate the mole fraction of components at outlet stream when the conversion of base component for the reaction is defined.</div><div><br></div>To simulate a convension reactor, following calculation parameters must be provided:<div><ol><li>Calculation Mode</li><li>Outlet Temperature (If calculation mode is Define_Out_Temperature\"</li><li>Number of Reactions</li><li>Base Component</li><li>Stoichiometric Coefficient of Components in Reaction</li><li>Conversion of Base Component</li><li>Pressure Drop</li></ol><div><br></div></div><div><span style=\"font-size: 12px;\">For example on simulating a conversion reactor, go to&nbsp;</span><i style=\"font-size: 12px;\"><b>Examples</b></i><span style=\"font-size: 12px;\">&nbsp;&gt;&gt;<i style=\"font-weight: bold;\">&nbsp;CR&nbsp;</i>&gt;&gt; <b><i>test</i></b></span></div><div><br></div></body></html>"));
+ end ConversionReactor;

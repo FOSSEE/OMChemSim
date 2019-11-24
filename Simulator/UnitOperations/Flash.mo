@@ -1,31 +1,33 @@
 within Simulator.UnitOperations;
 
-model Flash
+model Flash "Model of a flash column to separate vapor and liquid phases from a mixed phase material stream"
 //==============================================================================
 //Header Files and Parameters
   extends Simulator.Files.Icons.Flash;
   import Simulator.Files.*;
   parameter ChemsepDatabase.GeneralProperties C[Nc];
-  parameter Integer Nc;
-  parameter Boolean BTdef = false, BPdef = false;
-  parameter Real Tdef = 298.15 "Default Temperature", Pdef = 101325 "Default Pressure";
+  parameter Integer Nc "Number of components";
+  parameter Boolean BTdef = false "True if flash is operated at temperature other than feed temp else false";
+  parameter Boolean BPdef = false "True if flash is operated at pressure other than feed pressure else false";
+  parameter Real Tdef(unit = "K") = 298.15 "Separation temperature if BTdef is true";
+  parameter Real Pdef(unit = "Pa") = 101325 "Separation pressure if BPdef is true";
   
 //==============================================================================
 //Model Variables
-  Real T(start = 298.15, min = 0) "Flash Temperature";
-  Real P(start = 101325, min = 0) "Flash Pressure";
-  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
-  Real Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
-  Real F_p[3](each min = 0, each start = 100)"Mole Flow";
-  Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component Mole Fraction";
-  Real Cp_pc[3, Nc]"Component Molar Specific Heat";
-  Real H_pc[3, Nc]"Comopent Molar Enthalpy";
-  Real S_pc[3, Nc]"Component Molar Entropy";
-  Real Cp_p[3]"Phase Molar Specific Heat";
-  Real H_p[3]"Phase Mole Enthalpy";
-  Real S_p[3]"Phase Mole Entropy";
-  Real xliq(min = 0, max = 1, start = 0.5)"Liqiud Fraction";
-  Real xvap(min = 0, max = 1, start = 0.5) "Vapor Fraction";
+  Real T(unit = "K", start = 298.15, min = 0) "Flash column temperature";
+  Real P(unit = "Pa", start = 101325, min = 0) "Flash column pressure";
+  Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
+  Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "Dew point pressure";
+  Real F_p[3](each unit = "mol/s", each min = 0, each start = 100)"Feed stream mole flow";
+  Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
+  Real Cp_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar specific heat";
+  Real H_pc[3, Nc](each unit = "kJ/kmol") "Comopent molar enthalpy";
+  Real S_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar entropy";
+  Real Cp_p[3](each unit = "kJ/[kmol.K]") "Molar specific heat in phase";
+  Real H_p[3](each unit = "kJ/kmol") "Molar enthalpy in phase";
+  Real S_p[3](each unit = "kJ/[kmol.K]") "Molar entropy in phase";
+  Real xliq(unit = "-", min = 0, max = 1, start = 0.5)"Liquid phase mole fraction";
+  Real xvap(unit = "-", min = 0, max = 1, start = 0.5) "Vapor phase mole fraction";
   
 //===============================================================================
 //Instantiation of Connectors
@@ -120,5 +122,6 @@ equation
 annotation(
     Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
     Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}})),
-    __OpenModelica_commandLineOptions = "");end Flash;
-
+    __OpenModelica_commandLineOptions = "",
+  Documentation(info = "<html><head></head><body>The flash column is used to calculate the vapor and liquid phase distribution for a mixed phase material stream.<div><br></div><div>Following calculation parameters may be provided for the flash column:</div><div><ol><li>Separation Temperature</li><li>Separation Pressure</li></ol><div><br></div></div><div>For example on simulating a flash column, go to <b><i>Examples</i></b> &gt;&gt; <b><i>Flash</i></b></div></body></html>"));
+  end Flash;

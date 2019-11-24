@@ -1,30 +1,31 @@
 within Simulator.UnitOperations;
 
-model Cooler
-  extends Simulator.Files.Icons.Cooler;
-  // This is generic cooler model. For using this model we need to extend this model and incorporte ouput material stream since this model is not doing any flash calculations. Refer cooler models in Test section for this.
+model Cooler "Model of a cooler to heat a material stream"
+  extends Simulator.Files.Icons.Cooler; 
+  
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
     parameter Integer Nc "number of components";
   //====================================================================================
-  Real Fin(min = 0, start = 100) "inlet mixture molar flow rate";
-  Real Pin(min = 0, start = 101325) "Inlet pressure";
-  Real Tin(min = 0, start = 273.15) "Inlet Temperature";
-  Real Hin "inlet mixture molar enthalpy";
-  Real Sin "inlet mixture molar entropy";
-  Real xvapin(min = 0, max = 1, start = 0.5) "Inlet vapor phase mole fraction";
+  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
+  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
+  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
+  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy";
+  Real Sin(unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
+  Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mole fraction";
   
-  Real Q "Heat removed";
-  Real Tdel "Temperature Drop";
+  Real Q(unit = "W") "Heat removed";
+  Real Tdel(unit = "K") "Temperature drop";
    
-  Real Fout(min = 0, start = 100) "outlet mixture molar flow rate";
-  Real Pout(min = 0, start = 101325) "Outlet pressure";
-  Real Tout(min = 0, start = 273.15) "Outlet Temperature";
-  Real xvapout(min = 0, max = 1, start = 0.5) "Outlet Vapor Mole Fraction";
-  Real Hout "outlet mixture molar enthalpy";
-  Real Sout "outlet mixture molar entropy"; 
-  Real x_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "mixture mole fraction";
+  Real Fout(unit = "mol/s", min = 0, start = 100) "Outlet stream molar flow rate";
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
+  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
+  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mole fraction";
+  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
+  Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy"; 
+  Real x_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
   //========================================================================================
-  parameter Real Pdel "Pressure drop", Eff "Efficiency";
+  parameter Real Pdel(unit = "Pa") "Pressure drop";
+  parameter Real Eff(unit = "-") "Efficiency";
 
   //========================================================================================
   Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -60,4 +61,7 @@ equation
 //pressure calculation
   Tin - Tdel = Tout;
 //temperature calculation
-end Cooler;
+annotation(
+    Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">The cooler is used to simulate the cooling process of a material stream.</span><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">Following calculation parameters must be provided to the cooler:</div><div style=\"font-size: 12px;\"><ol><li>Pressure Drop</li><li>Efficiency</li></ol><div>In addition to the above parameters, any one additional variable from the below list must be provided for the model to simulate successfully:</div><div><ol><li>Outlet Temperature (Tout)</li><li>Temperature Drop (Tdel)</li><li>Heat Removed (Q)</li><li>Outlet Stream Vapor Phase Mole Fraction (xvapout)</li></ol><div><br></div></div><div>For example on simulating a cooler, go to <b><i>Examples</i></b> &gt;&gt; <i><b>Cooler</b></i></div></div></body></html>"));
+    
+    end Cooler;

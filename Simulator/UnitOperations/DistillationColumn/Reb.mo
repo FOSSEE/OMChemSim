@@ -1,30 +1,30 @@
 within Simulator.UnitOperations.DistillationColumn;
 
-  model Reb
+  model Reb "Model of a reboiler used in distillation column"
     import Simulator.Files.*;
-    parameter Integer Nc = 2;
-    parameter Boolean Bin = false;
+    parameter Integer Nc = 2 "Number of components";
     parameter ChemsepDatabase.GeneralProperties C[Nc];
-    Real P(min = 0, start = 101325);
-    Real T(min = 0, start = 273.15);
-    Real Fin(min = 0, start = 100);
-    Real Hin;
-    Real Hliqin;
-    Real xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)); 
-    Real Fliqin(min = 0, start = 100);
-    Real xliqin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    parameter Boolean Bin = false;
+    Real P(unit = "Pa", min = 0, start = 101325) "Pressure";
+    Real T(unit = "K", min = 0, start = 273.15) "Temperature";
+    Real Fin(unit = "mol/s", min = 0, start = 100) "Feed molar flow";
+    Real Hin(unit = "kJ/kmol") "Feed molar enthalpy";
+    Real Hliqin(unit = "kJ/kmol") "Inlet liquid molar enthalpy";
+    Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Feed components mole fraction"; 
+    Real Fliqin(unit = "mol/s", min = 0, start = 100) "Inlet liquid molar flow";
+    Real xliqin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Inlet liquid component mole fraction";
    
-    Real Fout(min = 0, start = 100);
-    Real Fvapout(min = 0, start = 100);
-    Real xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
-    Real xvapout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
-    Real Hvapout;
-    Real Hvapout_c[Nc];
-    Real Q;
-    Real Hout;
-    Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
-    Real Pdew(min = 0, start = sum(C[:].Pc)/Nc);
-    Real Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+    Real Fout(unit = "mol/s", min = 0, start = 100) "Side draw molar flow";
+    Real Fvapout(unit = "mol/s", min = 0, start = 100) "Outlet vapor molar flow";
+    Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Side draw mole fraction";
+    Real xvapout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Outlet vapor component mole fraction";
+    Real Hvapout(unit = "kJ/kmol") "Outlet vapor molar enthalpy";
+    Real Hvapout_c[Nc](each unit = "kJ/kmol") "Outlet vapor component molar enthalpy";
+    Real Q(unit = "W") "Heat load";
+    Real Hout(unit = "kJ/kmol") "Side draw molar enthalpy";
+    Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Component mole fraction";
+    Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Dew point pressure";
+    Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Bubble point pressure";
    
     replaceable Simulator.Files.Interfaces.matConn In(Nc = Nc) if Bin annotation(
       Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

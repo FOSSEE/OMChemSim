@@ -1,33 +1,33 @@
 within Simulator.UnitOperations.DistillationColumn;
 
-  model DistTray
+  model DistTray "Model of a tray used in distillation column"
     import Simulator.Files.*;
-    parameter Integer Nc = 2;
-    parameter Boolean Bin = true;
     parameter ChemsepDatabase.GeneralProperties C[Nc];
-    Real P(min = 0, start = 101325);
-    Real T(min = 0, start = (min(C[:].Tb) + max(C[:].Tb)) / 2);
-    Real Fin(min = 0, start = 100);
-    Real xin_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)); 
-    Real Hin; 
+    parameter Integer Nc = 2 "Number of components";
+    parameter Boolean Bin = true;
+    Real P(unit = "Pa", min = 0, start = 101325) "Pressure";
+    Real T(unit = "K", min = 0, start = (min(C[:].Tb) + max(C[:].Tb)) / 2) "Temperature";
+    Real Fin(unit = "mol/s", min = 0, start = 100) "Feed molar flow";
+    Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Feed components mole fraction"; 
+    Real Hin(unit = "kJ/kmol") "Feed molar enthalpy"; 
     
-    Real Fout(min = 0, start = 100);
-    Real Fvap_s[2](each min = 0, each start = 100);
-    Real Fliq_s[2](each min = 0, each start = 100);  
-    Real xout_c[Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
-    Real xvap_sc[2, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
-    Real xliq_sc[2, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1));
+    Real Fout(unit = "mol/s", min = 0, start = 100) "Sidedraw molar flow";
+    Real Fvap_s[2](each unit = "mol/s", each min = 0, each start = 100) "Vapor molar flow";
+    Real Fliq_s[2](each unit = "mol/s", each min = 0, each start = 100) "Liquid molar flow";  
+    Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Components mole fraction at sidedraw";
+    Real xvap_sc[2, Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Components vapor mole fraction";
+    Real xliq_sc[2, Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Components liquid mole fraction";
  
-    Real Hvap_s[2];
-    Real Hliq_s[2];
-    Real Q;
-    Real Hout;
-    Real Hvapout_c[Nc];
-    Real Hliqout_c[Nc];
+    Real Hvap_s[2](unit = "kJ/kmol") "Vapor molar enthalpy";
+    Real Hliq_s[2](unit = "kJ/kmol") "Liquid molar enthalpy";
+    Real Q(unit = "W") "Heat load";
+    Real Hout(unit = "kJ/kmol") "Side draw molar enthalpy";
+    Real Hvapout_c[Nc](unit = "kJ/kmol") "Outlet components vapor molar enthalpy";
+    Real Hliqout_c[Nc](unit = "kJ/kmol") "Outlet components liquid molar enthalpy";
     Real x_pc[3, Nc](each min =0, each max = 0, each start = 1/(Nc + 1));
     
-    Real Pdew(min = 0, start = sum(C[:].Pc)/Nc);
-    Real Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+    Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Dew pressure";
+    Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Bubble pressure";
     Real Pdmy1, Tdmy1, xdmy1_pc[3,Nc], Fdmy1,Hdmy1, Sdmy1, xvapdmy1;
   //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
     String OutType(start = "Null");

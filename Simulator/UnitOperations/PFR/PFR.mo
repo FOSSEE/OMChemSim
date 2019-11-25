@@ -7,58 +7,63 @@ within Simulator.UnitOperations.PFR;
         extends Simulator.Files.Icons.PFR;
         import Simulator.Files.*;
         import Simulator.Files.ThermodynamicFunctions.*; 
-         parameter Integer Nc "number of Cin_cunds ";
         parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-        parameter Real Pdel  "Pressure Drop";
+        parameter Integer Nc "Number of components ";
         extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
-        parameter Real Zv = 1 "Cressiblity Factor";
+        parameter Real Zv = 1 "Compressiblity factor";
    
         parameter Integer Nr "Number of reactions";
-        parameter Integer Phase;
-        parameter Integer Mode;
-        parameter Integer Base_C = 1;
-        parameter Real Tdef;
+        parameter Integer Phase "Reaction phase: 1-Mixture, 2-Liquid, 3-Vapor";
+        parameter Integer Mode "Mode of operation: 1-Isothermal, 2-Define Outlet Temperature, 3-Adiabatic";
+        parameter Real Tdef(unit = "K") "Outlet temperature when Mode = 2";
+        parameter Real Pdel(unit = "Pa")  "Pressure Drop";
+        parameter Integer Base_C = 1 "Base component";
   //=========================================================================
   //Model Variables
-        Real Tin(min = 0, start = 273.15) "Inlet Temperature", T "Adjustment";
-        Real Pin(min = 0, start = 101325) "Inlet pressure", P "Adjustment";
-        Real Fin_pc[3, Nc](each min = 0, each start = 100) "Total molar flow rates of respective phases";
-        Real Fin_p[3](each min = 0, each start = 100) "Total inlet molar flow rate";
-        Real xin_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)) "Mole Fraction at inlet ";
-        Real Hin "Inlet Enthalpy", Sin "Inlet Entropy";
-        Real xvapin(min = 0, max = 1, start = 0.5) "Vapor Fraction";
+        Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
+        Real T "Adjustment";
+        Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
+        Real P "Adjustment";
+        Real Fin_pc[3, Nc](each unit = "mol/s", each min = 0, each start = 100) "Inlet stream components molar flow rate in phase";
+        Real Fin_p[3](each unti = "mol/s", each min = 0, each start = 100) "Inlet stream molar flow rate in phase";
+        Real xin_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Inlet stream mole fraction";
+        Real Hin(unit = "kJ/kmol") "Inlet stream enthalpy";
+        Real Sin(unit = "kJ/[kmol.K]") "Inlet stream entropy";
+        Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mole fraction";
         Real Cin_c[Nc] "Inlet Concentration";
         Real Fin_c[Nc](each min = 0, each start = 100) "Inlet Mole Flow";
-        Real Tout(min = 0, start = 273.15) "Outlet Temperature";
-        Real Pout(min  = 0, start = 101325) "Outlet Pressure";
-        Real Fout_p[3](each min = 0, each start = 50) "Total Outlet Molar Flow Rate";
-        Real Fout_pc[3, Nc](each min = 0, each start = 50) "Component outlet molar flow rate";
+        Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
+        Real Pout(unit = "Pa", min  = 0, start = 101325) "Outlet stream pressure";
+        Real Fout_p[3](each unit = "mol/s", each min = 0, each start = 50) "Outlet stream molar flow rate";
+        Real Fout_pc[3, Nc](each unit = "mol/s", each min = 0, each start = 50) "Outlet stream components molar flow rate";
         Real xout_pc[3, Nc](each min = 0, each start = 0.5) "Mole Fraction of Component in outlet stream";
-        Real Hout "Outlet Enthalpy", Sout "Outlet Entropy", xvapout(min = 0, max = 1, start = 0.5) "Vapor Fraction at inlet";
+        Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
+        Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy";
+        Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mole fraction";
         Real Pdewin(unit = "Pa", start = max(C[:].Pc), min = 0) "Dew point pressure at inlet";
         Real Pbublin(min = 0, unit = "Pa", start = min(C[:].Pc)) "Bubble point pressure at inlet";
-        Real xmvapin(start = 0.5) "Vapor Mass Fraction";
-        Real Pdewout(unit = "Pa", start = max(C[:].Pc), min = 0) "Dew point pressure at outlet";
-        Real Pbublout(min = 0, unit = "Pa", start = min(C[:].Pc)) "Bubble point pressure at outlet";
-        Real xmvapout(start = 0.5) "Vapor Mass Fraction at Outlet";
-        Real MWout_p[3](each start = 30) "Outlet Molecular Weight";
-        Real Fmin_p[3](each start = 50) "Mass Flow Rate of phases";
-        Real xm_pc[3, Nc] "Mass Fraction of Cin_cnents in all phases";
-        Real MW_p[3](each start = 30);
+        Real xmvapin(start = 0.5) "Inlet stream vapor phase mass fraction";
+        Real Pdewout(unit = "Pa", start = max(C[:].Pc), min = 0) "Outlet stream dew point pressure";
+        Real Pbublout(min = 0, unit = "Pa", start = min(C[:].Pc)) "Outlet stream bubble point pressure";
+        Real xmvapout(each unit = "-", start = 0.5) "Outlet stream vapor mass fraction";
+        Real MWout_p[3](each unit = "kg/kmol", each start = 30) "Outlset stream molecular weight in phase";
+        Real Fmin_p[3](each unit = "kg/s", each start = 50) "Inlet stream mass flow rate";
+        Real xm_pc[3, Nc](each unit = "-") "Component mass fraction in phase";
+        Real MW_p[3](each unit = "kg/kmol", each start = 30)"Molecular weight of phase";
         Real Fv_p[3](each start = 30);
-        Real rholiq_c[Nc] "Liquid Density";
-        Real rholiq "Liquid Phase Density";
-        Real rhovap_c[Nc](unit = "kg/m^3") "Vapor Density";
-        Real rhovap "Vapor Phase Density";
-        Real rho "Mixture Density";
+        Real rholiq_c[Nc](each unit = "kg/m3") "Components density in liquid phase";
+        Real rholiq(unit = "kg/m3") "Liquid phase density";
+        Real rhovap_c[Nc](each unit = "kg/m3") "Components density in vapor phase";
+        Real rhovap(unit = "kg/m3") "Vapor phase density";
+        Real rho(unit = "kg/m3") "Mixture density";
  
-        Real Fout_c[Nc](each min = 0, each start = 100) "Outlet Mole Flow";      
+        Real Fout_c[Nc](each unit = "mol/s", each min = 0, each start = 100) "Outlet Mole Flow";      
         Integer n "Order of the Reaction";
         Real k_r[Nr] "Rate constant";
-        Real Hr "Heat of Reaction";
-        Real Fin_cr[Nc, Nr] "Number of moles-initial state";
-        Real X_r[Nc](each min = 0, each max = 1, each start = 0.5) "Conversion of the reaction Cin_cnents";
-        Real V(min = 0, start = 1) "Volume of the reactor";
+        Real Hr(unit = "kJ/kmol") "Heat of Reaction";
+        Real Fin_cr[Nc, Nr](each unit = "mol/s") "Number of moles at initial state";
+        Real X_r[Nc](each unit = "-", each min = 0, each max = 1, each start = 0.5) "Conversion of the components in reaction";
+        Real V(unit = "m3", min = 0, start = 1) "Volume of the reactor";
         
         
        extends Simulator.Files.Models.ReactionManager.KineticReaction( Nr = 1,BC_r = {1}, Coef_cr = {{-1}, {-1}, {1}}, DO_cr = {{1}, {0}, {0}}, RO_cr = {{0}, {0}, {0}}, Af_r = {0.005}, Ef_r = {0}, Ab_r = {0}, Eb_r = {0});
@@ -220,8 +225,8 @@ within Simulator.UnitOperations.PFR;
       Fv_p[2] = 0;
       Fv_p[3] = Fmin_p[3] / (rhovap * MW_p[3]);
     end if;
-//Mixture Phase
-//=============================================================================================================
+
+//=================================================================================
 //Inlet concentration
     if Phase == 1 then
       Cin_c[:] = Fin_pc[1, :] / Fv_p[1];

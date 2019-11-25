@@ -1,33 +1,33 @@
 within Simulator.UnitOperations;
 
-model AdiabaticCompressor
+model AdiabaticCompressor "Model of an adiabatic compressor to provide energy to vapor stream in form of pressure"
   extends Simulator.Files.Icons.AdiabaticCompressor;
-  // This is generic Adibatic Compressor model. For using this model we need to extend this model and respective thermodynamic model and use the new model in flowsheets. Refer adia_comp models in Test section for this.
+  
   extends Simulator.Files.Models.Flash;
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
   parameter Integer Nc "number of components";
 
   //====================================================================================
-  Real Fin(min = 0, start = 100) "inlet mixture molar flow rate";
-  Real Pin(min = 0, start = 101325) "Inlet pressure"; 
-  Real Tin(min = 0, start = 273.15) "Inlet Temperature";
-  Real Hin "inlet mixture molar enthalpy";
-  Real Sin "inlet mixture molar entropy";
-  Real xvapin(min = 0, max = 1, start = 0.5) "Inlet vapor mol fraction";   
+  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
+  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure"; 
+  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
+  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy";
+  Real Sin(unit = "kJ/[kmol/K]") "Inlet stream molar entropy";
+  Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mol fraction";   
   
-  Real Fout(min = 0, start = 100) "outlet mixture molar flow rate";
-  Real Q "required Power";
-  Real Pdel "Pressure Increase"; 
-  Real Tdel "Temperature increase"; 
+  Real Fout(min = 0, start = 100) "Outlet stream molar flow rate";
+  Real Q(unit = "W") "Power required";
+  Real Pdel(unit = "Pa") "Pressure increase"; 
+  Real Tdel(unit = "K") "Temperature increase"; 
 
-  Real Pout(min = 0, start = 101325) "Outlet pressure";
-  Real Tout(min = 0, start = 273.15) "Outlet Temperature";
-  Real Hout "outlet mixture molar enthalpy";
-  Real Sout "outlet mixture molar entropy";
-  Real xvapout(min = 0, max = 1, start = 0.5) "Outlet Vapor Mole fraction";
-  Real x_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "mixture mole fraction";
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
+  Real Tout(unit = "Pa", min = 0, start = 273.15) "Outlet stream temperature";
+  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
+  Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy";
+  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mole fraction";
+  Real x_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
  
-  parameter Real Eff "Efficiency";
+  parameter Real Eff(unit = "-") "Efficiency";
 
   //========================================================================================
   Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -70,4 +70,6 @@ equation
   Pout = P;
   Sin = S_p[1];
   x_c[:] = x_pc[1, :];
-end AdiabaticCompressor;
+annotation(
+    Documentation(info = "<html><head></head><body><div style=\"font-size: 12px;\">Adiabatic Compressor is generally used to provide energy to a vapor material stream. The energy supplied is in form of pressure.</div><div style=\"font-size: 12px;\"><br></div><span style=\"font-size: 12px;\">To simulate an adiabatic compressor, Efficiency of the compressor should be provided as calculation parameter. Additionally, one of the following variables must be defined:</span><div style=\"font-size: 12px;\"><ol><li>Outlet Pressure</li><li>Pressure Increase</li><li>Power Required</li></ol><div><br></div></div><div style=\"font-size: 12px;\">For example on simulating an adiabatic compressor, go to&nbsp;<i><b>Examples</b></i>&nbsp;&gt;&gt; <b><i>Compressor</i></b></div></body></html>"));
+    end AdiabaticCompressor;

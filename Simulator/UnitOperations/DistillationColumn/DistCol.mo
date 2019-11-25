@@ -3,12 +3,16 @@ within Simulator.UnitOperations.DistillationColumn;
   model DistCol
     extends Simulator.Files.Icons.DistillationColumn;
      parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-    parameter Integer Nc;
+    parameter Integer Nc "Number of components";
     import data = Simulator.Files.ChemsepDatabase;
     parameter Boolean Bin_t[Nt] = Simulator.Files.OtherFunctions.colBoolCalc(Nt, Ni, InT_s);
-    parameter Integer Nt = 4, Nout = 0, NQ = 0, Ni = 1, InT_s[Ni];
-    parameter String Ctype = "Total";
-    //Total or Partial
+    parameter Integer Nt = 4 "Number of stages";
+    parameter Integer Nout = 0 "Number of side draws";
+    parameter Integer NQ = 0 "Number of heat load";
+    parameter Integer Ni = 1 "Number of feed streams";
+    parameter Integer InT_s[Ni] "Feed stage location";
+    parameter String Ctype = "Total" "Condenser type: Total or Partial";
+
     Real RR(min = 0);
     Simulator.Files.Interfaces.matConn In_s[Ni](each Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-248, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

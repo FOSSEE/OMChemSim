@@ -1,30 +1,30 @@
 within Simulator.UnitOperations;
 
-model Mixer
+model Mixer "Model of a mixer to mix multiple material streams"
   extends Simulator.Files.Icons.Mixer;
   import Simulator.Files.*;
   parameter ChemsepDatabase.GeneralProperties C[Nc];
-  parameter Integer Nc "Number of Components", NI = 6 "Number of Input streams";
+  parameter Integer Nc "Number of components";
+  parameter Integer NI = 6 "Number of inlet streams";
   
-  Real Pin[NI](min = 0, start = 101325);
-  Real xin_sc[NI, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Input stream component mol fraction";
-  Real Fin_s[NI](each min = 0, each start = 100) "Input stream Molar Flow";
-  Real Hin_s[NI] "Inlet molar enthalpy of each stream";
-  Real Tin_s[NI](each min = 0, each start = 273.15) "Temperature of each stream";
-  Real Sin_s[NI] "Inlet molar enthalpy of each stream";
-  Real Bin_s[NI](each min = 0, each max = 1, each start = 0.5) "Inlet vapor phase mol fraction";
+  Real Pin[NI](unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
+  Real xin_sc[NI, Nc](each unit = "-", each start = 1 / (Nc + 1), each min = 0, each max = 1) "Inlet stream component mol fraction";
+  Real Fin_s[NI](each unit = "mol/s", each min = 0, each start = 100) "Inlet stream Molar Flow";
+  Real Hin_s[NI](each unit = "kJ/kmol") "Inlet stream molar enthalpy";
+  Real Tin_s[NI](each unit = "K", each min = 0, each start = 273.15) "Inlet stream temperature";
+  Real Sin_s[NI](each unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
+  Real xvapin_s[NI](each unit = "-", each min = 0, each max = 1, each start = 0.5) "Inlet stream vapor phase mol fraction";
   
- parameter String outPress;
+  parameter String outPress "Calculation mode for outet pressure: Inlet_Minimum, Inlet_Average, Inlet_Maximum";
   
-  Real Fout(each min = 0, each start = 100) "Output stream Molar Flow";
-  Real Pout(min = 0, start = 101325);
-  Real Hout "Outlet molar enthalpy";
-  Real Tout(each min = 0, each start = 273.15) "Temperature of outlet stream";
-  Real Sout "Outlet molar entropy";
-  Real Bout(min = 0, max = 1, start = 0.5) "Outlet vapor phase mol fraction";
-  Real xout_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Output Stream component mol fraction";
- 
-  //================================================================================
+  Real Fout(unit = "mol/s", each min = 0, each start = 100) "Outlet stream molar flow";
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
+  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
+  Real Tout(unit = "K", each min = 0, each start = 273.15) "Outlet stream temperature";
+  Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy";
+  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mol fraction";
+  Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet stream component mol fraction";
+ //================================================================================
   //  Files.Interfaces.matConn inlet[NI](each Nc = Nc);
   Simulator.Files.Interfaces.matConn outlet(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -39,7 +39,7 @@ equation
     inlet[i].H = Hin_s[i];
     inlet[i].S = Sin_s[i];
     inlet[i].x_pc[1, :] = xin_sc[i, :];
-    inlet[i].xvap = Bin_s[i];
+    inlet[i].xvap = xvapin_s[i];
   end for;
   outlet.P = Pout;
   outlet.T = Tout;
@@ -47,7 +47,7 @@ equation
   outlet.H = Hout;
   outlet.S = Sout;
   outlet.x_pc[1, :] = xout_c[:];
-  outlet.xvap = Bout;
+  outlet.xvap = xvapout;
 //===================================================================================
 //Output Pressure
   if outPress == "Inlet_Minimum" then
@@ -64,5 +64,7 @@ equation
   end for;
 //Energy balance
   Hout = sum(Hin_s[:] .* Fin_s[:] / Fout);
-end Mixer;
 
+annotation(
+    Documentation(info = "<html><head></head><body><!--StartFragment--><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13.3333px; orphans: 2; widows: 2;\">The Mixer is used to mix up to any number of material streams into one, while executing all the mass and energy balances.</span><div style=\"orphans: 2; widows: 2;\"><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\"><br></span></font></div><div style=\"orphans: 2; widows: 2;\"><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">The only calculation parameter for mixer is the outlet pressure calculation (<b>Pout</b>). It can be calculated in three different modes:</span></font></div><div style=\"orphans: 2; widows: 2;\"><ol><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\"><b>Inlet_Minimum</b>: Outlet pressure is taken as minimum of all inlet streams pressure</span></font></li><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\"><b>Inlet_Average</b></span></font><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">: Outlet pressure is calculated as average of all inlet streams pressure</span></li><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\"><b>Inlet_Maximum</b></span></font><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">: Outlet pressure is taken as maximum of all inlet streams pressure</span></li></ol><div><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\"><br></span></font></div><div><span style=\"font-size: 12px; orphans: auto; widows: auto;\">For examples on simulating mixer, go to&nbsp;</span><b style=\"font-size: 12px; orphans: auto; widows: auto;\"><i>Examples</i></b><span style=\"font-size: 12px; orphans: auto; widows: auto;\">&nbsp;&gt;&gt;&nbsp;</span><i style=\"font-size: 12px; orphans: auto; widows: auto;\"><b>Mixer</b></i></div><p style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13.3333px; orphans: 2; widows: 2;\"></p><br class=\"Apple-interchange-newline\"><!--EndFragment--></div></body></html>"));
+    end Mixer;

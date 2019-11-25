@@ -1,33 +1,33 @@
 within Simulator.Streams;
 
-model MaterialStream
+model MaterialStream "Model representing Material Stream"
   //1 -  Mixture, 2 - Liquid phase, 3 - Gas Phase
-//  extends Modelica.Icons.SourcesPackage;
+
   extends Simulator.Files.Icons.MaterialStream;
   import Simulator.Files.*;
-  parameter Integer Nc;
+  parameter Integer Nc "Number of components";
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-  Real P(min = 0, start = 101325) "Pressure";
-  Real T(start = 273) "Temperature";
-  Real Pbubl(min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
-  Real Pdew(min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
-  Real xliq(start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction";
-  Real xvap(start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction";
-  Real xmliq(start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction";
-  Real xmvap(start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
-  Real F_p[3](each min = 0, each start = 100) "Total molar flow";
-  Real Fm_p[3](each min = 0, each start = 100) "Total Mass Flow";
-  Real MW_p[3](each start = 0, each min = 0) "Average Molecular weight of Phases";
-  Real x_pc[3, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
-  Real xm_pc[3, Nc](each start = 1 / (Nc + 1), each min = 0, each max = 1) "Component Mass fraction";
-  Real F_pc[3, Nc](each start = 100, each min = 0) "Component Molar flow";
-  Real Fm_pc[3, Nc](each min = 0, each start = 100) "Component Mass Fraction";
-  Real Cp_p[3] "phase Molar Specific Heat";
-  Real Cp_pc[3, Nc] "Component Molar Specific Heat";
-  Real H_p[3] "Phase Molar Enthalpy";
-  Real H_pc[3, Nc] "Component Molar Enthalpy";
-  Real S_p[3] "Phase Molar Entropy";
-  Real S_pc[3, Nc] "Component Molar Entropy";
+  Real P(unit = "Pa", min = 0, start = 101325) "Pressure";
+  Real T(unit = "K", start = 273) "Temperature";
+  Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
+  Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
+  Real xliq(unit = "-", start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction";
+  Real xvap(unit = "-", start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction";
+  Real xmliq(unit = "-", start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction";
+  Real xmvap(unit = "-",start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
+  Real F_p[3](each unit = "mol/s", each min = 0, each start = 100) "Total molar flow in phase";
+  Real Fm_p[3](each unit = "kg/s", each min = 0, each start = 100) "Total mass flow in phase";
+  Real MW_p[3](each unit = "-", each start = 0, each min = 0) "Average Molecular weight in phase";
+  Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction in phase";
+  Real xm_pc[3, Nc](each unit = "-", each start = 1 / (Nc + 1), each min = 0, each max = 1) "Component mass fraction in phase";
+  Real F_pc[3, Nc](each unit = "mol/s", each start = 100, each min = 0) "Component molar flow in phase";
+  Real Fm_pc[3, Nc](each unit = "kg/s", each min = 0, each start = 100) "Component mass flow in phase";
+  Real Cp_p[3](each unit = "kJ/[kmol.K]") "Phase molar specific heat";
+  Real Cp_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar specific heat in phase";
+  Real H_p[3](each unit = "kJ/kmol") "Phase molar enthalpy";
+  Real H_pc[3, Nc](each unit = "kJ/kmol") "Component molar enthalpy in phase";
+  Real S_p[3](each unit = "kJ/[kmol.K]") "Phase molar entropy";
+  Real S_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar entropy in phase";
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
@@ -131,5 +131,9 @@ algorithm
     MW_p[:] := MW_p[:] + C[i].MW * x_pc[:, i];
   end for;
 
-end MaterialStream;
+annotation(
+    Documentation(info = "<html><head></head><body><div><!--StartFragment-->A <strong>Material Stream</strong> represents whatever enters and leaves the simulation passing through the unit operations.<!--EndFragment-->
 
+</div><div><br></div><div>For variables which are decalared as 1-D array, the array size represent the phase where the array element indices 1 represents mixed phase, 2 represents liquid phase and 3 represents vapor phase.</div><div><br></div><div>For example, variable <b>F_p[3]</b> represents <i>Total molar flow in different phase</i>. So when simulated, the variables in the results will be as follow:</div><div>F_p[1] is Molar flow in mixed phase</div><div>F_p[2] is Molar flow in liquid phase</div><div>F_p[3] is Molar flow in vapor phase</div><div><br></div><div><br></div><div>For variables which are decalared as 2-D array, the first indice represent phase and second indice represents components.<div><br></div><div>For example, variable&nbsp;<b>F_pc[3,Nc]</b>&nbsp;represents <i>Component&nbsp;molar flow in different phase</i>. So when simulated, the variables in the results will be as follow:</div><div>F_pc[1,Nc] is Molar flow of Nc<sup>th</sup> in mixed phase</div><div>F_pc[2,Nc] is Molar flow of Nc<sup>th</sup> in liquid phase</div><div>F_pc[3,Nc] is Molar flow of Nc<sup>th</sup> in vapor phase</div></div><div><br></div><div><br></div><div>For examples on simulating a material stream, go to <b><i>Examples</i></b> &gt;&gt; <i><b>MaterialStream</b></i></div></body></html>"));
+    
+    end MaterialStream;

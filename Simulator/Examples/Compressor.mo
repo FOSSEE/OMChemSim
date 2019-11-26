@@ -27,7 +27,7 @@ package Compressor
       Placement(visible = true, transformation(origin = {-17, 7}, extent = {{-15, -15}, {15, 15}}, rotation = 0)));
     Simulator.Examples.Compressor.ms inlet(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms outlet(Nc = Nc, C = C, T(start = 374)) annotation(
+    ms outlet(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {58, 6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream power annotation(
       Placement(visible = true, transformation(origin = {-50, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

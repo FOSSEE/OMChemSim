@@ -4,10 +4,10 @@ within Simulator.Files.Models;
     //this is basic flash model.  comp and Nc has to be defined in model. thermodyanamic model must also be extended along with this model for K value.
     import Simulator.Files.*;
     Real F_p[3](each min = 0, start = {Fg,Fliqg,Fvapg});
-    Real x_pc[3, Nc](each min = 0, each max = 1, start = {xg,xliqg,xvapg});
+    Real x_pc[3, Nc](each min = 0, each max = 1, start={xguess,xg,yg});
     Real Cp_pc[3, Nc], H_pc[3, Nc], S_pc[3, Nc], Cp_p[3], H_p[3], S_p[3];
-    Real xliq(min = 0, max = 1, start = xg);
-    Real xvap(min = 0, max = 1, start = xg);
+    Real xliq(min = 0, max = 1, start = xliqg);
+    Real xvap(min = 0, max = 1, start = xvapg);
     Real P(min = 0, start = Pg);
     Real T(min = 0, start = Tg);
     Real Pbubl(start = Pmin, min = 0)"Bubble point pressure";

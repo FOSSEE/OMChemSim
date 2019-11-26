@@ -14,20 +14,20 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
   
 //==============================================================================
 //Model Variables
-  Real T(unit = "K", start = Tg, min = 0) "Flash column temperature";
-  Real P(unit = "Pa", start = Pg, min = 0) "Flash column pressure";
-  Real Pbubl(unit = "Pa", min = 0, start = Pmin) "Bubble point pressure";
-  Real Pdew(unit = "Pa", min = 0, start = Pmax) "Dew point pressure";
-  Real F_p[3](each unit = "mol/s", each min = 0, each start = Fg)"Feed stream mole flow";
-  Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, start={xguess,xg,yg}) "Component mole fraction";
+  Real T(unit = "K", start = 298.15, min = 0) "Flash column temperature";
+  Real P(unit = "Pa", start = 101325, min = 0) "Flash column pressure";
+  Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
+  Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "Dew point pressure";
+  Real F_p[3](each unit = "mol/s", each min = 0, each start = 100)"Feed stream mole flow";
+  Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
   Real Cp_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar specific heat";
-  Real H_pc[3, Nc](each unit = "kJ/kmol",start={Htotg,Hliqg,Hvapg}) "Comopent molar enthalpy";
+  Real H_pc[3, Nc](each unit = "kJ/kmol") "Comopent molar enthalpy";
   Real S_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar entropy";
   Real Cp_p[3](each unit = "kJ/[kmol.K]") "Molar specific heat in phase";
-  Real H_p[3](each unit = "kJ/kmol",start={Htotg,Hliqg,Hvapg}) "Molar enthalpy in phase";
+  Real H_p[3](each unit = "kJ/kmol") "Molar enthalpy in phase";
   Real S_p[3](each unit = "kJ/[kmol.K]") "Molar entropy in phase";
-  Real xliq(unit = "-", min = 0, max = 1, start = xliqg)"Liquid phase mole fraction";
-  Real xvap(unit = "-", min = 0, max = 1, start = xvapg) "Vapor phase mole fraction";
+  Real xliq(unit = "-", min = 0, max = 1, start = 0.5)"Liquid phase mole fraction";
+  Real xvap(unit = "-", min = 0, max = 1, start = 0.5) "Vapor phase mole fraction";
   
 //===============================================================================
 //Instantiation of Connectors
@@ -37,9 +37,7 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
     Placement(visible = true, transformation(origin = {102, 72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out2(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  
-  extends GuessModels.InitialGuess;
-  
+
 equation
 //================================================================================
 //Connector equation

@@ -6,23 +6,23 @@ model Cooler "Model of a cooler to heat a material stream"
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
     parameter Integer Nc "number of components";
   //====================================================================================
-  Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
-  Real Pin(unit = "Pa", min = 0, start =Pg) "Inlet stream pressure";
-  Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
+  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
+  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
+  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
   Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy";
   Real Sin(unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
-  Real xvapin(unit = "-", min = 0, max = 1, start = xvapg) "Inlet stream vapor phase mole fraction";
+  Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mole fraction";
   
   Real Q(unit = "W") "Heat removed";
   Real Tdel(unit = "K") "Temperature drop";
    
-  Real Fout(unit = "mol/s", min = 0, start = Fg) "Outlet stream molar flow rate";
-  Real Pout(unit = "Pa", min = 0, start = Pg) "Outlet stream pressure";
-  Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
-  Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
+  Real Fout(unit = "mol/s", min = 0, start = 100) "Outlet stream molar flow rate";
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
+  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
+  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mole fraction";
   Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
   Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy"; 
-  Real x_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Component mole fraction";
+  Real x_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
   //========================================================================================
   parameter Real Pdel(unit = "Pa") "Pressure drop";
   parameter Real Eff(unit = "-") "Efficiency";
@@ -35,9 +35,6 @@ model Cooler "Model of a cooler to heat a material stream"
   Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
-  
-  extends GuessModels.InitialGuess;
-  
 equation
 //connector equations
   In.P = Pin;

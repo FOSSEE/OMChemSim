@@ -5,23 +5,23 @@ model Valve "Model of a valve to regulate the pressure of a material stream"
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
     parameter Integer Nc = 3 "Number of components";
   //====================================================================================
-  Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
-  Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure"; 
-  Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream emperature";
-  Real Hin(unit = "kJ/kmol",start=Htotg) "Inlet stream molar enthalpy"; 
+  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
+  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure"; 
+  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream emperature";
+  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy"; 
   Real Sin(unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
-  Real xvapin(unit = "-", min = 0, max = 1, start = xvapg) "Inlet stream vapor phase mole fraction"; 
+  Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mole fraction"; 
   
   Real Tdel(unit = "K") "Temperature increase";
   Real Pdel(unit = "Pa") "Pressure drop"; 
  
-  Real Fout(unit = "mol/s", min = 0, start = Fg) "outlet stream molar flow rate";
-  Real Pout(unit = "Pa", min = 0, start = Pg) "Outlet stream pressure";
-  Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
-  Real Hout(unit = "kJ/kmol",start=Htotg) "Outlet stream molar enthalpy";
+  Real Fout(unit = "mol/s", min = 0, start = 100) "outlet stream molar flow rate";
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
+  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
+  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
   Real Sout(unit = "kJ/[kmol.K]")  "Outlet stream molar entropy";
-  Real x_c[Nc](each unit = "-", each min = 0, each max = 1,  start = xg) "Component mole fraction";
-  Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
+  Real x_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
+  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mole fraction";
   //========================================================================================
 
   //========================================================================================
@@ -30,8 +30,6 @@ model Valve "Model of a valve to regulate the pressure of a material stream"
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
-
-  extends GuessModels.InitialGuess;
 equation
 //connector equations
   In.P = Pin;

@@ -13,42 +13,42 @@ model ShortcutColumn "Model of a shortcut column to calculate minimum reflux in 
   parameter String Ctype = "Total" "Condenser type: Total or Partial";
   //==============================================================================
   //Model Variables
-  Real F_p[3](each unit = "mol/s", each min = 0, each start = Fg) "Inlet stream molar flow";
-  Real x_pc[3, Nc](each unit = "-",  start = {xguess,xg,yg}, each min = 0, each max = 1) "Inlet stream mole fraction";
-  Real H_p[3](each unit = "kJ/kmol",start={Htotg,Hliqg,Hvapg}) "Inlet stream molar enthalpy ";
+  Real F_p[3](each unit = "mol/s", each min = 0, each start = 100) "Inlet stream molar flow";
+  Real x_pc[3, Nc](each unit = "-", each start = 1 / (Nc + 1), each min = 0, each max = 1) "Inlet stream mole fraction";
+  Real H_p[3](each unit = "kJ/kmol") "Inlet stream molar enthalpy ";
   Real S_p[3](each unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
-  Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
-  Real Tin(unit = "K", min = 0, start = Tg)"Inlet stream temperature";
-  Real xin_pc[3, Nc](each unit = "-", each min = 0, each max = 1, start={xguess,xg,yg}) "Inlet stream components mole fraction";
+  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
+  Real Tin(unit = "K", min = 0, start = 273.15)"Inlet stream temperature";
+  Real xin_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet stream components mole fraction";
   
   Real Ntmin(unit = "-", min = 0, start = 10) "Minimum Number of trays";
   Real RRmin(unit = "-", start = 1) "Minimum Reflux Ratio";
   Real alpha_c[Nc](unit = "-") "Relative Volatility";
   Real theta(unit = "-", start = 1) "Fraction";
-  Real T(start=Tg) "Thermodynamic Adjustment", P(start=Pg) "Thermodynamic Adjustment";
+  Real T "Thermodynamic Adjustment", P "Thermodynamic Adjustment";
   Real Tcond(unit = "K", start = max(C[:].Tb), min = 0)"Condenser temperature";
   Real Pcond(unit = "Pa", min = 0, start = 101325) "Condenser pressure";
   Real Preb(unit = "Pa", min = 0, start = 101325)"Reboiler pressure";
   Real Treb(unit = "K", start = min(C[:].Tb), min = 0) "Reboiler temperature";
-  Real xvap_p[3](each unit = "-", each min = 0, each max = 1, each start = xvapg) "Vapor Phase Mole Fraction";
-  Real Hliqcond(unit = "kJ/kmol",start=Hliqg) "Enthalpy of liquid in condenser";
-  Real Hvapcond(unit = "kJ/kmol",start=Hvapg) "Enthalpy of vapor in condenser";
+  Real xvap_p[3](each unit = "-", each min = 0, each max = 1, each start = 0.5) "Vapor Phase Mole Fraction";
+  Real Hliqcond(unit = "kJ/kmol") "Enthalpy of liquid in condenser";
+  Real Hvapcond(unit = "kJ/kmol") "Enthalpy of vapor in condenser";
   Real Hvapcond_c[Nc](each unit = "kJ/kmol") "Component enthalpy of vapor in condenser";
   Real Hliqcond_c[Nc](each unit = "kJ/kmol") "Component enthalpy of vapor in condenser";
-  Real xliqcond_c[Nc](each unit = "-", each min = 0, each max = 1,  start = xg)"Component mole fraction in liquid phase in condenser";
-  Real xvapcond_c[Nc](each unit = "-", each min = 0, each max = 1,  start = yg)"Component mole fraction in vapor phase in condenser";
+  Real xliqcond_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1))"Component mole fraction in liquid phase in condenser";
+  Real xvapcond_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1))"Component mole fraction in vapor phase in condenser";
   
-  Real Pdew(unit = "Pa", min = 0, start = Pmax)"Dew point pressure";
-  Real Pbubl(unit = "Pa", min = 0, start = Pmin)"Bubble point pressure";
+  Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc)"Dew point pressure";
+  Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc)"Bubble point pressure";
   Real RR "Actual Reflux Ratio";
   Real Nt "Actual Number of Trays";
   Real x "Intermediate variable";
   Real y "Intermediate variable";
   Real Intray "Feed Tray";
-  Real Fliqrec(unit = "mol/s", min = 0, start = Fg) "Liquid molar flow in rectification section";
-  Real Fvaprec(unit = "mol/s", min = 0, start = Fg)"Vapor molar flow in rectification section";
-  Real Fliqstrip(unit = "mol/s", min = 0, start = Fg) "Liquid molar flow in stripping section";
-  Real Fvapstrip(unit = "mol/s", min = 0, start = Fg)"Vapor molar flow in stripping section";
+  Real Fliqrec(unit = "mol/s", min = 0, start = 100) "Liquid molar flow in rectification section";
+  Real Fvaprec(unit = "mol/s", min = 0, start = 100)"Vapor molar flow in rectification section";
+  Real Fliqstrip(unit = "mol/s", min = 0, start = 100) "Liquid molar flow in stripping section";
+  Real Fvapstrip(unit = "mol/s", min = 0, start = 100)"Vapor molar flow in stripping section";
   Real Qr(unit = "W") "Reboiler Duty";
   Real Qc(unit = "W") "Condenser Duty";
 
@@ -65,7 +65,6 @@ model ShortcutColumn "Model of a shortcut column to calculate minimum reflux in 
   Simulator.Files.Interfaces.enConn En2 annotation(
     Placement(visible = true, transformation(origin = {254, -592}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -600}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 
-  extends GuessModels.InitialGuess;
 equation
 //==============================================================================
 // Connector equations

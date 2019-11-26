@@ -7,32 +7,29 @@ model Mixer "Model of a mixer to mix multiple material streams"
   parameter Integer Nc "Number of components";
   parameter Integer NI = 6 "Number of inlet streams";
   
-  Real Pin[NI](unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
-  Real xin_sc[NI, Nc](each unit = "-", each min = 0, each max = 1) "Inlet stream component mol fraction";
-  Real Fin_s[NI](each unit = "mol/s", each min = 0, each start = Fg) "Inlet stream Molar Flow";
+  Real Pin[NI](unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
+  Real xin_sc[NI, Nc](each unit = "-", each start = 1 / (Nc + 1), each min = 0, each max = 1) "Inlet stream component mol fraction";
+  Real Fin_s[NI](each unit = "mol/s", each min = 0, each start = 100) "Inlet stream Molar Flow";
   Real Hin_s[NI](each unit = "kJ/kmol") "Inlet stream molar enthalpy";
-  Real Tin_s[NI](each unit = "K", each min = 0, each start = Tg) "Inlet stream temperature";
+  Real Tin_s[NI](each unit = "K", each min = 0, each start = 273.15) "Inlet stream temperature";
   Real Sin_s[NI](each unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
-  Real xvapin_s[NI](each unit = "-", each min = 0, each max = 1, each start = xvapg) "Inlet stream vapor phase mol fraction";
+  Real xvapin_s[NI](each unit = "-", each min = 0, each max = 1, each start = 0.5) "Inlet stream vapor phase mol fraction";
   
   parameter String outPress "Calculation mode for outet pressure: Inlet_Minimum, Inlet_Average, Inlet_Maximum";
   
-  Real Fout(unit = "mol/s", each min = 0, each start = Fg) "Outlet stream molar flow";
-  Real Pout(unit = "Pa", min = 0, start = Pg) "Outlet stream pressure";
+  Real Fout(unit = "mol/s", each min = 0, each start = 100) "Outlet stream molar flow";
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
   Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
-  Real Tout(unit = "K", each min = 0, each start = Tg) "Outlet stream temperature";
+  Real Tout(unit = "K", each min = 0, each start = 273.15) "Outlet stream temperature";
   Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy";
-  Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mol fraction";
-  Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, start = xguess) "Outlet stream component mol fraction";
+  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mol fraction";
+  Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet stream component mol fraction";
  //================================================================================
   //  Files.Interfaces.matConn inlet[NI](each Nc = Nc);
   Simulator.Files.Interfaces.matConn outlet(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn inlet[NI](each Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  
-  extends GuessModels.InitialGuess;
-  
 equation
 //Connector equation
   for i in 1:NI loop

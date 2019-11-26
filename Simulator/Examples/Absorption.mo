@@ -14,7 +14,7 @@ package Absorption
 
   model AbsColumn
     extends Simulator.UnitOperations.AbsorptionColumn.AbsCol;
-    Tray tray[Nt](each Nc = Nc, each C = C);
+    Tray tray[Nt](each Nc = Nc, each C = C, each Fliq_s(each start = 30), each Fvap_s(each start = 30), each T(start = 300));
   end AbsColumn;
 
   model Test

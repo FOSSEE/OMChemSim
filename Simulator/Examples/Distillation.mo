@@ -19,9 +19,9 @@ package Distillation
 
   model DistColumn
     extends Simulator.UnitOperations.DistillationColumn.DistCol;
-    Condenser condenser(Nc = Nc, C = C, Ctype = Ctype, Bin = Bin_t[1]);
+    Condenser condenser(Nc = Nc, C = C, Ctype = Ctype, Bin = Bin_t[1], T(start = 300));
     Reboiler reboiler(Nc = Nc, C = C, Bin = Bin_t[Nt]);
-    Tray tray[Nt - 2](each Nc = Nc, each C = C, Bin = Bin_t[2:Nt - 1]);
+    Tray tray[Nt - 2](each Nc = Nc, each C = C, Bin = Bin_t[2:Nt - 1], each Fliq_s(each start = 150), each Fvap_s(each start = 150));
   end DistColumn;
 
   model ms
@@ -156,7 +156,7 @@ package Distillation
     parameter data.Benzene benz;
     parameter data.Toluene tol;
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] = {benz, tol};
-    DistColumn distCol(Nc = Nc, C = C, Nt = 22, Ni = 1, InT_s = {10}, condenser.Ctype = "Partial") annotation(
+    DistColumn distCol(Nc = Nc, C = C, Nt = 22, Ni = 1, InT_s = {10}, condenser.Ctype = "Partial", each tray.Fliq_s(each start = 100), each tray.Fvap_s(each start = 100)) annotation(
       Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
     ms feed(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

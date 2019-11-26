@@ -10,22 +10,22 @@ model AdiabaticExpander "Model of an adiabatic expander to extract energy from a
   parameter Real Eff(unit = "-") "Expander efficiency";
   //====================================================================================
   //Model Variables
-  Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
-  Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
-  Real Hin(unit = "kJ/kmol",start=Htotg) "Inlet stream molar enthalpy";
-  Real xvapin(unit = "-", min = 0, max = 1, start = xvapg) "Inlet stream vapor phase mole fraction";
-  Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Component mole fraction";
+  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
+  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
+  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy";
+  Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mole fraction";
+  Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
   Real Sin(unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
-  Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
+  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
   Real Q(unit = "W") "Generated Power";
   Real Pdel(unit = "Pa") "Pressure drop";
   Real Tdel(unit = "K") "Temperature change";
-  Real Pout(unit = "Pa", min = 0, start = Pg) "Outlet stream pressure";
-  Real Fout(unit = "mol/s", min = 0, start = Fg) "Outlet stream molar flow rate";
-  Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
+  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
+  Real Fout(unit = "mol/s", min = 0, start = 100) "Outlet stream molar flow rate";
+  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
   Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
   Real Sout(unit = "kJ/[kmol.k]") "Outlet stream molar entropy";
-  Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
+  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mole fraction";
   //========================================================================================
   //Instantiation of connectors
   Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -34,9 +34,6 @@ model AdiabaticExpander "Model of an adiabatic expander to extract energy from a
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -66}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  
-  extends GuessModels.InitialGuess;
-  
 equation
 //========================================================================================
 //connector equations

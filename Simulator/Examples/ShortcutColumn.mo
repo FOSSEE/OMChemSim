@@ -26,11 +26,11 @@ package ShortcutColumn
     
   //============================================================================
   //Instantiation of Streams and Blocks
-    Simulator.Examples.ShortcutColumn.ms S1(Nc = Nc, C = C) annotation(
+    Simulator.Examples.ShortcutColumn.ms S1(Nc = Nc, C = C, x_pc(start = {{0.5, 0.5}, {0.34, 0.65}, {0.56, 0.44}})) annotation(
       Placement(visible = true, transformation(origin = {-70, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.ShortcutColumn.ms S3(Nc = Nc, C = C) annotation(
+    Simulator.Examples.ShortcutColumn.ms S3(Nc = Nc, C = C, T(start = 383.08), x_pc(start = {{0.01, 0.99}, {0.01, 0.99}, {0, 0}})) annotation(
       Placement(visible = true, transformation(origin = {62, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.ShortcutColumn.ms S2(Nc = Nc, C = C) annotation(
+    Simulator.Examples.ShortcutColumn.ms S2(Nc = Nc, C = C, T(start = 353.83), x_pc(start = {{0.99, 0.01}, {0.99, 0.01}, {0, 0}})) annotation(
       Placement(visible = true, transformation(origin = {62, 30}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream E1 annotation(
       Placement(visible = true, transformation(origin = {60, 60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

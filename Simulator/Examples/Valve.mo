@@ -26,7 +26,7 @@ package Valve
       Placement(visible = true, transformation(origin = {0, 4}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
     ms inlet(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-74, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.Valve.ms outlet(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Valve.ms outlet(Nc = Nc, C = C, T(start = 352), x_pc(start = {{0.33, 0.33, 0.34}, {0.26, 0.32, 0.40}, {0.47, 0.34, 0.18}})) annotation(
       Placement(visible = true, transformation(origin = {71, 3}, extent = {{-11, -11}, {11, 11}}, rotation = 0)));
   equation
     connect(valve1.Out, outlet.In) annotation(

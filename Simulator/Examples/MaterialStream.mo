@@ -14,7 +14,7 @@ package MaterialStream
     //instantiation of ethanol
     parameter data.Water wat;
     //instantiation of water
-    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat}, x_pc(each min = 0.01, each max = 1, start = {{0.33, 0.33, 0.34}, {0.32, 0.33, 0.34}, {0.53, 0.32, 0.14}}), F_p(each start = 50));
+    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat});
     //material stream model is extended and values of parameters Nc and comp are given. These parameters are declared in Material stream model. We are only giving them values here.
     //Nc - number of components, comp -  component array.
     //start values are given for convergence
@@ -34,7 +34,7 @@ package MaterialStream
     parameter data.Methanol meth;
     parameter data.Ethanol eth;
     parameter data.Water wat;
-    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat}, x_pc(start = {{0.33, 0.33, 0.34}, {0.32, 0.33, 0.34}, {0.53, 0.32, 0.14}}));
+    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat});
     //Nc - number of components, comp -  component array.
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   equation
@@ -50,7 +50,7 @@ package MaterialStream
     parameter data.Methanol meth;
     parameter data.Ethanol eth;
     parameter data.Water wat;
-    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat}, T(start = 355.97), x_pc(start = {{0.33, 0.33, 0.34}, {0.32, 0.33, 0.34}, {0.53, 0.32, 0.14}}));
+    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat});
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   equation
     P = 101325;
@@ -69,7 +69,7 @@ package MaterialStream
     //instantiation of ethanol
     parameter data.Water wat;
     //instantiation of water
-    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat}, F_p(each start = 1), x_pc(each start = 0.33), T(start = sum(C.Tb) / Nc));
+    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat});
     //material stream model is extended and values of parameters NOC and comp are given. These parameters are declred in Material stream model. We are only giving them values here.
     //we need to give proper initialization values for converging, Initialization values are provided for totMolFlo, compMolFrac and T while extending.
     //NOC - number of components, comp -  component array.
@@ -95,7 +95,7 @@ package MaterialStream
     //instantiation of ethanol
     parameter data.Water wat;
     //instantiation of water
-    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat}, F_p(each start = 100), x_pc(each start = 0.33), T(start = sum(C.Tb) / Nc));
+    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat});
     //material stream model is extended and values of parameters NOC and comp are given. These parameters are declred in Material stream model. We are only giving them values here.
     //we need to give proper initialization values for converging, Initialization values are provided for totMolFlo, compMolFrac and T while extending.
     //NOC - number of components, comp -  component array.
@@ -121,7 +121,7 @@ package MaterialStream
     //instantiation of ethanol
     parameter data.Water wat;
     //instantiation of water
-    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat}, H_pc(each start = eth.SH), S_pc(each start = eth.AS), x_pc(each min = 0.01, each max = 1, each start = 0.33));
+    extends Streams.MaterialStream(Nc = 3, C = {meth, eth, wat});
     //material stream model is extended and values of parameters NOC and comp are given. These parameters are declared in Material stream model. We are only giving them values here.
     //NOC - number of components, comp -  component array.
     extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;

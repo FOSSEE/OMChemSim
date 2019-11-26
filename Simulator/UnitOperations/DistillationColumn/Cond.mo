@@ -5,27 +5,27 @@ within Simulator.UnitOperations.DistillationColumn;
     parameter ChemsepDatabase.GeneralProperties C[Nc];
     parameter Integer Nc = 2 "Number of components";
     parameter Boolean Bin = false;
-    Real P(unit = "K", min = 0, start = 101325) "Pressure";
-    Real T(unit = "Pa", min = 0, start = 273.15) "Temperature";
-    Real Fin(unit = "mol/s", min = 0, start = 100) "Feed molar flow rate";
-    Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Feed components mole fraction"; 
-    Real xvapin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Inlet components vapor molar fraction"; 
-    Real Hin(unit = "kJ/kmol") "Feed inlet molar enthalpy";
+    Real P(unit = "K", min = 0, start = Pg) "Pressure";
+    Real T(unit = "Pa", min = 0, start = Tg) "Temperature";
+    Real Fin(unit = "mol/s", min = 0, start =Fg) "Feed molar flow rate";
+    Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Feed components mole fraction"; 
+    Real xvapin_c[Nc](each unit = "-", each min = 0, each max = 1, start=xvapg) "Inlet components vapor molar fraction"; 
+    Real Hin(unit = "kJ/kmol",start=Htotg) "Feed inlet molar enthalpy";
    
-    Real Fout(unit = "mol/s", min = 0, start = 100) "Side draw molar flow";
-    Real Fvapin(unit = "mol/s", min = 0, start = 100) "Inlet vapor molar flow";
-    Real Fliqout(unit = "mol/s", min = 0, start = 100) "Outlet liquid molar flow";
-    Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Side draw components mole fraction";
-    Real xliqout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Outlet components liquid mole fraction";
+    Real Fout(unit = "mol/s", min = 0, start = Fg) "Side draw molar flow";
+    Real Fvapin(unit = "mol/s", min = 0, start = Fg) "Inlet vapor molar flow";
+    Real Fliqout(unit = "mol/s", min = 0, start = Fg) "Outlet liquid molar flow";
+    Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Side draw components mole fraction";
+    Real xliqout_c[Nc](each unit = "-", each min = 0, each max = 1, start=xliqg) "Outlet components liquid mole fraction";
     
-    Real Hvapin(unit = "kJ/kmol") "Inlet vapor molar enthalpy";
-    Real Hliqout(unit = "kJ/kmol") "Outlet liquid molar enthalpy";
+    Real Hvapin(unit = "kJ/kmol",start=Hvapg) "Inlet vapor molar enthalpy";
+    Real Hliqout(unit = "kJ/kmol",start=Hliqg) "Outlet liquid molar enthalpy";
     Real Q(unit = "W") "Heat load";
-    Real Hout(unit = "kJ/kmol") "Side draw molar enthalpy";
+    Real Hout(unit = "kJ/kmol",start=Htotg) "Side draw molar enthalpy";
     Real Hliqout_c[Nc](each unit = "kJ/kmol") "Outlet liquid components molar enthalpy";
-    Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Component mole fraction";
-    Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Dew point pressure";
-    Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Bubble point pressure";
+    Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1,start={xguess,xguess,xguess}) "Component mole fraction";
+    Real Pdew(unit = "Pa", min = 0, start = Pmax) "Dew point pressure";
+    Real Pbubl(unit = "Pa", min = 0,start=Pmin) "Bubble point pressure";
     
     //String sideDrawType(start = "Null");
     //L or V
@@ -42,7 +42,9 @@ within Simulator.UnitOperations.DistillationColumn;
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Interfaces.enConn En annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  
+    
+    extends GuessModels.InitialGuess;
+    
   equation
 //connector equation
     if Bin then

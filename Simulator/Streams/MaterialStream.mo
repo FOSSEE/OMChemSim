@@ -7,24 +7,24 @@ model MaterialStream "Model representing Material Stream"
   import Simulator.Files.*;
   parameter Integer Nc "Number of components";
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-  Real P(unit = "Pa", min = 0, start = 101325) "Pressure";
-  Real T(unit = "K", start = 273) "Temperature";
-  Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "Bubble point pressure";
-  Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc) / Nc) "dew point pressure";
-  Real xliq(unit = "-", start = 0.5, min = 0, max = 1) "Liquid Phase mole fraction";
-  Real xvap(unit = "-", start = 0.5, min = 0, max = 1) "Vapor Phase mole fraction";
-  Real xmliq(unit = "-", start = 0.5, min = 0, max = 1) "Liquid Phase mass fraction";
-  Real xmvap(unit = "-",start = 0.5, min = 0, max = 1) "Vapor Phase Mass fraction";
-  Real F_p[3](each unit = "mol/s", each min = 0, each start = 100) "Total molar flow in phase";
-  Real Fm_p[3](each unit = "kg/s", each min = 0, each start = 100) "Total mass flow in phase";
+  Real P(unit = "Pa", min = 0, start = Pg) "Pressure";
+  Real T(unit = "K", start = Tg) "Temperature";
+  Real Pbubl(unit = "Pa", min = 0, start = Pmin) "Bubble point pressure";
+  Real Pdew(unit = "Pa", min = 0, start = Pmax) "dew point pressure";
+  Real xliq(unit = "-", start = xliqg, min = 0, max = 1) "Liquid Phase mole fraction";
+  Real xvap(unit = "-", start = xvapg, min = 0, max = 1) "Vapor Phase mole fraction";
+  Real xmliq(unit = "-", start = xliqg, min = 0, max = 1) "Liquid Phase mass fraction";
+  Real xmvap(unit = "-",start =xvapg, min = 0, max = 1) "Vapor Phase Mass fraction";
+  Real F_p[3](each unit = "mol/s", each min = 0, start={Fg,Fliqg,Fvapg}) "Total molar flow in phase";
+  Real Fm_p[3](each unit = "kg/s", each min = 0, each start = Fg) "Total mass flow in phase";
   Real MW_p[3](each unit = "-", each start = 0, each min = 0) "Average Molecular weight in phase";
-  Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction in phase";
-  Real xm_pc[3, Nc](each unit = "-", each start = 1 / (Nc + 1), each min = 0, each max = 1) "Component mass fraction in phase";
-  Real F_pc[3, Nc](each unit = "mol/s", each start = 100, each min = 0) "Component molar flow in phase";
-  Real Fm_pc[3, Nc](each unit = "kg/s", each min = 0, each start = 100) "Component mass flow in phase";
-  Real Cp_p[3](each unit = "kJ/[kmol.K]") "Phase molar specific heat";
+  Real x_pc[3, Nc](each unit = "-", each min = 0, each max = 1, start={xguess,xg,yg}) "Component mole fraction in phase";
+  Real xm_pc[3, Nc](each unit ="-", start={xguess,xg,yg}, each min = 0, each max = 1) "Component mass fraction in phase";
+  Real F_pc[3, Nc](each unit = "mol/s", each start = Fg, each min = 0) "Component molar flow in phase";
+  Real Fm_pc[3, Nc](each unit = "kg/s", each min = 0, each start = Fg) "Component mass flow in phase";
+  Real Cp_p[3](each unit = "kJ/[kmol.K]",start={Hmixg,Hliqg,Hvapg}) "Phase molar specific heat";
   Real Cp_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar specific heat in phase";
-  Real H_p[3](each unit = "kJ/kmol") "Phase molar enthalpy";
+  Real H_p[3](each unit = "kJ/kmol",start={Hmixg,Hliqg,Hvapg}) "Phase molar enthalpy";
   Real H_pc[3, Nc](each unit = "kJ/kmol") "Component molar enthalpy in phase";
   Real S_p[3](each unit = "kJ/[kmol.K]") "Phase molar entropy";
   Real S_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar entropy in phase";
@@ -32,6 +32,9 @@ model MaterialStream "Model representing Material Stream"
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+
+  extends GuessModels.InitialGuess;
+
 equation
 //Connector equations
   In.P = P;

@@ -36,47 +36,47 @@ model HeatExchanger
   parameter String Cmode"''BothOutletTemp(UA)''";
   //Variables
   //Hot Stream Inlet
-  Real Phin;
-  Real Thin;
-  Real Fhin;
-  Real Hhin;
+  Real Phin(start=Pg);
+  Real Thin(start=Tg);
+  Real Fhin(start=Fg);
+  Real Hhin(start=Htotg);
   Real Shin;
-  Real xhin_pc[2, Nc];
-  Real xvaphin;
+  Real xhin_pc[2, Nc](start={xg,xg});
+  Real xvaphin(start=xvapg);
   //Hot Stream Outlet
-  Real Phout;
-  Real Thout;
-  Real Fhout;
-  Real Hhout;
+  Real Phout(start=Pg);
+  Real Thout(start=Tg);
+  Real Fhout(start=Fg);
+  Real Hhout(start=Htotg);
   Real Shout;
-  Real xhout_pc[2, Nc];
+  Real xhout_pc[2, Nc](start={xg,xg});
   Real xvaphout;
   //Cold Stream Inlet
-  Real Pcin;
-  Real Tcin;
-  Real Fcin[1];
-  Real Hcin;
+  Real Pcin(start=Pg);
+  Real Tcin(start=Tg);
+  Real Fcin[1](start=Fg);
+  Real Hcin(start=Htotg);
   Real Scin;
   Real xcin_pc[2, Nc];
-  Real  xvapcin;
+  Real xvapcin(start=xvapg);
   //Cold Stream Outlet
-  Real Pcout;
-  Real Tcout;
-  Real couttT;
-  Real Fcout[1];
-  Real Hcout;
+  Real Pcout(start=Pg);
+  Real Tcout(start=Tg);
+  Real couttT(start=Tg);
+  Real Fcout[1](start=Fg);
+  Real Hcout(start=Htotg);
   Real Scout;
-  Real xcout_pc[2, Nc];
-  Real xvapcout;
+  Real xcout_pc[2, Nc](start={xg,xg});
+  Real xvapcout(start=xvapg);
   
   Real Qact(start = 2000) "Actual Heat Load";
   Real Qmax, Qmaxh, Qmaxc;
   //Hot Stream Enthalpy at Cold Stream Inlet Temperature
   Real Hhin_pc[2, Nc];
-  Real Hhin_p[3];
+  Real Hhin_p[3](start={Htotg,Hliqg,Hvapg});
   //Cold Stream Enthalpy at Hot Stream Inlet Temperature
   Real Hcin_pc[2, Nc];
-  Real Hcin_p[3];
+  Real Hcin_p[3](start={Htotg,Hliqg,Hvapg});
   Real Hdel;
   //Heat Exchanger Effeciency
   Real Eff;
@@ -97,6 +97,8 @@ model HeatExchanger
   Real Rc, Rh;
   //Effectiveness Factor
   Real Effc, Effh;
+
+ extends GuessModels.InitialGuess;
 equation
 //Hot Stream Inlet
   In_Hot.P = Phin;

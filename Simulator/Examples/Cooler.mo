@@ -25,7 +25,7 @@ package Cooler
       Placement(visible = true, transformation(origin = {-8, 18}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
     ms inlet(Nc = 3, C = {meth, eth, wat}) annotation(
       Placement(visible = true, transformation(origin = {-72, 18}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
-    Simulator.Examples.Cooler.ms outlet(Nc = 3, C = {meth, eth, wat}, T(start = 352.6146), x_pc(start = {{0.33, 0.33, 0.34}, {0.27, 0.32, 0.39}, {0.48, 0.33, 0.18}}), P(start = 101325)) annotation(
+    Simulator.Examples.Cooler.ms outlet(Nc = 3, C = {meth, eth, wat}) annotation(
       Placement(visible = true, transformation(origin = {60, 12}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
     Simulator.Streams.EnergyStream energy annotation(
       Placement(visible = true, transformation(origin = {47, -27}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));

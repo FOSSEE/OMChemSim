@@ -4,16 +4,16 @@ model AbsTray
     import Simulator.Files.*;
     parameter Integer Nc;
     parameter ChemsepDatabase.GeneralProperties C[Nc];
-    Real P(min = 0, start = 101325);
-    Real T(min = 0, start = sum(C[:].Tb) / Nc);
-    Real Fvap_s[2](each min = 0, each start = 100);
-    Real Fliq_s[2](each min = 0, each start = 100);
-    Real xvap_sc[2, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1));
-    Real xliq_sc[2, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1));
-    Real Hvap_s[2], Hliq_s[2], Hvapout_c[Nc], Hliqout_c[Nc];
-    Real x_pc[3, Nc](each min =0, each max = 0, each start = 1/(Nc + 1));
-    Real Pdew(min = 0, start = sum(C[:].Pc)/Nc);
-    Real Pbubl(min = 0, start = sum(C[:].Pc)/Nc);
+    Real P(min = 0, start = Pg);
+    Real T(min = 0, start = Tg);
+    Real Fvap_s[2](each min = 0, start={Fg,Fg});
+    Real Fliq_s[2](each min = 0, start={Fliqg,Fliqg});
+    Real xvap_sc[2, Nc](each min = 0, each max = 1, start=xvapg);
+    Real xliq_sc[2, Nc](each min = 0, each max = 1, start=xliqg);
+    Real Hvap_s[2](start={Hvapg,Hvapg}), Hliq_s[2](start={Hliqg,Hliqg}), Hvapout_c[Nc], Hliqout_c[Nc];
+    Real x_pc[3, Nc](each min =0, each max = 0,start=xliqg);
+    Real Pdew(min = 0, start =Pmax);
+    Real Pbubl(min = 0, start =Pmin);
   
     Simulator.Files.Interfaces.trayConn In_Liq(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -23,6 +23,8 @@ model AbsTray
       Placement(visible = true, transformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Interfaces.trayConn In_Vap(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
+    extends GuessModels.InitialGuess;
   equation
 //connector equation
     In_Liq.F = Fliq_s[1];

@@ -5,29 +5,29 @@ within Simulator.UnitOperations.DistillationColumn;
     parameter ChemsepDatabase.GeneralProperties C[Nc];
     parameter Integer Nc = 2 "Number of components";
     parameter Boolean Bin = true;
-    Real P(unit = "Pa", min = 0, start = 101325) "Pressure";
-    Real T(unit = "K", min = 0, start = (min(C[:].Tb) + max(C[:].Tb)) / 2) "Temperature";
-    Real Fin(unit = "mol/s", min = 0, start = 100) "Feed molar flow";
-    Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Feed components mole fraction"; 
-    Real Hin(unit = "kJ/kmol") "Feed molar enthalpy"; 
+    Real P(unit = "Pa", min = 0, start = Pg) "Pressure";
+    Real T(unit = "K", min = 0, start = Tg) "Temperature";
+    Real Fin(unit = "mol/s", min = 0, start = Fg) "Feed molar flow";
+    Real xin_c[Nc](each unit = "-", each min = 0, each max = 1,start=xg) "Feed components mole fraction"; 
+    Real Hin(unit = "kJ/kmol",start=Htotg) "Feed molar enthalpy"; 
     
-    Real Fout(unit = "mol/s", min = 0, start = 100) "Sidedraw molar flow";
-    Real Fvap_s[2](each unit = "mol/s", each min = 0, each start = 100) "Vapor molar flow";
-    Real Fliq_s[2](each unit = "mol/s", each min = 0, each start = 100) "Liquid molar flow";  
-    Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Components mole fraction at sidedraw";
-    Real xvap_sc[2, Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Components vapor mole fraction";
-    Real xliq_sc[2, Nc](each unit = "-", each min = 0, each max = 1, each start = 1/(Nc + 1)) "Components liquid mole fraction";
+    Real Fout(unit = "mol/s", min = 0, start = Fg) "Sidedraw molar flow";
+    Real Fvap_s[2](each unit = "mol/s", each min = 0,start={Fg,Fg}) "Vapor molar flow";
+    Real Fliq_s[2](each unit = "mol/s", each min = 0,start={Fg,Fg}) "Liquid molar flow";  
+    Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Components mole fraction at sidedraw";
+    Real xvap_sc[2, Nc](each unit = "-", each min = 0, each max = 1, start=yg) "Components vapor mole fraction";
+    Real xliq_sc[2, Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Components liquid mole fraction";
  
-    Real Hvap_s[2](unit = "kJ/kmol") "Vapor molar enthalpy";
-    Real Hliq_s[2](unit = "kJ/kmol") "Liquid molar enthalpy";
+    Real Hvap_s[2](unit = "kJ/kmol",start=Hvapg) "Vapor molar enthalpy";
+    Real Hliq_s[2](unit = "kJ/kmol",start=Hliqg) "Liquid molar enthalpy";
     Real Q(unit = "W") "Heat load";
-    Real Hout(unit = "kJ/kmol") "Side draw molar enthalpy";
-    Real Hvapout_c[Nc](unit = "kJ/kmol") "Outlet components vapor molar enthalpy";
-    Real Hliqout_c[Nc](unit = "kJ/kmol") "Outlet components liquid molar enthalpy";
-    Real x_pc[3, Nc](each min =0, each max = 0, each start = 1/(Nc + 1));
+    Real Hout(unit = "kJ/kmol",start=Htotg) "Side draw molar enthalpy";
+    Real Hvapout_c[Nc](unit = "kJ/kmol",start=Hvapg) "Outlet components vapor molar enthalpy";
+    Real Hliqout_c[Nc](unit = "kJ/kmol",start=Hliqg) "Outlet components liquid molar enthalpy";
+    Real x_pc[3, Nc](each min =0, each max = 0,start={xguess,xguess,xguess});
     
-    Real Pdew(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Dew pressure";
-    Real Pbubl(unit = "Pa", min = 0, start = sum(C[:].Pc)/Nc) "Bubble pressure";
+    Real Pdew(unit = "Pa", min = 0, start = Pmax) "Dew pressure";
+    Real Pbubl(unit = "Pa", min = 0, start = Pmin) "Bubble pressure";
     Real Pdmy1, Tdmy1, xdmy1_pc[3,Nc], Fdmy1,Hdmy1, Sdmy1, xvapdmy1;
   //this is adjustment done since OpenModelica 1.11 is not handling array modification properly
     String OutType(start = "Null");
@@ -48,6 +48,8 @@ within Simulator.UnitOperations.DistillationColumn;
       Placement(visible = true, transformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {50, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Interfaces.enConn En annotation(
       Placement(visible = true, transformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 40}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  extends GuessModels.InitialGuess;
+  
   equation
 //connector equation
     if Bin then

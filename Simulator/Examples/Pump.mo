@@ -20,7 +20,7 @@ package Pump
       Placement(visible = true, transformation(origin = {-70, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.UnitOperations.CentrifugalPump B1(C = {benz, tol}, Nc = 2, Eff = 0.75) annotation(
       Placement(visible = true, transformation(origin = {-8.99281e-15, -2}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
-    Simulator.Examples.Pump.ms S2(Nc = 2, C = {benz, tol}, T(start = 300.089),  x_pc(start = {{0.5, 0.5}, {0.5, 0.5}, {0, 0}}), F_p(start = 100)) annotation(
+    Simulator.Examples.Pump.ms S2(Nc = 2, C = {benz, tol}) annotation(
       Placement(visible = true, transformation(origin = {64, 12}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Streams.EnergyStream E1 annotation(
       Placement(visible = true, transformation(origin = {-38, -44}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

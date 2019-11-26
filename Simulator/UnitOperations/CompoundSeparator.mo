@@ -6,24 +6,24 @@ model CompoundSeparator
    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Components array";
     parameter Integer SepStrm "Specified Stream";
 
-  Real Pin(min = 0, start = 101325) "inlet pressure";
-  Real Tin(min = 0, start = 273.15) "inlet temperature";
-  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "inlet mixture mole fraction";
+  Real Pin(min = 0, start = Pg) "inlet pressure";
+  Real Tin(min = 0, start = Tg) "inlet temperature";
+  Real xin_c[Nc](each min = 0, each max = 1, start=xguess) "inlet mixture mole fraction";
   Real Fin(min = 0, start = 100) "inlet mixture molar flow";
-  Real Fin_c[Nc](each min = 0, each start = 100) "inlet compound molar flow";
-  Real Fmin_c[Nc](each min = 0, each start = 100) "inlet compound mass flow";
-  Real Hin "inlet mixture molar enthalpy";
+  Real Fin_c[Nc](each min = 0, each start = Fg) "inlet compound molar flow";
+  Real Fmin_c[Nc](each min = 0, each start =Fg) "inlet compound mass flow";
+  Real Hin(start=Htotg) "inlet mixture molar enthalpy";
   
   Real Q "energy required";
   Real SepVal_c[Nc] "Separation factor value";
  
-  Real Pout_s[2](each min = 0, each start = 100) "outlet Pressure";
-  Real Tout_s[2](each min = 0, each start = 273.15) "outlet temperature";
-  Real xout_sc[2, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "outlet mixture mole fraction";
-  Real Fout_s[2](each min = 0, each start = 100) "Outlet mixture molar flow";
-  Real Fout_sc[2, Nc](each min = 0, each start = 100) "outlet compounds molar flow";
-  Real Fmout_sc[2, Nc](each min = 0, each start = 100) "outlet compound mass flow";
-  Real Hout_s[2] "outlet mixture molar enthalpy";
+  Real Pout_s[2](each min = 0, start={Pg,Pg}) "outlet Pressure";
+  Real Tout_s[2](each min = 0, start={Tg,Tg}) "outlet temperature";
+  Real xout_sc[2, Nc](each min = 0, each max = 1, start={xg,xg}) "outlet mixture mole fraction";
+  Real Fout_s[2](each min = 0,  start = {Fg,Fg}) "Outlet mixture molar flow";
+  Real Fout_sc[2, Nc](each min = 0,  start = {Fg,Fg}) "outlet compounds molar flow";
+  Real Fmout_sc[2, Nc](each min = 0, start={Fg,Fg}) "outlet compound mass flow";
+  Real Hout_s[2](start={Hvapg,Hliqg}) "outlet mixture molar enthalpy";
  
   parameter String SepFact_c[Nc] "Separation factor";
   // separation factor: Molar_Flow, Mass_Flow, Inlet_Molar_Flow_Percent, Inlet_Mass_Flow_Percent.
@@ -35,6 +35,9 @@ model CompoundSeparator
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -130}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out2(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+  
+  extends GuessModels.InitialGuess;
+  
 equation
 // Connector equation
   In.P = Pin;

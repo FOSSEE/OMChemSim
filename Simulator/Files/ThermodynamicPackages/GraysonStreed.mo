@@ -11,7 +11,7 @@ within Simulator.Files.ThermodynamicPackages;
     parameter Real W_c[Nc];
     parameter Real SP_c[Nc](each unit = "(cal/mL)^0.5");
     parameter Real V_c[Nc](each unit = "mL/mol");
-    parameter Real Tc[Nc] = C.Tc;
+    parameter Real T_c[Nc] = C.Tc;
     parameter Real Pc_c[Nc] = C.Pc;
     parameter Real Rgas = 8314470;
     
@@ -47,7 +47,7 @@ within Simulator.Files.ThermodynamicPackages;
     for i in 1:Nc loop
       gma_c[i] = exp(V_c[i] * (SP_c[i] - S) ^ 2 / (Rgas * T));
     end for;
-    philiq_c = Simulator.Files.ThermodynamicFunctions.LiquidFugacityCoeffcient(Nc, Tc, Pc_c, W_c, T, P, V_c, S, gma_c);
+    philiq_c = Simulator.Files.ThermodynamicFunctions.LiquidFugacityCoeffcient(Nc, T_c, Pc_c, W_c, T, P, V_c, S, gma_c);
     for i in 1:Nc loop
       Pvap_c[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP, T);
       gmaliq_c[i] = philiq_c[i] * (P / Pvap_c[i]);
@@ -55,8 +55,8 @@ within Simulator.Files.ThermodynamicPackages;
 //========================================================================================================
 //Calculation Routine for Vapour Phase Fugacity Coefficient
 //Calculation of Equation of State Constants
-    a_c = Simulator.Files.ThermodynamicFunctions.EOSConstants(Nc, Tc, Pc_c, T);
-    b_c = Simulator.Files.ThermodynamicFunctions.EOSConstantII(Nc, Tc, Pc_c, T);
+    a_c = Simulator.Files.ThermodynamicFunctions.EOSConstants(Nc, T_c, Pc_c, T);
+    b_c = Simulator.Files.ThermodynamicFunctions.EOSConstantII(Nc, T_c, Pc_c, T);
     aij_c = Simulator.Files.ThermodynamicFunctions.EOSConstantIII(Nc, a_c);
     amv = Simulator.Files.ThermodynamicFunctions.EOSConstant1V(Nc, x_pc[3, :], aij_c);
     bmv = sum(x_pc[3, :] .* b_c[:]);
@@ -98,15 +98,15 @@ within Simulator.Files.ThermodynamicPackages;
       gmabubl[i] = exp(V_c[i] * (SP_c[i] - S_bubl) ^ 2 / (Rgas * T));
     end for;
     for i in 1:Nc loop
-      Tr_c[i] = T / Tc[i];
+      Tr_c[i] = T / T_c[i];
       if Pc_c[i] <= 0 then
         Prbubl_c[i] = 0;
       else
         Prbubl_c[i] = Pbubl / Pc_c[i];
       end if;
-      if Tc[i] == 33.19 then
+      if T_c[i] == 33.19 then
         Vo_c[i] = 10 ^ (1.50709 + 2.74283 / Tr_c[i] + (-0.0211) * Tr_c[i] + 0.00011 * Tr_c[i] * Tr_c[i] + 0.008585 - log10(Prbubl_c[i]));
-      elseif Tc[i] == 190.56 then
+      elseif T_c[i] == 190.56 then
         Vo_c[i] = 10 ^ (1.36822 + (-1.54831) / Tr_c[i] + 0.02889 * Tr_c[i] * Tr_c[i] + (-0.01076) * Tr_c[i] * Tr_c[i] * Tr_c[i] + 0.10486 + (-0.02529) * Tr_c[i] - log10(Prbubl_c[i]));
       else
         Vo_c[i] = 10 ^ (2.05135 + (-2.10889) / Tr_c[i] + (-0.19396) * Tr_c[i] * Tr_c[i] + 0.02282 * Tr_c[i] * Tr_c[i] * Tr_c[i] + (0.08852 + (-0.00872) * Tr_c[i] * Tr_c[i]) * Prbubl_c[i] + ((-0.00353) + 0.00203 * Tr_c[i]) * (Prbubl_c[i] * Prbubl_c[i]) - log10(Prbubl_c[i]));

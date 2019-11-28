@@ -6,20 +6,20 @@ model Heater "Model of a heater to heat a material stream"
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
     parameter Integer Nc "Number of components";
   //========================================================================================
-  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
-  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
-  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
-  Real Hin(unit = "kJ/kmol") "inlet stream molar enthalpy";
-  Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mole fraction";
+  Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
+  Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
+  Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
+  Real Hin(unit = "kJ/kmol",start=Htotg) "inlet stream molar enthalpy";
+  Real xvapin(unit = "-", min = 0, max = 1, start = xvapg) "Inlet stream vapor phase mole fraction";
   
-  Real x_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
+  Real x_c[Nc](each unit = "-", each min = 0, each max = 1) "Component mole fraction";
   Real Q(unit = "W") "Heat added";
-  Real Fout(unit = "mol/s", min = 0, start = 100) "outlet stream molar flow rate";
-  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
-  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
+  Real Fout(unit = "mol/s", min = 0, start = Fg) "outlet stream molar flow rate";
+  Real Pout(unit = "Pa", min = 0, start = Pg) "Outlet stream pressure";
+  Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
   Real Tdel(unit = "K") "Temperature Increase";
-  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor mole fraction";
-  Real Hout(unit = "kJ/kmol") "outlet mixture molar enthalpy";
+  Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor mole fraction";
+  Real Hout(unit = "kJ/kmol",start=Htotg) "outlet mixture molar enthalpy";
   //========================================================================================
   parameter Real Pdel(unit = "Pa") "Pressure drop";
   parameter Real Eff(unit = "-") "Efficiency";
@@ -31,6 +31,8 @@ model Heater "Model of a heater to heat a material stream"
   Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-98, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //=========================================================================================
+
+  extends GuessModels.InitialGuess;
 equation
 //connector equations
   In.P = Pin;

@@ -10,20 +10,20 @@ model Splitter
   
 //=============================================================================
 //Model Variables
-  Real Pin(min = 0, start = 101325) "Inlet pressure";
-  Real Tin(min = 0, start = 273.15) "Inlet Temperature";
-  Real xin_c[Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet Mixture Mole Fraction";
-  Real Fin(min = 0, start = 100) "Inlet Mixture Molar Flow";
+  Real Pin(min = 0, start = Pg) "Inlet pressure";
+  Real Tin(min = 0, start = Tg) "Inlet Temperature";
+  Real xin_c[Nc](each min = 0, each max = 1,  start =xg) "Inlet Mixture Mole Fraction";
+  Real Fin(min = 0, start = Fg) "Inlet Mixture Molar Flow";
   
   Real SplRat_s[No](each min = 0, each max = 1) "Split ratio";
   Real MW(each min = 0) "Average molecular weight";
   Real SpecVal_s[No] "Specification value"; 
   
-  Real Pout_s[No](each min = 0, each start = 101325) "Outlet Pressure";
-  Real Tout_s[No](each min = 0, each start = 273.15) "Outlet Temperature";
-  Real xout_sc[No, Nc](each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet Mixture Molar Fraction";
-  Real Fout_c[No](each min = 0, each start = 100) "Outlet Mixture Molar Flow";
-  Real Fmout_c[No](each min = 0, each start = 100) "Outlet Mixture Mass Flow";
+  Real Pout_s[No](each min = 0, each start = Pg) "Outlet Pressure";
+  Real Tout_s[No](each min = 0, each start = Tg) "Outlet Temperature";
+  Real xout_sc[No, Nc](each min = 0, each max = 1, start = xguess) "Outlet Mixture Molar Fraction";
+  Real Fout_c[No](each min = 0,  start = Fg) "Outlet Mixture Molar Flow";
+  Real Fmout_c[No](each min = 0, start = Fg) "Outlet Mixture Mass Flow";
   
 
 //==============================================================================
@@ -32,7 +32,9 @@ model Splitter
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out[No](each Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-
+  
+  extends GuessModels.InitialGuess;
+  
   equation
 //==============================================================================
 //Connector equations

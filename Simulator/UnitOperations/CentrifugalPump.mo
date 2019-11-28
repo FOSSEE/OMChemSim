@@ -9,23 +9,23 @@ model CentrifugalPump "Model of a centrifugal pump to provide energy to liquid s
   parameter Real Eff(unit = "-") "Efficiency";
   //===========================================================================
   //Model Variables
-  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure";
-  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
-  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy";
-  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow";
-  Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet stream components molar fraction";
+  Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
+  Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
+  Real Hin(unit = "kJ/kmol",start=Htotg) "Inlet stream molar enthalpy";
+  Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow";
+  Real xin_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Inlet stream components molar fraction";
   Real Tdel(unit = "K") "Temperature increase";
   Real Pdel(unit = "K") "Pressure increase";
   Real Q(unit = "W") "Power required";
   Real rho_c[Nc](each unit = "kmol/m3", each min = 0) "Component molar density";
   Real rho(unit = "kmol/m3", min = 0) "Density";
-  Real Pvap(unit = "Pa", min = 0, start = 101325) "Vapor pressure of mixture at Outlet temperature";
+  Real Pvap(unit = "Pa", min = 0, start = Pg) "Vapor pressure of mixture at Outlet temperature";
   Real NPSH(unit = "m") "Net Positive Suction Head";
-  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
-  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
-  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
-  Real Fout(unit = "mol/s", min = 0, start = 100) "Outlet stream molar flow";
-  Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet stream molar fraction";
+  Real Pout(unit = "Pa", min = 0, start = Pg) "Outlet stream pressure";
+  Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
+  Real Hout(unit = "kJ/kmol",start=Htotg) "Outlet stream molar enthalpy";
+  Real Fout(unit = "mol/s", min = 0, start = Fg) "Outlet stream molar flow";
+  Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Outlet stream molar fraction";
   //============================================================================
   //Instantiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -34,6 +34,8 @@ model CentrifugalPump "Model of a centrifugal pump to provide energy to liquid s
     Placement(visible = true, transformation(origin = {102, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {2, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+
+  extends GuessModels.InitialGuess;
 equation
 //============================================================================
 //Connector equation

@@ -8,24 +8,24 @@ model AdiabaticCompressor "Model of an adiabatic compressor to provide energy to
   parameter Integer Nc "number of components";
 
   //====================================================================================
-  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
-  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure"; 
-  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
-  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy";
+  Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
+  Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure"; 
+  Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
+  Real Hin(unit = "kJ/kmol",start=Htotg) "Inlet stream molar enthalpy";
   Real Sin(unit = "kJ/[kmol/K]") "Inlet stream molar entropy";
-  Real xvapin(unit = "-", min = 0, max = 1, start = 0.5) "Inlet stream vapor phase mol fraction";   
+  Real xvapin(unit = "-", min = 0, max = 1, start = xvapg) "Inlet stream vapor phase mol fraction";   
   
-  Real Fout(min = 0, start = 100) "Outlet stream molar flow rate";
+  Real Fout(min = 0, start = Fg) "Outlet stream molar flow rate";
   Real Q(unit = "W") "Power required";
   Real Pdel(unit = "Pa") "Pressure increase"; 
   Real Tdel(unit = "K") "Temperature increase"; 
 
-  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
-  Real Tout(unit = "Pa", min = 0, start = 273.15) "Outlet stream temperature";
-  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
+  Real Pout(unit = "Pa", min = 0, start = Pg) "Outlet stream pressure";
+  Real Tout(unit = "Pa", min = 0, start = Tg) "Outlet stream temperature";
+  Real Hout(unit = "kJ/kmol",start=Htotg) "Outlet stream molar enthalpy";
   Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy";
-  Real xvapout(unit = "-", min = 0, max = 1, start = 0.5) "Outlet stream vapor phase mole fraction";
-  Real x_c[Nc](each unit = "-", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Component mole fraction";
+  Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
+  Real x_c[Nc](each unit = "-", each min = 0, each max = 1,start=xg) "Component mole fraction";
  
   parameter Real Eff(unit = "-") "Efficiency";
 
@@ -37,6 +37,9 @@ model AdiabaticCompressor "Model of an adiabatic compressor to provide energy to
   Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -66}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
+  
+  extends GuessModels.InitialGuess;
+  
 equation
 //connector equations
   In.P = Pin;

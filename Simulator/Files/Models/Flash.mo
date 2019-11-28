@@ -3,8 +3,18 @@ within Simulator.Files.Models;
  model Flash
     //this is basic flash model.  comp and Nc has to be defined in model. thermodyanamic model must also be extended along with this model for K value.
     import Simulator.Files.*;
-    Real F_p[3](each min = 0, each start = 100), x_pc[3, Nc](each min = 0, each max = 1, each start = 1/(Nc + 1)), Cp_pc[3, Nc], H_pc[3, Nc], S_pc[3, Nc], Cp_p[3], H_p[3], S_p[3], xliq(min = 0, max = 1, start = 0.5), xvap(min = 0, max = 1, start = 0.5), P(min = 0, start = 101325), T(min = 0, start = 298.15);
-    Real Pbubl(start = 101325, min = 0)"Bubble point pressure", Pdew(start = 101325, min = 0)"dew point pressure";
+    Real F_p[3](each min = 0, start = {Fg,Fliqg,Fvapg});
+    Real x_pc[3, Nc](each min = 0, each max = 1, start={xguess,xg,yg});
+    Real Cp_pc[3, Nc], H_pc[3, Nc], S_pc[3, Nc], Cp_p[3], H_p[3], S_p[3];
+    Real xliq(min = 0, max = 1, start = xliqg);
+    Real xvap(min = 0, max = 1, start = xvapg);
+    Real P(min = 0, start = Pg);
+    Real T(min = 0, start = Tg);
+    Real Pbubl(start = Pmin, min = 0)"Bubble point pressure";
+    Real Pdew(start = Pmax, min = 0)"dew point pressure";
+  
+  extends GuessModels.InitialGuess;
+  
   equation
 //Mole Balance
     F_p[1] = F_p[2] + F_p[3];

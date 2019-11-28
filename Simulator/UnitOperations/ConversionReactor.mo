@@ -14,19 +14,18 @@ model ConversionReactor "Model of a conversion reactor to calculate the outlet s
  
 //=============================================================================
 //Model Variables
-  Real Fin(unit = "mol/s", min = 0, start = 100) "Inlet stream molar flow rate";
-  Real Hin(unit = "kJ/kmol") "Inlet stream molar enthalpy"; 
-  Real Pin(unit = "Pa", min = 0, start = 101325) "Inlet stream pressure"; 
-  Real Tin(unit = "K", min = 0, start = 273.15) "Inlet stream temperature";
-  Real xin_c[Nc](each unit = "K", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Inlet stream component mole fraction"; 
+  Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
+  Real Hin(unit = "kJ/kmol",start=Htotg) "Inlet stream molar enthalpy"; 
+  Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure"; 
+  Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
+  Real xin_c[Nc](each unit = "K", each min = 0, each max = 1, start=xg) "Inlet stream component mole fraction"; 
  
-  Real Fout(unit = "mol/s", min = 0, start = 100) "Outlet stream molar flow rate";   
-  Real Hout(unit = "kJ/kmol") "Outlet stream molar enthalpy";
-  Real xout_c[Nc](each unit = "=", each min = 0, each max = 1, each start = 1 / (Nc + 1)) "Outlet stream component mole fraction";  
-  Real Pout(unit = "Pa", min = 0, start = 101325) "Outlet stream pressure";
-  Real Tout(unit = "K", min = 0, start = 273.15) "Outlet stream temperature";
+  Real Fout(unit = "mol/s", min = 0, start = Fg) "Outlet stream molar flow rate";   
+  Real Hout(unit = "kJ/kmol",start=Htotg) "Outlet stream molar enthalpy";
+  Real xout_c[Nc](each unit = "=", each min = 0, each max = 1, start=xg) "Outlet stream component mole fraction";  
+  Real Pout(unit = "Pa", min = 0, start =Pg) "Outlet stream pressure";
+  Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
   Real Fout_cr[Nc, Nr](each unit = "mol/s") "Molar flor rate of components after each reaction";
-  Real Hr_r[Nr](each unit = "kJ/kmol") "Heat of reaction";
 //=============================================================================
 //Instanstiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -35,7 +34,8 @@ model ConversionReactor "Model of a conversion reactor to calculate the outlet s
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.enConn energy annotation(
     Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -130}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-
+  
+  extends GuessModels.InitialGuess;
 equation
 
 //=============================================================================

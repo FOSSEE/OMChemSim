@@ -25,7 +25,7 @@ package PFR
       Placement(visible = true, transformation(origin = {-70, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
    Simulator.Examples.PFR.MS S2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {90, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-   Simulator.UnitOperations.PFR.PFR B1( C = {eth, wat, eg}, Mode = 1,Nc = 3, Nr = 1, Pdel = 90.56, Phase = 1,  Tdef = 390) annotation(
+   Simulator.UnitOperations.PFR.PFR B1(C = {eth, wat, eg}, Mode = "Isothermal",Nc = 3, Nr = 1, Pdel = 90.56, Phase = "Mixture",  Tdef = 360,Basis="Molar Concentration") annotation(
       Placement(visible = true, transformation(origin = { 3, -1}, extent = {{-33, -33}, {33, 33}}, rotation = 0)));
    Simulator.Streams.EnergyStream Energy annotation(
       Placement(visible = true, transformation(origin = {-14, -54}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

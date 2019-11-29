@@ -12,13 +12,15 @@ within Simulator.UnitOperations.PFR;
         parameter Real Zv = 1 "Compressiblity factor";
    
         parameter Integer Nr "Number of reactions";
-        parameter Integer Phase "Reaction phase: 1-Mixture, 2-Liquid, 3-Vapor";
-        parameter Integer Mode "Mode of operation: 1-Isothermal, 2-Define Outlet Temperature, 3-Adiabatic";
-        parameter Real Tdef(unit = "K") "Outlet temperature when Mode = 2";
+        parameter String  Phase "Reaction phase: 1-Mixture, 2-Liquid, 3-Vapor";
+        parameter String  Mode "Mode of operation: 1-Isothermal, 2-Define Outlet Temperature, 3-Adiabatic";
+      parameter String  Basis "Reaction Basis : Molar Concentration,Mass Concentration,Molar Fractions,Mass Fraction";
+        parameter Real Tdef(unit = "K") "Outlet temperature when Mode = Define Outlet Temp";
         parameter Real Pdel(unit = "Pa")  "Pressure Drop";
         parameter Integer Base_C = 1 "Base component";
   //=========================================================================
   //Model Variables
+        Integer Phaseindex;
         //Inlet Stream Variables
         Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
         Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
@@ -73,7 +75,7 @@ within Simulator.UnitOperations.PFR;
         Real Pvapin_c[Nc];
         Real Pvapout_c[Nc];
    
-       extends Simulator.Files.Models.ReactionManager.KineticReaction( Nr = 1,BC_r = {1}, Coef_cr = {{-1}, {-1}, {1}}, DO_cr = {{1}, {0}, {0}}, RO_cr = {{0}, {0}, {0}}, Af_r = {0.005}, Ef_r = {0}, Ab_r = {0}, Eb_r = {0});
+       extends Simulator.Files.Models.ReactionManager.KineticReaction( Nr = 1,BC_r = {1}, Coef_cr = {{-1}, {-1}, {1}}, DO_cr = {{1}, {0}, {0}}, Af_r = {0.005}, Ef_r = {0});
         //===========================================================================================================
     //Instantiation of Connectors
     Real Q "The total energy given out/taken in due to the reactions";
@@ -89,6 +91,7 @@ within Simulator.UnitOperations.PFR;
       Placement(visible = true, transformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 //============================================================================================================
       extends GuessModels.InitialGuess;
+     
       equation
 //connector-Equations
     In.P = Pin;
@@ -114,7 +117,16 @@ within Simulator.UnitOperations.PFR;
 for i in 1:Nc loop
    Pvapin_c[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP, Tin);
    Pvapout_c[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP, Tout);
- end for;        
+ end for;  
+ 
+ if(Phase=="Mixture") then
+ Phaseindex=1;
+ elseif(Phase=="Liquid") then
+ Phaseindex=2;
+ else
+ Phaseindex=3;
+ end if;
+        
 //===========================================================================================================
 //Calculation of Mass Fraction
 //Average Molecular Weights of respective phases
@@ -203,11 +215,11 @@ for i in 1:Nc loop
     Fin_pc[3, :] = Fin_p[3] .* xin_pc[3, :];
 //======================================================================================================
 //Phase Volumetric flow rates
-    if Phase == 1 then
+    if Phase == "Mixture" then
       Fv_p[1] = Fmin_p[1] / rho;
       Fv_p[2] = Fmin_p[2] / (rholiq * MW_p[2]);
       Fv_p[3] = Fmin_p[3] / (rhovap * MW_p[3]);
-    elseif Phase == 2 then
+    elseif Phase == "Liquid" then
       Fv_p[1] = Fmin_p[1] / rho;
       Fv_p[2] = Fmin_p[2] / (rholiq * MW_p[2]);
       Fv_p[3] = 0;
@@ -219,8 +231,12 @@ for i in 1:Nc loop
 
 //=================================================================================
 //Inlet concentration
-    if Phase == 1 then
+    if Phase == "Mixture" then
+      if(Basis =="Molar Concentration") then
       Cin_c[:] = Fin_pc[1, :] / Fv_p[1];
+      else
+      Cin_c[:] = Fin_pc[1, :] / Fv_p[1] * MW_p[2] / rholiq;
+      end if;
       for i in 1:Nc loop
         if i == Base_C then
           Fin_c[i] = Fin_pc[1, i];
@@ -233,15 +249,28 @@ for i in 1:Nc loop
 //Conversion of Reactants
       for j in 2:Nc loop
         if Coef_cr[j, 1] < 0 then
-          X_r[j] = (Fin_pc[Phase, j] - Fout_c[j]) / Fin_pc[Phase, j];
+          X_r[j] = (Fin_pc[Phaseindex, j] - Fout_c[j]) / Fin_pc[Phaseindex, j];
         else
           X_r[j] = 0;
         end if;
       end for;
 //=========================================================================================
 //Liquid-Phase
-    elseif Phase == 2 then
+    elseif Phase == "Liquid" then
+    //Molar Concentration
+      if(Basis =="Molar Concentration") then
       Cin_c[:] = Fin_pc[2, :] / Fv_p[2];
+   //Molar Fractions   
+      elseif(Basis =="Molar Fractions") then
+      Cin_c[:] = Fin_pc[2, :] / Fv_p[2] * MW_p[2]/rholiq;
+   //Mass Concentration
+      elseif(Basis=="Mass Concentration") then
+      Cin_c[:] = Fin_pc[2, :] / Fv_p[2] * 1000 / MW_p[2];
+    //Mass Fractions  
+      else
+      Cin_c[:] = Fin_pc[2, :] / Fv_p[2] * rholiq * 1000 / MW_p[2];
+      end if;
+      
       for i in 1:Nc loop
         if i == Base_C then
           Fin_c[i] = Fin_pc[2, i];
@@ -254,7 +283,7 @@ for i in 1:Nc loop
 //Cin_cnversion of Reactants
       for j in 2:Nc loop
         if Coef_cr[j, 1] < 0 then
-          X_r[j] = (Fin_pc[Phase, j] - Fout_pc[Phase, j]) / Fin_pc[Phase, j];
+          X_r[j] = (Fin_pc[Phaseindex, j] - Fout_pc[Phaseindex, j]) / Fin_pc[Phaseindex, j];
         else
           X_r[j] = 0;
         end if;
@@ -262,7 +291,20 @@ for i in 1:Nc loop
     else
 //Vapour Phase
 //======================================================================================================
+   if(Basis=="Molar Concentration") then
+   //Molar Concentration
       Cin_c[:] = Fin_pc[3, :] / Fv_p[3];
+   //Molar Fractions   
+   elseif(Basis=="Molar Fractions") then
+      Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * Zv * 8.314 * Tin / Pin;
+   //Mass Concentration   
+    elseif(Basis=="Mass Concentration") then
+     Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * 1000 / MW_p[3];
+    else  
+   //Mass Fractions 
+     Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * Zv * 8.314 * Tin / Pin * 1000 / MW_p[3];
+    end if; 
+//=======================================================================================================         
       for i in 1:Nc loop
         if i == Base_C then
           Fin_c[i] = Fin_pc[3, i];
@@ -275,7 +317,7 @@ for i in 1:Nc loop
 //Cin_cnversion of Reactants
       for j in 2:Nc loop
         if Coef_cr[j, 1] < 0 then
-          X_r[j] = (Fin_pc[Phase, j] - Fout_pc[Phase, j]) / Fin_pc[Phase, j];
+          X_r[j] = (Fin_pc[Phaseindex, j] - Fout_pc[Phaseindex, j]) / Fin_pc[Phaseindex, j];
         else
           X_r[j] = 0;
         end if;
@@ -301,19 +343,19 @@ for i in 1:Nc loop
     end for;
 //Calculation of V with respect to Cin_cnversion of limiting reeactant
 //    V = PerformancePFR(n, Cin_c[Base_C], Fin_c[Base_C], k_r[1], X_r[Base_C]);
- V = PFR.Performance_PFR(Nc, Nr, n, Base_C, Co_dummy, DO_dummy, X_dummy, DO_cr, Cin_c, Coef_cr, BC_r, Fin_c[Base_C], k_r[1], X_r[Base_C]);
+ V = PFR.PerformancePFR(Nc, Nr, n, Base_C, Co_dummy, DO_dummy, X_dummy, DO_cr, Cin_c, Coef_cr, BC_r, Fin_c[Base_C], k_r[1], X_r[Base_C]);
  
-  tr = V / sum(Fv_p[:]);
+  tr = V / Fv_p[1];
 //============================================================================================================
 //Calculation of Heat of Reaction at the reaction temperature
 //Outlet temperature and energy stream
 //Isothermal Mode
-    if Mode == 1 then
+    if Mode == "Isothermal" then
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Tout = Tin;
       Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MWout_p[1] * Fmin_p[1];
 //Outlet temperature defined
-    elseif Mode == 2 then
+    elseif Mode == "Define Outlet Temperature" then
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Tout = Tdef;
       Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MWout_p[1] * Fmin_p[1];
@@ -331,7 +373,7 @@ for i in 1:Nc loop
         sum(Fout_c[:]) = Fout_p[1];
 //===========================================================================================================
        Fout_p[3] = Fout_p[1] * xvapout;
-        Fout_p[2] = Fout_p[1] * (1 - xvapout);
+       Fout_p[2] = Fout_p[1] * (1 - xvapout);
 //===========================================================================================================
 //Calculation of Mass Fraction
 //Average Molecular Weights of respective phases
@@ -367,12 +409,12 @@ for i in 1:Nc loop
       for i in 1:Nr loop
         Ephsilon = Deln / Fin_cr[Base_C, i] * xin_pc[1, Base_C];
       end for;
-      if Phase == 3 then
+      if Phase == "Vapour" then
         Foutv_p[2] = Fv_p[2];
         Foutv_p[1] = Foutv_p[3];
         Foutv_p[3] = Fv_p[3] * (1 + Ephsilon * X_r[Base_C]) * (Pin / Pout) * (Tout / Tin);
         Cout_c[:] = Fout_pc[3, :] /Foutv_p[3];
-      elseif Phase == 2 then
+      elseif Phase == "Liquid" then
         Foutv_p[2] = Fv_p[2];
         Foutv_p[1] = Foutv_p[3];
         Foutv_p[3] = Fv_p[3] * (1 + Ephsilon * X_r[Base_C]) * (Pin / Pout) * (Tout / Tin);

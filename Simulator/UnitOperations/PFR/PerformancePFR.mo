@@ -1,6 +1,7 @@
 within Simulator.UnitOperations.PFR;
 
- function Performance_PFR
+ function PerformancePFR
+ extends Modelica.Icons.Function;
     input Integer Nc;
         input Integer Nr;
         input Integer Order;
@@ -18,4 +19,4 @@ within Simulator.UnitOperations.PFR;
         output Real V;
       algorithm
         V := Modelica.Math.Nonlinear.quadratureLobatto(function Integral(Nc = Nc, Nr = Nr, Order = Order, Base_comp = Base_comp, Co_dummy = Co_dummy, DO_dummy = DO_dummy, X_dummy = X_dummy, DO = DO, Co = C, Sc = Sc, Bc = Bc, Fao = F, k = k, X = X), 0, X);
-      end Performance_PFR;
+      end PerformancePFR;

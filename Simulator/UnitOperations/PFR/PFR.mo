@@ -9,29 +9,31 @@ within Simulator.UnitOperations.PFR;
         import Simulator.Files.ThermodynamicFunctions.*; 
         parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
         parameter Integer Nc "Number of components ";
-        extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
         parameter Real Zv = 1 "Compressiblity factor";
    
         parameter Integer Nr "Number of reactions";
-        parameter Integer Phase "Reaction phase: 1-Mixture, 2-Liquid, 3-Vapor";
-        parameter Integer Mode "Mode of operation: 1-Isothermal, 2-Define Outlet Temperature, 3-Adiabatic";
-        parameter Real Tdef(unit = "K") "Outlet temperature when Mode = 2";
+        parameter String  Phase "Reaction phase: 1-Mixture, 2-Liquid, 3-Vapor";
+        parameter String  Mode "Mode of operation: 1-Isothermal, 2-Define Outlet Temperature, 3-Adiabatic";
+      parameter String  Basis "Reaction Basis : Molar Concentration,Mass Concentration,Molar Fractions,Mass Fraction";
+        parameter Real Tdef(unit = "K") "Outlet temperature when Mode = Define Outlet Temp";
         parameter Real Pdel(unit = "Pa")  "Pressure Drop";
         parameter Integer Base_C = 1 "Base component";
   //=========================================================================
   //Model Variables
+        Integer Phaseindex;
+        //Inlet Stream Variables
         Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
-        Real T(start=Tg) "Adjustment";
         Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
-        Real P(start=Pg) "Adjustment";
         Real Fin_pc[3, Nc](each unit = "mol/s", each min = 0, start={Fg,Fliqg,Fvapg}) "Inlet stream components molar flow rate in phase";
-      Real Fin_p[3](each unit = "mol/s", each min = 0,start={Fg,Fliqg,Fvapg}) "Inlet stream molar flow rate in phase";
-      Real xin_pc[3, Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Inlet stream mole fraction";
+        Real Fin_p[3](each unit = "mol/s", each min = 0,start={Fg,Fliqg,Fvapg}) "Inlet stream molar flow rate in phase";
+        Real xin_pc[3, Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Inlet stream mole fraction";
         Real Hin(unit = "kJ/kmol",start=Htotg) "Inlet stream enthalpy";
         Real Sin(unit = "kJ/[kmol.K]") "Inlet stream entropy";
         Real xvapin(unit = "-", min = 0, max = 1, start = xvapg) "Inlet stream vapor phase mole fraction";
         Real Cin_c[Nc] "Inlet Concentration";
         Real Fin_c[Nc](each min = 0, each start = Fg) "Inlet Mole Flow";
+        
+        //Outlet Stream variables
         Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
         Real Pout(unit = "Pa", min  = 0, start = Pg) "Outlet stream pressure";
         Real Fout_p[3](each unit = "mol/s", each min = 0, start={Fg,Fliqg,Fvapg}) "Outlet stream molar flow rate";
@@ -40,23 +42,21 @@ within Simulator.UnitOperations.PFR;
         Real Hout(unit = "kJ/kmol",start=Htotg) "Outlet stream molar enthalpy";
         Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy";
         Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
-        Real Pdewin(unit = "Pa", start = Pmax) "Dew point pressure at inlet";
-        Real Pbublin(min = 0, unit = "Pa", start = Pmin) "Bubble point pressure at inlet";
-        Real xmvapin(start = xvapg) "Inlet stream vapor phase mass fraction";
-        Real Pdewout(unit = "Pa", start = Pmax, min = 0) "Outlet stream dew point pressure";
-        Real Pbublout(min = 0, unit = "Pa", start = Pmin) "Outlet stream bubble point pressure";
-        Real xmvapout(each unit = "-", start = xvapg) "Outlet stream vapor mass fraction";
+
         Real MWout_p[3](each unit = "kg/kmol") "Outlset stream molecular weight in phase";
         Real Fmin_p[3](each unit = "kg/s",start={Fg,Fliqg,Fvapg}) "Inlet stream mass flow rate";
         Real xm_pc[3, Nc](each unit = "-",start=xg) "Component mass fraction in phase";
         Real MW_p[3](each unit = "kg/kmol")"Molecular weight of phase";
         Real Fv_p[3](start={Fg,Fliqg,Fvapg});
+        
+        //Phase and Total Densities
         Real rholiq_c[Nc](each unit = "kg/m3") "Components density in liquid phase";
         Real rholiq(unit = "kg/m3") "Liquid phase density";
         Real rhovap_c[Nc](each unit = "kg/m3") "Components density in vapor phase";
         Real rhovap(unit = "kg/m3") "Vapor phase density";
         Real rho(unit = "kg/m3") "Mixture density";
- 
+        
+        //Outlet    
         Real Fout_c[Nc](each unit = "mol/s", each min = 0, each start = 100) "Outlet Mole Flow";      
         Integer n "Order of the Reaction";
         Real k_r[Nr] "Rate constant";
@@ -64,12 +64,24 @@ within Simulator.UnitOperations.PFR;
         Real Fin_cr[Nc, Nr](each unit = "mol/s") "Number of moles at initial state";
         Real X_r[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Conversion of the components in reaction";
         Real V(unit = "m3", min = 0) "Volume of the reactor";
+        Real tr(unit = "s")"Residence Time";
         
+        Real Deln;
+        Real Foutv_p[3];
+        Real Ephsilon;
+        Real Cout_c[Nc];
         
-       extends Simulator.Files.Models.ReactionManager.KineticReaction( Nr = 1,BC_r = {1}, Coef_cr = {{-1}, {-1}, {1}}, DO_cr = {{1}, {0}, {0}}, RO_cr = {{0}, {0}, {0}}, Af_r = {0.005}, Ef_r = {0}, Ab_r = {0}, Eb_r = {0});
+        //Vapour Pressure at the inlet and outlet temperatures
+        Real Pvapin_c[Nc];
+        Real Pvapout_c[Nc];
+   
+       extends Simulator.Files.Models.ReactionManager.KineticReaction( Nr = 1,BC_r = {1}, Coef_cr = {{-1}, {-1}, {1}}, DO_cr = {{1}, {0}, {0}}, Af_r = {0.005}, Ef_r = {0});
         //===========================================================================================================
     //Instantiation of Connectors
-        Real Q "The total energy given out/taken in due to the reactions";
+    Real Q "The total energy given out/taken in due to the reactions";
+    Real X_dummy[Nc-1];
+    Real Co_dummy[Nc-1];
+    Real DO_dummy[Nc-1,Nr];
         
       Simulator.Files.Interfaces.enConn En annotation(
           Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -79,6 +91,7 @@ within Simulator.UnitOperations.PFR;
       Placement(visible = true, transformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 //============================================================================================================
       extends GuessModels.InitialGuess;
+     
       equation
 //connector-Equations
     In.P = Pin;
@@ -86,7 +99,7 @@ within Simulator.UnitOperations.PFR;
     In.F = Fin_p[1];
     In.H = Hin;
     In.S = Sin;
-    In.x_pc[1, :] = xin_pc[1, :];
+    In.x_pc = xin_pc;
     In.xvap = xvapin;
         
     Out.P = Pout;
@@ -94,41 +107,30 @@ within Simulator.UnitOperations.PFR;
     Out.F = Fout_p[1];
     Out.H = Hout;
     Out.S = Sout;
-    Out.x_pc[1, :] = xout_pc[1, :];
+    Out.x_pc = xout_pc;
     Out.xvap = xvapout;
     En.Q = Q;
     
 //Phase Equilibria
 //==========================================================================================================
-//Bubble point calculation
-    Pbublin = sum(gmabubl_c[:] .* xin_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tin + C[:].VP[4] * log(Tin) + C[:].VP[5] .* Tin .^ C[:].VP[6]) ./ philiqbubl_c[:]);
-//Dew point calculation
-    Pdewin = 1 / sum(xin_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tin + C[:].VP[4] * log(Tin) + C[:].VP[5] .* Tin .^ C[:].VP[6])) .* phivapdew_c[:]);
-  if Pin >= Pbublin then
-//below bubble point region
-      xin_pc[3, :] = zeros(Nc);
-      sum(xin_pc[2, :]) = 1;
-    elseif Pin <= Pdewin then
-//above dew point region
-      xin_pc[2, :] = zeros(Nc);
-      sum(xin_pc[3, :]) = 1;
-    else
-//VLE region
-      for i in 1:Nc loop
-        xin_pc[3, i] = K_c[i] * xin_pc[2, i];
-      end for;
-      sum(xin_pc[2, :]) = 1;
-//sum y = 1
-    end if;
-//RachFin_crd Rice Equation
-    for i in 1:Nc loop
-      xin_pc[1, i] = xin_pc[3, i] * xmvapin + xin_pc[2, i] * (1 - xmvapin);
-    end for;
-     T = Tin; P = Pin;
+
+for i in 1:Nc loop
+   Pvapin_c[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP, Tin);
+   Pvapout_c[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP, Tout);
+ end for;  
+ 
+ if(Phase=="Mixture") then
+ Phaseindex=1;
+ elseif(Phase=="Liquid") then
+ Phaseindex=2;
+ else
+ Phaseindex=3;
+ end if;
+        
 //===========================================================================================================
 //Calculation of Mass Fraction
 //Average Molecular Weights of respective phases
-    if xmvapin <= 0 then
+    if xvapin <= 0 then
       MW_p[1] = sum(xin_pc[1, :] .* C[:].MW);
       MW_p[2] = sum(xin_pc[2, :] .* C[:].MW);
       MW_p[3] = 0;
@@ -140,18 +142,18 @@ within Simulator.UnitOperations.PFR;
       for i in 1:Nc loop
         xm_pc[3, i] = 0;
       end for;
-//rholiq
-      rholiq_c = ThermodynamicFunctions.DensityRacket(Nc, Tin, Pin, C[:].Pc, C[:].Tc, C[:].Racketparam, C[:].AF, C[:].MW, Pvap_c[:]);
-      rholiq = 1 / sum(xm_pc[2, :] ./ rholiq_c[:]) / MW_p[2];
+//Liquid Phase Density
+ rholiq_c = ThermodynamicFunctions.DensityRacket(Nc,Tin,Pin,C[:].Pc,C[:].Tc,C[:].Racketparam,C[:].AF,C[:].MW,Pvapin_c[:]);
+ rholiq = 1 / sum(xm_pc[2, :] ./ rholiq_c[:]) / MW_p[2];
 //Vapour Phase Density
-      for i in 1:Nc loop
-        rhovap_c[i] = 0;
-      end for;
+ for i in 1:Nc loop
+  rhovap_c[i] = 0;
+  end for;
       rhovap = 0;
 //Density of Inlet-Mixture
-      rho = 1 / ((1 - xmvapin) / rholiq) * sum(xin_pc[1, :] .* C[:].MW);
+      rho = 1 / ((1 - xvapin) / rholiq) * sum(xin_pc[1, :] .* C[:].MW);
 //====================================================================================================
-    elseif xmvapin == 1 then
+    elseif xvapin == 1 then
       MW_p[1] = sum(xin_pc[1, :] .* C[:].MW);
       MW_p[2] = 0;
       MW_p[3] = sum(xin_pc[3, :] .* C[:].MW);
@@ -164,7 +166,7 @@ within Simulator.UnitOperations.PFR;
       end for;
       xm_pc[3, :] = xin_pc[3, :] .* C[:].MW / MW_p[3];
       
-  //=========================================================================
+//=========================================================================
 //Calculation of Phase Densities
 //Liquid Phase Density-Inlet Conditions
       for i in 1:Nc loop
@@ -175,9 +177,9 @@ within Simulator.UnitOperations.PFR;
       for i in 1:Nc loop
         rhovap_c[i] = Pin / (Zv * 8.314 * Tin) * C[i].MW * 1E-3;
       end for;
-      rhovap = 1 / sum(xm_pc[3, :] ./ rhovap_c[:]) / MW_p[3];
+       rhovap = 1 / sum(xm_pc[3, :] ./ rhovap_c[:]) / MW_p[3];
 //Density of Inlet-Mixture
-      rho = 1 / (xmvapin / rhovap) * sum(xin_pc[1, :] .* C[:].MW);
+       rho = 1 / (xvapin / rhovap) * sum(xin_pc[1, :] .* C[:].MW);
     else
       MW_p[1] = sum(xin_pc[1, :] .* C[:].MW);
       MW_p[2] = sum(xin_pc[2, :] .* C[:].MW);
@@ -192,7 +194,7 @@ within Simulator.UnitOperations.PFR;
   //=========================================================================
 //Calculation of Phase Densities
 //Liquid Phase Density-Inlet Conditions
-      rholiq_c = ThermodynamicFunctions.DensityRacket(Nc, Tin, Pin, C[:].Pc, C[:].Tc, C[:].Racketparam, C[:].AF, C[:].MW, Pvap_c[:]);
+      rholiq_c = ThermodynamicFunctions.DensityRacket(Nc, Tin, Pin, C[:].Pc, C[:].Tc, C[:].Racketparam, C[:].AF, C[:].MW, Pvapin_c[:]);
       rholiq = 1 / sum(xm_pc[2, :] ./ rholiq_c[:]) / MW_p[2];
 //Vapour Phase Density
       for i in 1:Nc loop
@@ -200,24 +202,24 @@ within Simulator.UnitOperations.PFR;
       end for;
       rhovap = 1 / sum(xm_pc[3, :] ./ rhovap_c[:]) / MW_p[3];
 //Density of Inlet-Mixture
-      rho = 1 / (xmvapin / rhovap + (1 - xmvapin) / rholiq) * sum(xin_pc[1, :] .* C[:].MW);
+      rho = 1 / (xvapin / rhovap + (1 - xvapin) / rholiq) * sum(xin_pc[1, :] .* C[:].MW);
     end if;
 //=====================================================================================================
 //Phase Flow Rates
 //Phase Molar Flow Rates
-    Fin_p[3] = Fin_p[1] * xmvapin;
-        Fin_p[2] = Fin_p[1] * (1 - xmvapin);
+    Fin_p[3] = Fin_p[1] * xvapin;
+    Fin_p[2] = Fin_p[1] * (1 - xvapin);
 //Cin_cnent Molar Flow Rates in Phases
     Fin_pc[1, :] = Fin_p[1] .* xin_pc[1, :];
-        Fin_pc[2, :] = Fin_p[2] .* xin_pc[2, :];
-        Fin_pc[3, :] = Fin_p[3] .* xin_pc[3, :];
+    Fin_pc[2, :] = Fin_p[2] .* xin_pc[2, :];
+    Fin_pc[3, :] = Fin_p[3] .* xin_pc[3, :];
 //======================================================================================================
 //Phase Volumetric flow rates
-    if Phase == 1 then
+    if Phase == "Mixture" then
       Fv_p[1] = Fmin_p[1] / rho;
       Fv_p[2] = Fmin_p[2] / (rholiq * MW_p[2]);
       Fv_p[3] = Fmin_p[3] / (rhovap * MW_p[3]);
-    elseif Phase == 2 then
+    elseif Phase == "Liquid" then
       Fv_p[1] = Fmin_p[1] / rho;
       Fv_p[2] = Fmin_p[2] / (rholiq * MW_p[2]);
       Fv_p[3] = 0;
@@ -229,8 +231,12 @@ within Simulator.UnitOperations.PFR;
 
 //=================================================================================
 //Inlet concentration
-    if Phase == 1 then
+    if Phase == "Mixture" then
+      if(Basis =="Molar Concentration") then
       Cin_c[:] = Fin_pc[1, :] / Fv_p[1];
+      else
+      Cin_c[:] = Fin_pc[1, :] / Fv_p[1] * MW_p[2] / rholiq;
+      end if;
       for i in 1:Nc loop
         if i == Base_C then
           Fin_c[i] = Fin_pc[1, i];
@@ -243,15 +249,28 @@ within Simulator.UnitOperations.PFR;
 //Conversion of Reactants
       for j in 2:Nc loop
         if Coef_cr[j, 1] < 0 then
-          X_r[j] = (Fin_pc[Phase, j] - Fout_C[j]) / Fin_pc[Phase, j];
+          X_r[j] = (Fin_pc[Phaseindex, j] - Fout_c[j]) / Fin_pc[Phaseindex, j];
         else
           X_r[j] = 0;
         end if;
       end for;
 //=========================================================================================
 //Liquid-Phase
-    elseif Phase == 2 then
+    elseif Phase == "Liquid" then
+    //Molar Concentration
+      if(Basis =="Molar Concentration") then
       Cin_c[:] = Fin_pc[2, :] / Fv_p[2];
+   //Molar Fractions   
+      elseif(Basis =="Molar Fractions") then
+      Cin_c[:] = Fin_pc[2, :] / Fv_p[2] * MW_p[2]/rholiq;
+   //Mass Concentration
+      elseif(Basis=="Mass Concentration") then
+      Cin_c[:] = Fin_pc[2, :] / Fv_p[2] * 1000 / MW_p[2];
+    //Mass Fractions  
+      else
+      Cin_c[:] = Fin_pc[2, :] / Fv_p[2] * rholiq * 1000 / MW_p[2];
+      end if;
+      
       for i in 1:Nc loop
         if i == Base_C then
           Fin_c[i] = Fin_pc[2, i];
@@ -264,7 +283,7 @@ within Simulator.UnitOperations.PFR;
 //Cin_cnversion of Reactants
       for j in 2:Nc loop
         if Coef_cr[j, 1] < 0 then
-          X_r[j] = (Fin_pc[Phase, j] - Fout_pc[Phase, j]) / Fin_pc[Phase, j];
+          X_r[j] = (Fin_pc[Phaseindex, j] - Fout_pc[Phaseindex, j]) / Fin_pc[Phaseindex, j];
         else
           X_r[j] = 0;
         end if;
@@ -272,7 +291,20 @@ within Simulator.UnitOperations.PFR;
     else
 //Vapour Phase
 //======================================================================================================
+   if(Basis=="Molar Concentration") then
+   //Molar Concentration
       Cin_c[:] = Fin_pc[3, :] / Fv_p[3];
+   //Molar Fractions   
+   elseif(Basis=="Molar Fractions") then
+      Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * Zv * 8.314 * Tin / Pin;
+   //Mass Concentration   
+    elseif(Basis=="Mass Concentration") then
+     Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * 1000 / MW_p[3];
+    else  
+   //Mass Fractions 
+     Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * Zv * 8.314 * Tin / Pin * 1000 / MW_p[3];
+    end if; 
+//=======================================================================================================         
       for i in 1:Nc loop
         if i == Base_C then
           Fin_c[i] = Fin_pc[3, i];
@@ -285,7 +317,7 @@ within Simulator.UnitOperations.PFR;
 //Cin_cnversion of Reactants
       for j in 2:Nc loop
         if Coef_cr[j, 1] < 0 then
-          X_r[j] = (Fin_pc[Phase, j] - Fout_pc[Phase, j]) / Fin_pc[Phase, j];
+          X_r[j] = (Fin_pc[Phaseindex, j] - Fout_pc[Phaseindex, j]) / Fin_pc[Phaseindex, j];
         else
           X_r[j] = 0;
         end if;
@@ -310,17 +342,20 @@ within Simulator.UnitOperations.PFR;
       end for;
     end for;
 //Calculation of V with respect to Cin_cnversion of limiting reeactant
-    V = PerformancePFR(n, Cin_c[Base_C], Fin_c[Base_C], k_r[1], X_r[Base_C]);
+//    V = PerformancePFR(n, Cin_c[Base_C], Fin_c[Base_C], k_r[1], X_r[Base_C]);
+ V = PFR.PerformancePFR(Nc, Nr, n, Base_C, Co_dummy, DO_dummy, X_dummy, DO_cr, Cin_c, Coef_cr, BC_r, Fin_c[Base_C], k_r[1], X_r[Base_C]);
+ 
+  tr = V / Fv_p[1];
 //============================================================================================================
 //Calculation of Heat of Reaction at the reaction temperature
 //Outlet temperature and energy stream
 //Isothermal Mode
-    if Mode == 1 then
+    if Mode == "Isothermal" then
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Tout = Tin;
       Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MWout_p[1] * Fmin_p[1];
 //Outlet temperature defined
-    elseif Mode == 2 then
+    elseif Mode == "Define Outlet Temperature" then
       Hr = Hr_r[1] * 1E-3 * Fin_c[Base_C] * X_r[Base_C];
       Tout = Tdef;
       Q = Hr - Hin / MW_p[1] * Fmin_p[1] + Hout / MWout_p[1] * Fmin_p[1];
@@ -337,42 +372,17 @@ within Simulator.UnitOperations.PFR;
     xout_pc[1, :] = Fout_c[:] / Fout_p[1];
         sum(Fout_c[:]) = Fout_p[1];
 //===========================================================================================================
-//Phase Equilibria For Outlet Stream
-//Bubble point calculation
-    Pbublout = sum(gmabubl_c[:] .* xout_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / Tout + C[:].VP[4] * log(Tout) + C[:].VP[5] .* Tout .^ C[:].VP[6]) ./ philiqbubl_c[:]);
-//Dew point calculation
-    Pdewout = 1 / sum(xout_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / Tout + C[:].VP[4] * log(Tout) + C[:].VP[5] .* Tout .^ C[:].VP[6])) .* phivapdew_c[:]);
-  if Pout >= Pbublout then
-//below bubble point region
-      xout_pc[3, :] = zeros(Nc);
-      sum(xout_pc[2, :]) = 1;
-    elseif Pout <= Pdewout then
-//above dew point region
-      xout_pc[2, :] = zeros(Nc);
-      sum(xout_pc[3, :]) = 1;
-    else
-//VLE region
-      for i in 1:Nc loop
-        xout_pc[3, i] = K_c[i] * xout_pc[2, i];
-      end for;
-      sum(xout_pc[2, :]) = 1;
-//sum y = 1
-    end if;
-//RachFord Rice Equation
-    for i in 1:Nc loop
-      xout_pc[1, i] = xout_pc[3, i] * xmvapout + xout_pc[2, i] * (1 - xmvapout);
-    end for;
-        Fout_p[3] = Fout_p[1] * xmvapout;
-        Fout_p[2] = Fout_p[1] * (1 - xmvapout);
+       Fout_p[3] = Fout_p[1] * xvapout;
+       Fout_p[2] = Fout_p[1] * (1 - xvapout);
 //===========================================================================================================
 //Calculation of Mass Fraction
 //Average Molecular Weights of respective phases
-    if xmvapout <= 0 then
+    if xvapout <= 0 then
       MWout_p[1] = sum(xout_pc[1, :] .* C[:].MW);
       MWout_p[2] = sum(xout_pc[2, :] .* C[:].MW);
       MWout_p[3] = 0;
 //====================================================================================================
-    elseif xmvapout == 1 then
+    elseif xvapout == 1 then
       MWout_p[1] = sum(xout_pc[1, :] .* C[:].MW);
       MWout_p[2] = 0;
       MWout_p[3] = sum(xout_pc[3, :] .* C[:].MW);
@@ -387,6 +397,35 @@ within Simulator.UnitOperations.PFR;
     Fout_pc[2, :] = Fout_p[2] .* xout_pc[2, :];
     Fout_pc[3, :] = Fout_p[3] .* xout_pc[3, :];
 //==================================================================================================
+  
+   for i in 2:Nc loop
+    X_dummy[i-1]    =  X_r[i];
+    Co_dummy[i-1]   =  Cin_c[i];
+    DO_dummy[i-1,1] =  DO_cr[i,1];
+   end for;
+
+//Change in conversion with change in temperature of the reactor
+      Deln = sum(Coef_cr[:, :]);
+      for i in 1:Nr loop
+        Ephsilon = Deln / Fin_cr[Base_C, i] * xin_pc[1, Base_C];
+      end for;
+      if Phase == "Vapour" then
+        Foutv_p[2] = Fv_p[2];
+        Foutv_p[1] = Foutv_p[3];
+        Foutv_p[3] = Fv_p[3] * (1 + Ephsilon * X_r[Base_C]) * (Pin / Pout) * (Tout / Tin);
+        Cout_c[:] = Fout_pc[3, :] /Foutv_p[3];
+      elseif Phase == "Liquid" then
+        Foutv_p[2] = Fv_p[2];
+        Foutv_p[1] = Foutv_p[3];
+        Foutv_p[3] = Fv_p[3] * (1 + Ephsilon * X_r[Base_C]) * (Pin / Pout) * (Tout / Tin);
+        Cout_c[:] = Fout_pc[2, :] / Foutv_p[2];
+      else
+        Foutv_p[2] = Fv_p[2];
+        Foutv_p[1] = Foutv_p[3];
+        Foutv_p[3] = Fv_p[3] * (1 + Ephsilon * X_r[Base_C]) * (Pin / Pout) * (Tout / Tin);
+        Cout_c[:] = Fout_pc[1, :] / Foutv_p[1];
+      end if;
+  
   annotation(Icon(coordinateSystem(extent = {{-350, -100}, {350, 100}})),
       Diagram(coordinateSystem(extent = {{-350, -100}, {350, 100}})),
       __OpenModelica_Cin_cmmandLineOptions = "");

@@ -15,7 +15,7 @@ within Simulator.Files.Models.ReactionManager;
   //Stochiometry of reactions
   parameter Real DO_cr[Nc, Nr];
   //Direct order of reactions
-  parameter Real RO_cr[Nc, Nr];
+//  parameter Real RO_cr[Nc, Nr];
   //Reverse order of reactions
   Real Schk_r[Nr];
   //Returns whether the specified stoichiometry is correct
@@ -23,8 +23,8 @@ within Simulator.Files.Models.ReactionManager;
   Real Hr_r[Nr];
   parameter Real Af_r[Nr] "Arrhenius constants of forward reaction";
   parameter Real Ef_r[Nr] "Activation Energy of the forward reaction";
-  parameter Real Ab_r[Nr] "Arrhenius constants of reverse reaction";
-  parameter Real Eb_r[Nr] "Activation Energy for the reverse reaction";
+//  parameter Real Ab_r[Nr] "Arrhenius constants of reverse reaction";
+//  parameter Real Eb_r[Nr] "Activation Energy for the reverse reaction";
 equation
 //Check of stoichiometric balance
   Schk_r = Stoichiometrycheck(Nr, Nc, C[:].MW, Coef_cr);

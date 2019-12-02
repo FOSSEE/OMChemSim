@@ -6,6 +6,7 @@ model InitialGuess
       extends GuessInput;
       //==========================================================================================
       //Guess variables for Pressures and Temperatures
+      protected
       parameter Real xguess[Nc](each fixed = false);
        parameter Real Tg(fixed = false);
        parameter Real Temp(fixed = false, start = 300);

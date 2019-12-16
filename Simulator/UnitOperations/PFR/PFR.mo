@@ -17,7 +17,7 @@ within Simulator.UnitOperations.PFR;
       parameter String  Basis "Reaction Basis : Molar Concentration,Mass Concentration,Molar Fractions,Mass Fraction";
         parameter Real Tdef(unit = "K") "Outlet temperature when Mode = Define Outlet Temp";
         parameter Real Pdel(unit = "Pa")  "Pressure Drop";
-        parameter Integer Base_C = 1 "Base component";
+        Integer Base_C  "Base component";
   //=========================================================================
   //Model Variables
         Integer Phaseindex;
@@ -113,7 +113,7 @@ within Simulator.UnitOperations.PFR;
     
 //Phase Equilibria
 //==========================================================================================================
-
+Base_C = BC_r[1];
 for i in 1:Nc loop
    Pvapin_c[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP, Tin);
    Pvapout_c[i] = Simulator.Files.ThermodynamicFunctions.Psat(C[i].VP, Tout);

@@ -11,6 +11,7 @@ CentrifugalPump
 AdiabaticCompressor
 AdiabaticExpander
 ConversionReactor
+EquilibriumReactor
 DistillationColumn
 AbsorptionColumn
 MaterialStream

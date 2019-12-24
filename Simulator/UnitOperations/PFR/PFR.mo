@@ -233,7 +233,7 @@ for i in 1:Nc loop
 //Inlet concentration
     if Phase == "Mixture" then
       if(Basis =="Molar Concentration") then
-      Cin_c[:] = Fin_pc[1, :] / Fv_p[1];
+      Cin_c[:] = Fin_pc[Phaseindex, :] / Fv_p[Phaseindex];
       else
       Cin_c[:] = Fin_pc[1, :] / Fv_p[1] * MW_p[2] / rholiq;
       end if;
@@ -293,16 +293,16 @@ for i in 1:Nc loop
 //======================================================================================================
    if(Basis=="Molar Concentration") then
    //Molar Concentration
-      Cin_c[:] = Fin_pc[3, :] / Fv_p[3];
+      Cin_c[:] = Fin_pc[Phaseindex, :] / Fv_p[Phaseindex];
    //Molar Fractions   
    elseif(Basis=="Molar Fractions") then
-      Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * Zv * 8.314 * Tin / Pin;
+      Cin_c[:] = Fin_pc[Phaseindex, :] / Fv_p[Phaseindex] * Zv * 8.314 * Tin / Pin;
    //Mass Concentration   
     elseif(Basis=="Mass Concentration") then
-     Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * 1000 / MW_p[3];
+     Cin_c[:] = Fin_pc[Phaseindex, :] / Fv_p[Phaseindex] * 1000 / MW_p[3];
     else  
    //Mass Fractions 
-     Cin_c[:] = Fin_pc[3, :] / Fv_p[3] * Zv * 8.314 * Tin / Pin * 1000 / MW_p[3];
+     Cin_c[:] = Fin_pc[Phaseindex, :] / Fv_p[Phaseindex] * Zv * 8.314 * Tin / Pin * 1000 / MW_p[3];
     end if; 
 //=======================================================================================================         
       for i in 1:Nc loop

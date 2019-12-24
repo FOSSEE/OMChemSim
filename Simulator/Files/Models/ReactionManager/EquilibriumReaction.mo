@@ -34,7 +34,7 @@ equation
   Hf_c[:] = C[:].IGHF .* 1E-3;
 //=============================================================================================
   for i in 1:Nr loop
-    Hr_r[i] = sum(Hf_c[:] .* Coef_cr[:, i])/(Coef_cr[Bc[1],i]);
+    Hr_r[i] = sum(Hf_c[:] .* Coef_cr[:, i])/(Coef_cr[BC_r[1],i]);
   end for;
 
 if(Rmode=="ConstantK") then

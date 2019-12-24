@@ -34,11 +34,11 @@ extends Simulator.Files.Icons.EquilibriumReactor;
   parameter Real Pdel;
   parameter Real Tdef;
   //Reaction Variables
-  Real Sc[Nr,Nc];
-  Integer Bc[Nr]"Base component of reaction";
+  Real SC_rc[Nr,Nc];
+  Integer BC_r[Nr]"Base component of reaction";
   Real Ndel[Nr];
   Real Scabs[Nr,Nc]"Relative stoichiometry with respect to base component";
-  Real Nb[Nr](each start=xvapg) "Reaction Extent";
+  Real Ext_r[Nr](each start=xvapg) "Reaction Extent";
   Real X_r[Nr,Nc]"Conversion of reactants";
  //============================================================================================================
 
@@ -79,58 +79,58 @@ end for;
   end for;
 
 for i in 1:Nr loop
-Bc[i] = Simulator.Files.Models.ReactionManager.BaseCalc(Nc,Fin_c,Sc[i,:]);
+BC_r[i] = Simulator.Files.Models.ReactionManager.BaseCalc(Nc,Fin_c,SC_rc[i,:]);
 end for;
 
 
 for j in 1:Nr loop
 for i in 1:Nc loop
-Sc[j,i] = Coef_cr[i,j];
+SC_rc[j,i] = Coef_cr[i,j];
 end for;
 end for;
 //==========================================================================================================
   for i in 1:Nr loop
-    Ndel[i] = sum(Sc[i, 1:Nc]);
+    Ndel[i] = sum(SC_rc[i, 1:Nc]);
   end for;
 
 if Mode == "Isothermal" then
   Tout = Tin;
-  Hr = Hr_r[1] * 1E-3 * (Fin_c[Bc[1]]*X_r[1,Bc[1]])/(Coef_cr[Bc[1],1]) * (Coef_cr[Bc[1],1]);
+  Hr = Hr_r[1] * 1E-3 * (Fin_c[BC_r[1]]*X_r[1,BC_r[1]])/(Coef_cr[BC_r[1],1]) * (Coef_cr[BC_r[1],1]);
   Q= (Hout*Fout*1E-3) - (Hin*Fin*1E-3) -Hr;
   
 else
   if Mode=="OutletTemperature" then
   Tout = Tdef;
-  Hr = Hr_r[1] * 1E-3 * (Fin_c[Bc[1]]*X_r[1,Bc[1]])/(Coef_cr[Bc[1],1]) * (Coef_cr[Bc[1],1]);
+  Hr = Hr_r[1] * 1E-3 * (Fin_c[BC_r[1]]*X_r[1,BC_r[1]])/(Coef_cr[BC_r[1],1]) * (Coef_cr[BC_r[1],1]);
   Q= (Hout*Fout*1E-3) - (Hin*Fin*1E-3) -Hr;
  
   else
   Q=0;
-  Hr =Hr_r[1] * 1E-3 * (Fin_c[Bc[1]]*X_r[1,Bc[1]])/(Coef_cr[Bc[1],1]) * (Coef_cr[Bc[1],1]);
+  Hr =Hr_r[1] * 1E-3 * (Fin_c[BC_r[1]]*X_r[1,BC_r[1]])/(Coef_cr[BC_r[1],1]) * (Coef_cr[BC_r[1],1]);
   Q = (Hout*Fout*1E-3) - (Hin*Fin*1E-3) -Hr;
   end if;
 end if;
 for i in 1:Nr loop
   for j in 1:Nc loop
-    Scabs[i, j] = Sc[i, j] / abs(Sc[i, Bc[i]]);
+    Scabs[i, j] = SC_rc[i, j] / abs(SC_rc[i, BC_r[i]]);
   end for;
 end for;
 if Phase == "Vapour" then
   if Basis == "MoleFraction" then
     for i in 1:Nr loop
       Kmod[i] = K[i];
-      Kmod[i] = product((xin_c+ Nb * Scabs) .^ Sc[i, 1:Nc]) / (1 + sum(Nb * Scabs)) ^ sum(Sc[i, 1:Nc]);
+      Kmod[i] = product((xin_c+ Ext_r * Scabs) .^ SC_rc[i, 1:Nc]) / (1 + sum(Ext_r * Scabs)) ^ sum(SC_rc[i, 1:Nc]);
     end for;
   else
     if Basis == "Activity" then
       for i in 1:Nr loop
         Kmod[i] = K[i] / (Pin / 101325) ^ Ndel[i];
-        Kmod[i] = product((xin_c + Nb * Scabs) .^ Sc[i, 1:Nc]) / (1 + sum(Nb * Scabs)) ^ sum(Sc[i, 1:Nc]);
+        Kmod[i] = product((xin_c + Ext_r * Scabs) .^ SC_rc[i, 1:Nc]) / (1 + sum(Ext_r * Scabs)) ^ sum(SC_rc[i, 1:Nc]);
       end for;
     else
       for i in 1:Nr loop
         Kmod[i] = K[i] / (Pout) ^ Ndel[i];
-        Kmod[i]=product((xin_c+Nb * Scabs).^ Sc[i, 1:Nc])/(1 + sum(Nb * Scabs))^sum(Sc[i, 1:Nc]);
+        Kmod[i]=product((xin_c+Ext_r * Scabs).^ SC_rc[i, 1:Nc])/(1 + sum(Ext_r * Scabs))^sum(SC_rc[i, 1:Nc]);
       end for;
     end if;
   end if;
@@ -138,31 +138,31 @@ else
   if Basis == "MoleFraction" then
     for i in 1:Nr loop
       Kmod[i] = K[i];
-      Kmod[i]=product((xin_c + Nb *Scabs).^ Sc[i,1:Nc])/(1 + sum(Nb * Scabs))^sum(Sc[i, 1:Nc]);
+      Kmod[i]=product((xin_c + Ext_r *Scabs).^ SC_rc[i,1:Nc])/(1 + sum(Ext_r * Scabs))^sum(SC_rc[i, 1:Nc]);
     end for;
   else
     if Basis == "Activity" then
       for i in 1:Nr loop
         Kmod[i] = K[i] /( Pout ^ (-Ndel[i]));
-     Kmod[i]=product((Psat.*(xin_c + Nb * Scabs)).^ Sc[i, 1:Nc])/(1 + sum(Nb * Scabs))^sum(Sc[i, 1:Nc]);
+     Kmod[i]=product((Psat.*(xin_c + Ext_r * Scabs)).^ SC_rc[i, 1:Nc])/(1 + sum(Ext_r * Scabs))^sum(SC_rc[i, 1:Nc]);
       end for;
     else
       for i in 1:Nr loop
      Kmod[i] = K[i];
-    Kmod[i]=product((Psat.*(xin_c + Nb * Scabs)).^ Sc[i, 1:Nc])/(1 + sum(Nb * Scabs))^sum(Sc[i, 1:Nc]);
+    Kmod[i]=product((Psat.*(xin_c + Ext_r * Scabs)).^ SC_rc[i, 1:Nc])/(1 + sum(Ext_r * Scabs))^sum(SC_rc[i, 1:Nc]);
       end for;
     end if;
   end if;
 end if;
 
-Fout = (1 + sum(Nb * Scabs))*Fin;
+Fout = (1 + sum(Ext_r * Scabs))*Fin;
 for i in 1:Nc loop
-  xout_c[i] = (xin_c[i] + Nb * Scabs[1:Nr, i])*(Fin/Fout);
+  xout_c[i] = (xin_c[i] + Ext_r * Scabs[1:Nr, i])*(Fin/Fout);
 end for;
 
 for j in 1:Nr loop
 for i in 1:Nc loop
-if(Sc[j,i]<0) then
+if(SC_rc[j,i]<0) then
 X_r[j,i] =((Fin *xin_c[i]) - (Fout * xout_c[i]))/(Fin * xin_c[i]);
 else
 X_r[j,i]=0;

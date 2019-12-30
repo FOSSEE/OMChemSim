@@ -126,7 +126,7 @@ model HeatExchanger
   //Design Rating Parameters and Variables
   Real f1,f2,f3,f4,f5;
   
-  Real Fx,Fy,Fz,Fl;
+  Real Fx,Fy,Fl;
   
   //Parameters used to compute LMTD correction factor
   Real R(start=6);
@@ -144,8 +144,8 @@ model HeatExchanger
   parameter Real Di(unit = "mm") = 14.83004 "Internal diameter of the tube";
   parameter Real L(unit = "m") = 6.5 "Tube Length";
   parameter Real Pt(unit = "mm") = 25.39999 "Tube Spacing";
-  parameter Real n = 1 "Number of Shell Passes";
-  parameter Real Nts =1000 "Tube Number per Shell";
+  parameter Real n = 2 "Number of Shell Passes";
+  parameter Real Nts =500 "Tube Number per Shell";
   parameter Real Tube_F(unit = "K.m^2/W") = 0.00035222 "Tube side Fouling Fractor";
   parameter Real kt(unit = "W/m.K") = 70 "Thermal Conductivity of the tube material";
   parameter Real Epsilon(unit = "mm") = 0.045 "Roughness";
@@ -660,14 +660,12 @@ if Tdel3 <= 0 or Tdel4 <= 0 then
     W = (n -( n * P)) / (n - (n * P + P));
     Fx = (W / (1 - W) + 1 / 2 ^ 0.5);
     Fy = (W / (1 - W) - 1 / 2 ^ 0.5);
-    Fz = log(Fx/Fy);
     Fl = 1.414 * ((1 - W) / W);
 //    F = 2 ^ 0.5 * ((1 - W) / W) / log((W / (1 - W) + 1 / 2 ^ 0.5) / (W / (1 - W) - 1 / 2 ^ 0.5));
   else
     W = ((1 - P * R) / (1 - P)) ^ (1 / n);
     Fx = (1 + W - S + S * W);
     Fy = (1 + W + S - S * W);
-    Fz = log(Fx/Fy);
     Fl = S * log(W);
 //    F = Fl*Fz;
 //    F = S * log(W) / log((1 + W - S + S * W) / (1 + W + S - S * W));

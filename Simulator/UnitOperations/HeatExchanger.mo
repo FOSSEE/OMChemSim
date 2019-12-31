@@ -102,15 +102,12 @@ model HeatExchanger
   Real Effc, Effh;
 //==============================================================================================================  
 //==============================================================================================================
-  parameter Integer Case = 1;
+  parameter String Case = "Cold in Tube";
   //Case -Refers to the type of Fluid in the Tubes
   //Case-1 - Cold Fluid in Tubes
   //Case-2 - Hot  Fluid in Tubes
-  parameter Integer Flow = 2;
-  //Flow   - Flow Direction
-  //Flow-1 - Counter-Current
-  //Flow-2 -      Co-Current
-  parameter Integer Layout = 3;
+
+  parameter String Layout = "Square";
   //Layout - Referes to the Tube Layout arrangment
   //Layout-1 - Triangle
   //Layout-2 - Rotated Triangle
@@ -209,6 +206,34 @@ model HeatExchanger
   //Parameters for Tube Layout Geometry
   Real xx, yy;
   Real Nh, Y, Np;
+
+  Real Z;
+  //Shell Side Parameters
+  Real nsc;
+  Real Hdi;
+  Real Nb "Number of Baffles";
+  Real Dsf;
+  Real Fp;
+  Real Cb;
+  Real Ca;
+  Real Ss;
+  Real Ssf;
+  Real Gsf;
+  Real Res "Shell Side Reynolds Number";
+  Real Prs "Shell side Prandtl Number";
+  Real jh;
+  Real fs "Shell Side Friction Factor";
+  Real Cx;
+  Real Pdels(unit = "Pa",start=Pg) "Shell side Pressure Drop";
+  Real Fh;
+  Real Ssh(unit = "m^2") "Effective area of flow section";
+  Real Gsh;
+  Real Rsh;
+  Real lb;
+  Real Ec;
+  Real he(unit = "W/m^2.K") "Shell Side Heat Transfer Coefficient";
+  
+  protected
   parameter Real aa1 = 0.9078565328950;
   parameter Real bb1 = 0.6633110612656;
   parameter Real cc1 = -4.432976463965;
@@ -237,31 +262,6 @@ model HeatExchanger
   parameter Real bb9 = 0.3839785947581;
   parameter Real cc9 = -3.627346599678;
   parameter Real F =0.9828;
-  Real Z;
-  //Shell Side Parameters
-  Real nsc;
-  Real Hdi;
-  Real Nb "Number of Baffles";
-  Real Dsf;
-  Real Fp;
-  Real Cb;
-  Real Ca;
-  Real Ss;
-  Real Ssf;
-  Real Gsf;
-  Real Res "Shell Side Reynolds Number";
-  Real Prs "Shell side Prandtl Number";
-  Real jh;
-  Real fs "Shell Side Friction Factor";
-  Real Cx;
-  Real Pdels(unit = "Pa",start=Pg) "Shell side Pressure Drop";
-  Real Fh;
-  Real Ssh(unit = "m^2") "Effective area of flow section";
-  Real Gsh;
-  Real Rsh;
-  Real lb;
-  Real Ec;
-  Real he(unit = "W/m^2.K") "Shell Side Heat Transfer Coefficient";
   parameter Real m = 0.96;
 //=========================================================================================================== 
  extends GuessModels.InitialGuess;
@@ -400,7 +400,7 @@ f5 = 1 / he;
     Ec = (lb + (L - lb) * (2 * (Baffle_Spacing * 1E-3) / (L - lb)) ^ 0.6) / L;
   end if;
 //==============================================================================================================
-  if Case == 1 then
+  if Case == "Cold in Tube" then
     Gsh = Fmhin / Ssh;
     Rsh = Gsh * (Do * 1E-3) / mu_hin;
     he = jh * k_hin * (Prs ^ 0.34 / (Do * 1E-3)) * Ec;
@@ -411,7 +411,7 @@ f5 = 1 / he;
   end if;
 //==============================================================================================================
 //Shell-Side Pressure Drop
-  if Case == 1 then
+  if Case == "Cold in Tube" then
     Pdels = 4 * fs * Gsf ^ 2 / (2 * rho_hin) * Cx * (1 - Hdi) * (Dsi / Pt) * Nb * (1 + Y * (Pt / Dsi)) * Shells;
   else
     Pdels = 4 * fs * Gsf ^ 2 / (2 * rho_cin) * Cx * (1 - Hdi) * (Dsi / Pt) * Nb * (1 + Y * (Pt / Dsi)) * Shells;
@@ -419,7 +419,7 @@ f5 = 1 / he;
 //==============================================================================================================
 //============================================================================================================
 //Computation of Friction Factor for Shell Side Flow
-  if Layout == 1 and Layout == 2 then
+  if Layout == "Triangle" and Layout == "Rotated Triangle" then
     if Res < 100 then
       jh = 0.497 * Rsh ^ 0.54;
     else
@@ -503,9 +503,9 @@ f5 = 1 / he;
   end if;
 //==============================================================================================================
 //Cx values with respect to Tube_Layout
-  if Layout == 1 and Layout == 2 then
+  if Layout == "Triangle" and Layout == "Rotated Triangle" then
     Cx = 1.154;
-  elseif Layout == 3 then
+  elseif Layout == "Square" then
     Cx = 1;
   else
     Cx = 1.414;
@@ -513,7 +513,7 @@ f5 = 1 / he;
 //============================================================================================================
 //=============================================================================================================
 //Calculation of Reynolds Number for Shell Side
-  if Case == 1 then
+  if Case == "Cold in Tube" then
     Gsf = Fmhin / Ssf;
     Res = Gsf * (Do * 1E-3) / mu_hin;
     Prs = mu_hin * (Cphin / MWhin) / (k_hin * 1E-3);
@@ -526,7 +526,7 @@ f5 = 1 / he;
 //=============================================================================================================  
 //======================================================================================================
 //Shell-Side Calculations
-  if Layout == 1 and Layout == 2 then
+  if Layout == "Triangle" and Layout == "Rotated Triangle" then
     nsc = 1.1 * Nts ^ 0.5;
   else
     nsc = 1.19 * Nts ^ 0.5;
@@ -537,12 +537,12 @@ f5 = 1 / he;
 //Calculation of Shell Side Pressure Drop
   xx = Dsi / Baffle_Spacing;
   yy = Pt / Do;
-  if Layout == 1 and Layout == 2 then
+  if Layout == "Triangle" and Layout == "Rotated Triangle" then
     Nh = aa1 * xx ^ bb1 * yy ^ cc1;
     Y = aa2 * xx ^ bb2 * yy ^ cc2;
     Np = aa3 * xx ^ bb3 * yy ^ cc3;
     Cb = 0.97;
-  elseif Layout == 3 then
+  elseif Layout == "Square" then
     Nh = aa4 * xx ^ bb4 * yy ^ cc4;
     Y = aa5 * xx ^ bb5 * yy ^ cc5;
     Np = aa6 * xx ^ bb6 * yy ^ cc6;
@@ -561,7 +561,7 @@ f5 = 1 / he;
 
 //==================================================================================================================
 //Computation of Tube Side Pressure Dropf
-  if Case == 1 then
+  if Case == "Cold in Tube" then
     Pdelt = f * L * (nt / (Di * 1E-3)) * (vt ^ 2 / 2) * rho_cin;
     hi * Di * 1E-3 / k_cin = f / 8 * Ret * (Prt / (1.07 + 12.7 * (f / 8) ^ 0.5 * (Prt ^ (2 / 3) - 1)));
   else
@@ -583,7 +583,7 @@ f5 = 1 / he;
   end if;
 //===========================================================================================================
   Area = 3.14 * (Di * 1E-3) ^ 2 / 4;
-  if Case == 1 then
+  if Case == "Cold in Tube" then
     vt = Fmcin / (rho_cin * Nt * Area);
     Ret = rho_cin * vt * (Di * 1E-3) / mu_cin;
     Prt = mu_cin * (Cpcin / MWcin) / (k_cin * 1E-3);
@@ -633,7 +633,7 @@ f5 = 1 / he;
   Nt = Nts / nt; 
 //=======================================================================================================  
 //Calculation of Corrected LMTD
-if Case == 1 then
+if Case == "Cold in Tube" then
     R = (Thin - Thout) / (Tcout - Tcin);
     P = (Tcout - Tcin) / (Thin - Tcin);
   else
@@ -641,7 +641,7 @@ if Case == 1 then
     Tcout = Tcin - R * (Thout - Thin);
   end if;
 //===================================================================================================
-  if Flow == 1 then
+  if Mode == "CounterCurrent" then
     Tdel3 = Thin -Tcout;
     Tdel4 = Thout - Tcin;
   else
@@ -713,10 +713,10 @@ end for;
  Cpc_p[1] = (1-xvapcin) * Cpc_p[2] + xvapcin * Cpc_p[3]; 
  Cpc_pc[1, :] = xcin_pc[1, :] .* Cpc_p[1];  
  Cpcin = Cpc_p[1];
-//====================================================================================================== 
+//======================================================================================================== 
   Fmhin = Fhin * MWhin*1E-3;
   Fmcin = Fcin[1] * MWcin*1E-3;
-//======================================================================================================
+//=========================================================================================================
 //==========================================================================================================
 algorithm
   for i in 1:Nc loop

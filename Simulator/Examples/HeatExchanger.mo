@@ -59,10 +59,8 @@ package HeatExchanger
     parameter data.Noctane oct;
     parameter data.Nnonane non;
     parameter data.Ndecane dec;
-  
+    
     parameter Integer Nc = 4;
-    
-    
     parameter data.GeneralProperties C[Nc] = {wat,oct,non,dec};
     
     Simulator.UnitOperations.HeatExchanger HX(Cmode = "Design", Qloss = 0, Mode = "CounterCurrent", Nc = Nc, C = C, Pdelc = 0, Pdelh = 0) annotation(

@@ -35,6 +35,7 @@ model HeatExchanger
   parameter Real Pdelc = 0;
   parameter String Mode"''CoCurrent'',''CounterCurrent''";
   parameter String Cmode"''BothOutletTemp(UA)''";
+  Real mu_c,mu_h,k_c,k_h,rho_c,rho_h,MW_h,MW_c;
   //Variables
   //Hot Stream Inlet
   Real Phin(start=Pg);
@@ -402,19 +403,19 @@ f5 = 1 / he;
 //==============================================================================================================
   if Case == "Cold in Tube" then
     Gsh = Fmhin / Ssh;
-    Rsh = Gsh * (Do * 1E-3) / mu_hin;
-    he = jh * k_hin * (Prs ^ 0.34 / (Do * 1E-3)) * Ec;
+    Rsh = Gsh * (Do * 1E-3) / mu_h;
+    he = jh * k_h * (Prs ^ 0.34 / (Do * 1E-3)) * Ec;
   else
     Gsh = Fmcin / Ssh;
-    Rsh = Gsh * (Do * 1E-3) / mu_cin;
-    he = jh * k_cin * Prs ^ 0.34 / (Do * 1E-3) * Ec;
+    Rsh = Gsh * (Do * 1E-3) / mu_c;
+    he = jh * k_c * Prs ^ 0.34 / (Do * 1E-3) * Ec;
   end if;
 //==============================================================================================================
 //Shell-Side Pressure Drop
   if Case == "Cold in Tube" then
-    Pdels = 4 * fs * Gsf ^ 2 / (2 * rho_hin) * Cx * (1 - Hdi) * (Dsi / Pt) * Nb * (1 + Y * (Pt / Dsi)) * Shells;
+    Pdels = 4 * fs * Gsf ^ 2 / (2 * rho_h) * Cx * (1 - Hdi) * (Dsi / Pt) * Nb * (1 + Y * (Pt / Dsi)) * Shells;
   else
-    Pdels = 4 * fs * Gsf ^ 2 / (2 * rho_cin) * Cx * (1 - Hdi) * (Dsi / Pt) * Nb * (1 + Y * (Pt / Dsi)) * Shells;
+    Pdels = 4 * fs * Gsf ^ 2 / (2 * rho_c) * Cx * (1 - Hdi) * (Dsi / Pt) * Nb * (1 + Y * (Pt / Dsi)) * Shells;
   end if;
 //==============================================================================================================
 //============================================================================================================
@@ -515,12 +516,12 @@ f5 = 1 / he;
 //Calculation of Reynolds Number for Shell Side
   if Case == "Cold in Tube" then
     Gsf = Fmhin / Ssf;
-    Res = Gsf * (Do * 1E-3) / mu_hin;
-    Prs = mu_hin * (Cphin / MWhin) / (k_hin * 1E-3);
+    Res = Gsf * (Do * 1E-3) / mu_h;
+    Prs = mu_h * (Cphin / MW_h) / (k_h * 1E-3);
   else
     Gsf = Fmcin / Ssf;
-    Res = Gsf * (Do * 1E-3) / mu_cin;
-    Prs = mu_cin * (Cpcin / MWcin) / (k_cin * 1E-3);
+    Res = Gsf * (Do * 1E-3) / mu_c;
+    Prs = mu_c * (Cpcin / MW_c) / (k_c * 1E-3);
   end if;
   Z = Pt / Do;
 //=============================================================================================================  
@@ -559,22 +560,22 @@ f5 = 1 / he;
   Ssf = Ss / Fp;
 //========================================================================================================
 
-//==================================================================================================================
+//=============================================================================================================
 //Computation of Tube Side Pressure Dropf
   if Case == "Cold in Tube" then
-    Pdelt = f * L * (nt / (Di * 1E-3)) * (vt ^ 2 / 2) * rho_cin;
-    hi * Di * 1E-3 / k_cin = f / 8 * Ret * (Prt / (1.07 + 12.7 * (f / 8) ^ 0.5 * (Prt ^ (2 / 3) - 1)));
+    Pdelt = f * L * (nt / (Di * 1E-3)) * (vt ^ 2 / 2) * rho_c;
+    hi * Di * 1E-3 / k_c = f / 8 * Ret * (Prt / (1.07 + 12.7 * (f / 8) ^ 0.5 * (Prt ^ (2 / 3) - 1)));
   else
-    Pdelt = f * L * nt / (Di * 1E-3 * (vt ^ 2 / 2) * rho_hin);
-    hi * (Di * 1E-3) / k_hin = f / 8 * Ret * Prt / (1.07 + 12.7 * (f / 8) ^ 0.5 * (Prt ^ (2 / 3) - 1));
+    Pdelt = f * L * nt / (Di * 1E-3 * (vt ^ 2 / 2) * rho_h);
+    hi * (Di * 1E-3) / k_h = f / 8 * Ret * Prt / (1.07 + 12.7 * (f / 8) ^ 0.5 * (Prt ^ (2 / 3) - 1));
   end if;
 //===========================================================================================================
 //===========================================================================================================
 //Calculation of Friction Factor
   E_D = Epsilon / Di;
   if Ret > 3250 then
-    a1 = log(E_D ^ 1.1096 / 2.8257 + (7.149 / Ret) ^ 0.8961);
-    b1 = -2 * log(E_D / 3.7065 - 5.0452 * a1 / Ret);
+    a1 = log10(E_D ^ 1.1096 / 2.8257 + (7.149 / Ret) ^ 0.8961);
+    b1 = -2 * log10(E_D / 3.7065 - 5.0452 * a1 / Ret);
     f = (1 / b1) ^ 2 * 1.2;
   else
     a1 = 0;
@@ -584,13 +585,13 @@ f5 = 1 / he;
 //===========================================================================================================
   Area = 3.14 * (Di * 1E-3) ^ 2 / 4;
   if Case == "Cold in Tube" then
-    vt = Fmcin / (rho_cin * Nt * Area);
-    Ret = rho_cin * vt * (Di * 1E-3) / mu_cin;
-    Prt = mu_cin * (Cpcin / MWcin) / (k_cin * 1E-3);
+    vt = Fmcin / (rho_c * Nt * Area);
+    Ret = rho_c * vt * (Di * 1E-3) / mu_c;
+    Prt = mu_c * (Cpcin / MW_c) / (k_c * 1E-3);
   else
-    vt = Fmhin / (rho_hin * Nt * (3.14 / 4 * (Di * 1E-3) ^ 2));
-    Ret = rho_hin * vt * (Di * 1E-3) / mu_hin;
-    Prt = mu_hin * (Cphin / MWhin) / (k_hin * 1E-3);
+    vt = Fmhin / (rho_h * Nt * (3.14 / 4 * (Di * 1E-3) ^ 2));
+    Ret = rho_h * vt * (Di * 1E-3) / mu_h;
+    Prt = mu_h * (Cphin / MW_h) / (k_h * 1E-3);
   end if;
 //===========================================================================================================
  //Calculation of Thermo-Physical Properties
@@ -601,10 +602,16 @@ f5 = 1 / he;
     rho3[i] = ThermodynamicFunctions.Dens(C[i].LiqDen, C[i].Tc, (Tcin + Tcout) / 2, Pcout);
     rho4[i] = ThermodynamicFunctions.Dens(C[i].LiqDen, C[i].Tc, (Thin + Thout) / 2, Phout);
   end for;
-  rho_cin = sum(xcin_pc[1, :] .* rho1[:]) * 1E-3 * MWcin;
-  rho_hin = sum(xhin_pc[1, :] .* rho2[:]) * 1E-3 * MWhin;
-  rho_cout = sum(xcout_pc[1, :] .* rho3[:]) * 1E-3 * MWcout;
-  rho_hout = sum(xhout_pc[1, :] .* rho4[:]) * 1E-3 * MWhout;
+//  rho_cin = sum(xcin_pc[1, :] .* rho1[:]) * 1E-3 * MWcin;
+//  rho_hin = sum(xhin_pc[1, :] .* rho2[:]) * 1E-3 * MWhin;
+//  rho_cout = sum(xcout_pc[1, :] .* rho3[:]) * 1E-3 * MWcout;
+//  rho_hout = sum(xhout_pc[1, :] .* rho4[:]) * 1E-3 * MWhout;
+rho_cin = 1035.41732;
+rho_hin = 669.43412;
+rho_hout = 705.29712;
+rho_cout = 1020.06001;
+rho_c = (rho_cin + rho_cout)/2;
+rho_h = (rho_hin + rho_hout)/2;
 //=======================================================================================================
   for i in 1:Nc loop
     mu1[i] = Simulator.Files.TransportProperties.LiqVis(C[i].LiqVis, (Tcin + Tcout) / 2);
@@ -612,10 +619,16 @@ f5 = 1 / he;
     mu3[i] = Simulator.Files.TransportProperties.LiqVis(C[i].LiqVis, (Tcin + Tcout) / 2);
     mu4[i] = Simulator.Files.TransportProperties.LiqVis(C[i].LiqVis, (Thin + Thout) / 2);
   end for;
-  mu_cin = sum(xcin_pc[1, :] .* mu1[:]);
-  mu_hin = sum(xhin_pc[1, :] .* mu2[:]);
-  mu_cout =sum(xcout_pc[1, :] .* mu3[:]);
-  mu_hout =sum(xhout_pc[1, :] .* mu4[:]);
+//  mu_cin = sum(xcin_pc[1, :] .* mu1[:]);
+//  mu_hin = sum(xhin_pc[1, :] .* mu2[:]);
+//  mu_cout =sum(xcout_pc[1, :] .* mu3[:]);
+//  mu_hout =sum(xhout_pc[1, :] .* mu4[:]);
+mu_cin = 0.000801837023398036 ;
+mu_cout = 0.000603245481110247  ;
+mu_hin = 0.000350348400808961 ;
+mu_hout = 0.000545155323029587;
+mu_c = (mu_cin + mu_cout)/2;
+mu_h = (mu_hin + mu_hout)/2;
 //==========================================================================================================
   for i in 1:Nc loop
     k1[i] = Simulator.Files.TransportProperties.LiqK(C[i].LiqK, (Tcin + Tcout) / 2);
@@ -623,10 +636,16 @@ f5 = 1 / he;
     k3[i] = Simulator.Files.TransportProperties.LiqK(C[i].LiqK, (Tcin + Tcout) / 2);
     k4[i] = Simulator.Files.TransportProperties.LiqK(C[i].LiqK, (Thin + Thout) / 2);
   end for;
-  k_cin = sum(xcin_pc[1, :] .* k1[:]);
-  k_hin = sum(xhin_pc[1, :] .* k2[:]);
-  k_cout = sum(xcout_pc[1, :] .* k3[:]);
-  k_hout = sum(xhout_pc[1, :] .* k4[:]); 
+//  k_cin = sum(xcin_pc[1, :] .* k1[:]);
+//  k_hin = sum(xhin_pc[1, :] .* k2[:]);
+//  k_cout = sum(xcout_pc[1, :] .* k3[:]);
+//  k_hout = sum(xhout_pc[1, :] .* k4[:]);
+k_cin =0.304;
+k_hin =0.11505;
+k_cout = 0.29663;
+k_hout = 0.12535; 
+k_c = (k_cin + k_cout)/2;
+k_h = (k_hin + k_hout)/2;
 //========================================================================================================= 
   Atc = Af / Shells;
 //=======================================================================================================
@@ -693,7 +712,7 @@ for i in 1:Nc loop
 Cph_pc[2, i] = ThermodynamicFunctions.LiqCpId(C[i].LiqCp, Thin);
 Cph_pc[3, i] = ThermodynamicFunctions.VapCpId(C[i].VapCp, Thin);
 end for;
-
+//==================================================================================================
  for i in 2:3 loop
     Cph_p[i] = sum(xhin_pc[i, :] .* Cph_pc[i, :]);
   end for;
@@ -713,11 +732,14 @@ end for;
  Cpc_p[1] = (1-xvapcin) * Cpc_p[2] + xvapcin * Cpc_p[3]; 
  Cpc_pc[1, :] = xcin_pc[1, :] .* Cpc_p[1];  
  Cpcin = Cpc_p[1];
+ //=====================================================================================================
 //======================================================================================================== 
   Fmhin = Fhin * MWhin*1E-3;
   Fmcin = Fcin[1] * MWcin*1E-3;
 //=========================================================================================================
 //==========================================================================================================
+  MW_h = (MWhin+MWhout)/2;
+  MW_c = (MWcin + MWcout)/2;
 algorithm
   for i in 1:Nc loop
     MWhin  :=  MWhin  +  C[i].MW *   xhin_pc[1,i];
@@ -725,4 +747,5 @@ algorithm
     MWcin  :=  MWcin  +  C[i].MW *   xcin_pc[1,i];
     MWcout :=  MWcout +  C[i].MW *   xcout_pc[1,i];
   end for;   
+
 end HeatExchanger;

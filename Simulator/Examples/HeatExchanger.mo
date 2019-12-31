@@ -63,7 +63,7 @@ package HeatExchanger
     parameter Integer Nc = 4;
     parameter data.GeneralProperties C[Nc] = {wat,oct,non,dec};
     
-    Simulator.UnitOperations.HeatExchanger HX(Cmode = "Design", Qloss = 0, Mode = "CounterCurrent", Nc = Nc, C = C, Pdelc = 0, Pdelh = 0) annotation(
+    Simulator.UnitOperations.HeatExchanger HX( C = C,Cmode = "Design", Mode = "CounterCurrent", Nc = Nc, Pdelc = 0, Pdelh = 0, Qloss = 0) annotation(
       Placement(visible = true, transformation(origin = {-16, -2}, extent = {{-22, -22}, {22, 22}}, rotation = 0)));
     Simulator.Examples.HeatExchanger.MS In_Hot(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-86, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

@@ -24,7 +24,7 @@ package Valve
     parameter data.GeneralProperties C[Nc] = {meth, eth, wat};
     Simulator.UnitOperations.Valve valve1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {0, 4}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
-    ms inlet(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Valve.ms inlet(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-74, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Examples.Valve.ms outlet(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {71, 3}, extent = {{-11, -11}, {11, 11}}, rotation = 0)));

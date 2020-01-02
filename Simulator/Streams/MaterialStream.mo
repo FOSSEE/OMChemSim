@@ -6,7 +6,22 @@ model MaterialStream "Model representing Material Stream"
   extends Simulator.Files.Icons.MaterialStream;
   import Simulator.Files.*;
   parameter Integer Nc "Number of components";
+  import Modelica.Constants.R;
+  import Modelica.SIunits.{Time};
+  parameter Time timestep "Delay in Time Step" annotation(
+    Dialog(tab = "Dynamics", group = "Time Delay"));
+  parameter Time timeramp "Delay in Time Ramp" annotation(
+    Dialog(tab = "Dynamics", group = "Time Delay"));
+  parameter Real DelF(unit = "mol") "Disturbance in Flow" annotation(
+    Dialog(tab = "Dynamics", group = "Disturbance"));
+  parameter Time duration "Ramp Duration (Applicable only for Ramp change)" annotation(
+    Dialog(tab = "Dynamics", group = "Time Delay"));
+  parameter types.disturbance Inlet_Disturbance "Type of Inlet Disturbance" annotation(
+    Dialog(tab = "Dynamics", group = "Disturbance Type"));
+  parameter types.variable Disturbance_Variable "Type of Disturbance Variable" annotation(
+    Dialog(tab = "Dynamics", group = "Disturbance Variable"));
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
+  parameter Boolean UserInput = false "The Input is Provided by User (Only if it is true, Move to Dynamics tab)";
   Real P(unit = "Pa", min = 0, start = Pg) "Pressure";
   Real T(unit = "K", start = Tg) "Temperature";
   Real Pbubl(unit = "Pa", min = 0, start = Pmin) "Bubble point pressure";
@@ -39,14 +54,28 @@ equation
 //Connector equations
   In.P = P;
   In.T = T;
-  In.F = F_p[1];
+if UserInput == true then
+  if Integer(Disturbance_Variable) == 1 then
+    if Integer(Inlet_Disturbance) == 1 then
+     In.F = F_p[1] + (if time < timestep then 0 else DelF);
+     elseif Integer(Inlet_Disturbance) == 2 then
+     In.F = F_p[1] + (if time < timeramp then 0 else if time < (timeramp + duration) then (time -  timeramp)*(DelF/duration) else DelF);
+    else
+    In.F = F_p[1];
+    end if;
+   else
+   In.F = F_p[1];
+   end if;
+else
+In.F = F_p[1];
+end if;
   In.H = H_p[1];
   In.S = S_p[1];
   In.x_pc = x_pc;
   In.xvap = xvap;
   Out.P = P;
   Out.T = T;
-  Out.F = F_p[1];
+  Out.F = In.F;
   Out.H = H_p[1];
   Out.S = S_p[1];
   Out.x_pc = x_pc;

@@ -22,7 +22,7 @@ model test1
   parameter data.Ethyleneglycol eg;
   parameter data.GeneralProperties C[Nc] = {e, w, eg};
   parameter Integer Nc = 3;
-  Simulator.UnitOperations.CSTR bmr1(C = C, Mode = "Define_Out_Temperature", Nc = Nc, Phase = 1, Tdef = 350, V = 1) annotation(
+  Simulator.UnitOperations.CSTR bmr1(C = C, Mode = "Adiabatic", Nc = Nc, Phase = 3, V = 2) annotation(
     Placement(visible = true, transformation(origin = {1, -1}, extent = {{-17, -17}, {17, 17}}, rotation = 0)));
   MS ms1(C = C, Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-50, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -33,7 +33,7 @@ equation
     Line(points = {{-40, 0}, {-16, 0}, {-16, -1}}, color = {0, 70, 70}));
   connect(bmr1.Out, ms2.In) annotation(
     Line(points = {{18, -1}, {44, -1}, {44, 0}}, color = {0, 70, 70}));
-  ms1.T = 320;
+  ms1.T = 360;
   ms1.P = 101325;
   ms1.x_pc[1, :] = {0.4, 0.6, 0};
   ms1.F_p[1] = 100;

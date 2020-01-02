@@ -23,7 +23,7 @@ package Cooler
     //instantiation of water
     Simulator.UnitOperations.Cooler cooler1(Pdel = 0, Eff = 1, Nc = 3, C = {meth, eth, wat}) annotation(
       Placement(visible = true, transformation(origin = {-8, 18}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
-    ms inlet(Nc = 3, C = {meth, eth, wat}) annotation(
+     Simulator.Examples.Cooler.ms inlet(Nc = 3, C = {meth, eth, wat}) annotation(
       Placement(visible = true, transformation(origin = {-72, 18}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
     Simulator.Examples.Cooler.ms outlet(Nc = 3, C = {meth, eth, wat}) annotation(
       Placement(visible = true, transformation(origin = {60, 12}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));

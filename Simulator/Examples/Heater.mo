@@ -22,12 +22,12 @@ package Heater
     //instance of heater
     parameter Integer Nc = 3;
     parameter data.GeneralProperties C[Nc] = {meth, eth, wat};
-    Simulator.UnitOperations.Heater heater1(Pdel = 101325, Eff = 1, Nc = Nc, C = C) annotation(
+    Simulator.UnitOperations.Heater heater1( C = C, Dynamics = true, Eff = 1, Nc = Nc,Pdel = 101325) annotation(
       Placement(visible = true, transformation(origin = {-26, -4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     //instances of composite material stream
-    Simulator.Examples.Heater.ms inlet(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Heater.ms inlet( C = C,Nc = Nc, UserInput = false) annotation(
       Placement(visible = true, transformation(origin = {-80, 4}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
-    Simulator.Examples.Heater.ms outlet(Nc = Nc, C = C, T(start = 353), x_pc(start = {{0.33, 0.33, 0.34}, {0.24, 0.31, 0.43}, {0.44, 0.34, 0.31}}), P(start = 101325)) annotation(
+    Simulator.Examples.Heater.ms outlet(Nc = Nc, C = C, T(start = 354)) annotation(
       Placement(visible = true, transformation(origin = {20, 8}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
     //instance of energy stream
     Simulator.Streams.EnergyStream energy annotation(

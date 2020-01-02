@@ -20,6 +20,7 @@ model Heater "Model of a heater to heat a material stream"
   Real Tdel(unit = "K") "Temperature Increase";
   Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor mole fraction";
   Real Hout(unit = "kJ/kmol",start=Htotg) "outlet mixture molar enthalpy";
+  
   //========================================================================================
   parameter Real Pdel(unit = "Pa") "Pressure drop";
   parameter Real Eff(unit = "-") "Efficiency";
@@ -33,6 +34,7 @@ model Heater "Model of a heater to heat a material stream"
   //=========================================================================================
 
   extends GuessModels.InitialGuess;
+
 equation
 //connector equations
   In.P = Pin;
@@ -49,9 +51,9 @@ equation
   Out.xvap = xvapout;
   En.Q = Q;
 //=============================================================================================
-  Fin = Fout;
+  Fin - Fout = 0;
 //material balance
-  Hin + Eff * Q / Fin = Hout;
+  Hin + Eff * Q / Fin = Hout ;
 //energy balance
   Pin - Pdel = Pout;
 //pressure calculation

@@ -9,13 +9,16 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
   parameter Integer Nc "Number of components";
   parameter Boolean BTdef = false "True if flash is operated at temperature other than feed temp else false";
   parameter Boolean BPdef = false "True if flash is operated at pressure other than feed pressure else false";
+  parameter Boolean Dynamics "True if flash is operated in Unsteady mode";
   parameter Real Tdef(unit = "K") = 298.15 "Separation temperature if BTdef is true";
   parameter Real Pdef(unit = "Pa") = 101325 "Separation pressure if BPdef is true";
-  
+  parameter Real A = 2 "Wetted area of the flash tank";
+  parameter Real VT = 8 "Total Volume of the flash tank";
+  parameter Real Cd = 50 "Discharge coefficient of valve";
 //==============================================================================
 //Model Variables
   Real T(unit = "K", start = Tg, min = 0) "Flash column temperature";
-  Real P(unit = "Pa", start = Pg, min = 0) "Flash column pressure";
+  Real Pin(unit = "Pa", start = Pg, min = 0) "Flash column pressure";
   Real Pbubl(unit = "Pa", min = 0, start = Pmin) "Bubble point pressure";
   Real Pdew(unit = "Pa", min = 0, start = Pmax) "Dew point pressure";
   Real F_p[3](each unit = "mol/s", each min = 0,start = {Fg,Fliqg,Fvapg})"Feed stream mole flow";
@@ -28,7 +31,10 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
   Real S_p[3](each unit = "kJ/[kmol.K]") "Molar entropy in phase";
   Real xliq(unit = "-", min = 0, max = 1, start = xliqg)"Liquid phase mole fraction";
   Real xvap(unit = "-", min = 0, max = 1, start = xvapg) "Vapor phase mole fraction";
-  
+  Real M[Nc](each unit = "mol", each start = 1000) "Component Molar Holdup", ML(unit = "mol") "Liquid Holdup", MV(unit = "mol") "Vapor Holdup";
+  Real VL(unit = "m^3") "Volume of Liquid holdup in flash tank", VG(unit = "m^3") "Volume of Gas Holdup in flash tank";
+  Real Q(unit = "W") "Heat supplied or Removed", rholiq_c[Nc](each unit = "mol/m^3") "Liquid Density", h(unit = "m") "Height of liquid holdup", rholiq(unit = "mol/m^3");
+  Real P(unit = "Pa") "Total Pressure in the tank", PG(unit = "Pa") "Pressure of Gas Holdup", PL(unit = "Pa") "Pressure of liquid head";
 //===============================================================================
 //Instantiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -39,7 +45,10 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
     Placement(visible = true, transformation(origin = {100, -72}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   
   extends GuessModels.InitialGuess;
-  
+initial equation
+if Dynamics == true then
+der(M) = zeros(Nc);
+end if;  
 equation
 //================================================================================
 //Connector equation
@@ -51,7 +60,7 @@ equation
   if BPdef then
     Pdef = P;
   else
-    In.P = P;
+    In.P = Pin;
   end if;
   In.F = F_p[1];
   In.x_pc[1, :] = x_pc[1, :];
@@ -60,15 +69,30 @@ equation
   Out2.F = F_p[2];
   Out2.x_pc[1, :] = x_pc[2, :];
   Out1.T = T;
-  Out1.P = P;
+  Out1.P = PG;
   Out1.F = F_p[3];
   Out1.x_pc[1, :] = x_pc[3, :];
   
 //=================================================================================
+//Thermodynamic Equations
+for i in 1:Nc loop
+rholiq_c[i] = Simulator.Files.ThermodynamicFunctions.Dens(C[i].LiqDen, C[i].Tc, T, P);
+end for;
+
+//=================================================================================
 //Mole Balance
-  F_p[1] = F_p[2] + F_p[3];
-  x_pc[1, :] .* F_p[1] = x_pc[2, :] .* F_p[2] + x_pc[3, :] .* F_p[3];
-  
+  x_pc[1, :] .* F_p[1] - x_pc[2, :] .* F_p[2] - x_pc[3, :] .* F_p[3] = if Dynamics == true then der(M) else zeros(Nc);
+  M = ML .* x_pc[2, :] + MV .* x_pc[3, :];
+  sum(M) = ML + MV;
+  rholiq = 1 / sum(x_pc[2, :] ./ rholiq_c) ;
+  ML = rholiq * VL;
+  F_p[2] = Cd * sqrt(2*9.81*h);
+  PG = (MV * 8.314 * T) / VG;
+  PL = sum(rholiq_c .* x_pc[2, :])*9.81*h;
+  P = PL + PG;
+  VL = A * h;
+  VT = VL + VG;
+  ML / MV = F_p[2] / F_p[3] ;
 //==================================================================================
 //Bubble point calculation
   Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
@@ -93,7 +117,10 @@ equation
     F_p[2] = 0;
   end if;
 //===================================================================================
-//Energy Balance / Specific Heat and Enthalpy calculation from Thermodynamic Functions
+//Energy Balance 
+  F_p[1] * H_p[1] + Q - F_p[2]*H_p[2] - F_p[3]*H_p[3] = 0;
+//===================================================================================
+// Specific Heat and Enthalpy calculation from Thermodynamic Functions
    for i in 1:Nc loop
     Cp_pc[2, i] = ThermodynamicFunctions.LiqCpId(C[i].LiqCp, T);
     Cp_pc[3, i] = ThermodynamicFunctions.VapCpId(C[i].VapCp, T);

@@ -18,7 +18,7 @@ package Mixer
     parameter data.Water wat;
     parameter Integer Nc = 3;
     parameter data.GeneralProperties C[Nc] = {meth, eth, wat};
-    ms ms1(Nc = Nc, C = C) annotation(
+    ms ms1( C = C, DelF = 5, Disturbance_Variable = types.variable.Flow, Inlet_Disturbance = types.disturbance.Step,Nc = Nc, UserInput = true, timestep = 10) annotation(
       Placement(visible = true, transformation(origin = {-84, 88}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms ms2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-84, 58}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -30,7 +30,7 @@ package Mixer
       Placement(visible = true, transformation(origin = {-84, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms ms6(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-82, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.UnitOperations.Mixer mixer1(Nc = Nc, NI = 6, C = C, outPress = "Inlet_Average") annotation(
+    Simulator.UnitOperations.Mixer mixer1( C = C, Dynamics = true, NI = 6,Nc = Nc, outPress = "Inlet_Average") annotation(
       Placement(visible = true, transformation(origin = {-8, 2}, extent = {{-20, -20}, {20, 20}}, rotation = 0)));
     ms out1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {62, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

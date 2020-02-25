@@ -24,8 +24,8 @@ package Flash
     
   //=====================================================================
   //Instantiation of Streams and Blocks
-    ms S1(Nc = Nc, C = C) annotation(
-      Placement(visible = true, transformation(origin = {-70, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Examples.Flash.ms S1(Nc = Nc, C = C) annotation(
+      Placement(visible = true, transformation(origin = {-76, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Examples.Flash.ms S2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {56, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Examples.Flash.ms S3(Nc = Nc, C = C) annotation(
@@ -42,7 +42,7 @@ package Flash
    connect(B1.Out1, S3.In) annotation(
       Line(points = {{-4, 10}, {32, 10}, {32, 28}, {44, 28}, {44, 28}}, color = {0, 70, 70}));
    connect(S1.Out, B1.In) annotation(
-      Line(points = {{-60, 2}, {-24, 2}, {-24, 2}, {-24, 2}}, color = {0, 70, 70}));
+      Line(points = {{-66, 4}, {-45, 4}, {-45, 2}, {-24, 2}}, color = {0, 70, 70}));
   
   //=====================================================================
   //Inputs and Specifications

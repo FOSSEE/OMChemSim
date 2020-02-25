@@ -1,28 +1,28 @@
 package Diethyl_Ether
   model Feed_PR
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     //material stream extended
-    extends Simulator.Files.Thermodynamic_Packages.Peng_Robinson;
+    extends Simulator.Files.ThermodynamicPackages.PengRobinson;
     //thermodynamic package Raoults law is extended
   end Feed_PR;
 
   model Feed_Raoults
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     //material stream extended
-    extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+    extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
     //thermodynamic package Raoults law is extended
   end Feed_Raoults;
 
   model Feed_Grayson
-    extends Simulator.Streams.Material_Stream;
+    extends Simulator.Streams.MaterialStream;
     //material stream extended
-    extends Simulator.Files.Thermodynamic_Packages.Grayson_Streed.GraysonStreed;
+    extends Simulator.Files.ThermodynamicPackages.GraysonStreed.GraysonStreed;
     //thermodynamic package Raoults law is extended
   end Feed_Grayson;
 
   model Shortcut
-    extends Simulator.Unit_Operations.Shortcut_Column;
-    extends Simulator.Files.Thermodynamic_Packages.Raoults_Law;
+    extends Simulator.UnitOperations.ShortcutColumn;
+    extends Simulator.Files.ThermodynamicPackages.RaoultsLaw;
   end Shortcut;
 
   package DC

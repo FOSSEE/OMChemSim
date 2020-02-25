@@ -22,7 +22,7 @@ package Pump
       Placement(visible = true, transformation(origin = {-8.99281e-15, -2}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
     Simulator.Examples.Pump.ms S2(Nc = 2, C = {benz, tol}) annotation(
       Placement(visible = true, transformation(origin = {64, 12}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Streams.EnergyStream E1 annotation(
+    Simulator.Streams.EnergyStream E1 annotation(
       Placement(visible = true, transformation(origin = {-38, -44}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   
   equation

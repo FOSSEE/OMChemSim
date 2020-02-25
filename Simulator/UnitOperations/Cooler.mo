@@ -27,15 +27,14 @@ model Cooler "Model of a cooler to heat a material stream"
   parameter Real Pdel(unit = "Pa") "Pressure drop";
   parameter Real Eff(unit = "-") "Efficiency";
 
-  //========================================================================================
-  Files.Interfaces.matConn In(Nc = Nc) annotation(
-    Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+//========================================================================================
+  Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
+    Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
-  
   extends GuessModels.InitialGuess;
   
 equation
@@ -64,7 +63,7 @@ equation
 //pressure calculation
   Tin - Tdel = Tout;
 //temperature calculation
-annotation(
+  annotation(
     Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">The cooler is used to simulate the cooling process of a material stream.</span><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">Following calculation parameters must be provided to the cooler:</div><div style=\"font-size: 12px;\"><ol><li>Pressure Drop</li><li>Efficiency</li></ol><div>In addition to the above parameters, any one additional variable from the below list must be provided for the model to simulate successfully:</div><div><ol><li>Outlet Temperature (Tout)</li><li>Temperature Drop (Tdel)</li><li>Heat Removed (Q)</li><li>Outlet Stream Vapor Phase Mole Fraction (xvapout)</li></ol><div><br></div></div><div>For example on simulating a cooler, go to <b><i>Examples</i></b> &gt;&gt; <i><b>Cooler</b></i></div></div></body></html>"));
     
     end Cooler;

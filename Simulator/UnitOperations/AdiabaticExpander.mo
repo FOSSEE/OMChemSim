@@ -28,7 +28,7 @@ model AdiabaticExpander "Model of an adiabatic expander to extract energy from a
   Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
   //========================================================================================
   //Instantiation of connectors
-  Files.Interfaces.matConn In(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

@@ -34,23 +34,21 @@ package Mixer
       Placement(visible = true, transformation(origin = {-8, 2}, extent = {{-20, -20}, {20, 20}}, rotation = 0)));
     ms out1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {62, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  
-  
   equation
-    connect(mixer1.outlet, out1.In) annotation(
-      Line(points = {{12, 2}, {52, 2}, {52, 2}, {52, 2}}, color = {0, 70, 70}));
-    connect(ms6.Out, mixer1.inlet[6]) annotation(
-      Line(points = {{-72, -86}, {-28, -86}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
-    connect(ms5.Out, mixer1.inlet[5]) annotation(
-      Line(points = {{-74, -52}, {-28, -52}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
-    connect(ms4.Out, mixer1.inlet[4]) annotation(
-      Line(points = {{-74, -16}, {-28, -16}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
-    connect(ms3.Out, mixer1.inlet[3]) annotation(
-      Line(points = {{-76, 24}, {-28, 24}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
-    connect(ms2.Out, mixer1.inlet[2]) annotation(
-      Line(points = {{-74, 58}, {-28, 58}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
-    connect(ms1.Out, mixer1.inlet[1]) annotation(
-      Line(points = {{-74, 88}, {-28, 88}, {-28, 2}, {-28, 2}}, color = {0, 70, 70}));
+  connect(mixer1.outlet, out1.In) annotation(
+      Line(points = {{12, 2}, {52, 2}}, color = {0, 70, 70}));
+  connect(ms6.Out, mixer1.inlet[6]) annotation(
+      Line(points = {{-72, -86}, {-28, -86}, {-28, 2}}, color = {0, 70, 70}));
+  connect(ms5.Out, mixer1.inlet[5]) annotation(
+      Line(points = {{-74, -52}, {-28, -52}, {-28, 2}}, color = {0, 70, 70}));
+  connect(ms4.Out, mixer1.inlet[4]) annotation(
+      Line(points = {{-74, -16}, {-51, -16}, {-51, 2}, {-28, 2}}, color = {0, 70, 70}));
+  connect(ms3.Out, mixer1.inlet[3]) annotation(
+      Line(points = {{-76, 24}, {-28, 24}, {-28, 2}}, color = {0, 70, 70}));
+  connect(ms2.Out, mixer1.inlet[2]) annotation(
+      Line(points = {{-74, 58}, {-28, 58}, {-28, 2}}, color = {0, 70, 70}));
+  connect(ms1.Out, mixer1.inlet[1]) annotation(
+      Line(points = {{-74, 88}, {-28, 88}, {-28, 2}}, color = {0, 70, 70}));
     ms1.P = 101325;
     ms2.P = 202650;
     ms3.P = 126523;

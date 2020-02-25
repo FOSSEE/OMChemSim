@@ -13,9 +13,9 @@ package CompoundSeparator
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Benzene benz;
     parameter data.Toluene tol;
-    ms Inlet(Nc = 2, C = {benz, tol}) annotation(
+    Simulator.Examples.CompoundSeparator.ms Inlet(Nc = 2, C = {benz, tol}) annotation(
       Placement(visible = true, transformation(origin = {-82, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms Outlet1(Nc = 2, C = {benz, tol}) annotation(
+    Simulator.Examples.CompoundSeparator.ms Outlet1(Nc = 2, C = {benz, tol}) annotation(
       Placement(visible = true, transformation(origin = {64, 18}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Examples.CompoundSeparator.ms Outlet2(Nc = 2, C = {benz, tol}) annotation(
       Placement(visible = true, transformation(origin = {66, -20}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

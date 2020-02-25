@@ -18,21 +18,21 @@ package Mixer
     parameter data.Water wat;
     parameter Integer Nc = 3;
     parameter data.GeneralProperties C[Nc] = {meth, eth, wat};
-    ms ms1(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Mixer.ms ms1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-84, 88}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms ms2(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Mixer.ms ms2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-84, 58}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms ms3(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Mixer.ms ms3(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-86, 24}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms ms4(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Mixer.ms ms4(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-84, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms ms5(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Mixer.ms ms5(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-84, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms ms6(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Mixer.ms ms6(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-82, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.UnitOperations.Mixer mixer1(Nc = Nc, NI = 6, C = C, outPress = "Inlet_Average") annotation(
       Placement(visible = true, transformation(origin = {-8, 2}, extent = {{-20, -20}, {20, 20}}, rotation = 0)));
-    ms out1(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Mixer.ms out1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {62, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
   connect(mixer1.outlet, out1.In) annotation(

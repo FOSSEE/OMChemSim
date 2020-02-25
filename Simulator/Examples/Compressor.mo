@@ -24,7 +24,7 @@ package Compressor
     parameter Integer Nc = 2;
     parameter data.GeneralProperties C[Nc] = {ben, tol};
     Simulator.Examples.Compressor.compres adiabatic_Compressor1(Nc = Nc, C = C, Eff = 0.75) annotation(
-      Placement(visible = true, transformation(origin = {-17, 7}, extent = {{-15, -15}, {15, 15}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-15, 13}, extent = {{-15, -15}, {15, 15}}, rotation = 0)));
     Simulator.Examples.Compressor.ms inlet(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-78, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     ms outlet(Nc = Nc, C = C) annotation(
@@ -33,11 +33,11 @@ package Compressor
       Placement(visible = true, transformation(origin = {-50, -56}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
   connect(inlet.Out, adiabatic_Compressor1.In) annotation(
-      Line(points = {{-68, 8}, {-50, 8}, {-50, 17}, {-32, 17}}));
+      Line(points = {{-68, 8}, {-50, 8}, {-50, 13}, {-30, 13}}));
   connect(adiabatic_Compressor1.Out, outlet.In) annotation(
-      Line(points = {{-2, 17}, {31, 17}, {31, 6}, {48, 6}}));
+      Line(points = {{0, 13}, {31, 13}, {31, 6}, {48, 6}}));
   connect(power.Out, adiabatic_Compressor1.En) annotation(
-      Line(points = {{-40, -56}, {-17, -56}, {-17, 7}}));
+      Line(points = {{-40, -56}, {-15, -56}, {-15, 3}}));
     inlet.x_pc[1, :] = {0.5, 0.5};
 //mixture molar composition
     inlet.P = 202650;

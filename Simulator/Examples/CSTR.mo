@@ -24,9 +24,9 @@ model test1
   parameter Integer Nc = 3;
   Simulator.UnitOperations.CSTR bmr1(C = C, Mode = "Define_Out_Temperature", Nc = Nc, Phase = 1, Tdef = 350, V = 1) annotation(
     Placement(visible = true, transformation(origin = {1, -1}, extent = {{-17, -17}, {17, 17}}, rotation = 0)));
-  MS ms1(C = C, Nc = Nc) annotation(
+  Simulator.Examples.CSTR.MS ms1(C = C, Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-50, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  MS ms2(C = C, Nc = Nc) annotation(
+  Simulator.Examples.CSTR.MS ms2(C = C, Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {54, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 equation
   connect(ms1.Out, bmr1.In) annotation(
@@ -48,9 +48,9 @@ parameter data.Water c4;
 
 parameter data.GeneralProperties C[Nc] = {c1, c2, c3, c4};
 parameter Integer Nc = 4;
-  MS S1(C = C, Nc = Nc)  annotation(
+  Simulator.Examples.CSTR.MS S1(C = C, Nc = Nc)  annotation(
     Placement(visible = true, transformation(origin = {-62, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  MS S2(C = C, Nc = Nc)  annotation(
+  Simulator.Examples.CSTR.MS S2(C = C, Nc = Nc)  annotation(
     Placement(visible = true, transformation(origin = {54, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.UnitOperations.CSTR B1(Af_r = {0.2},BC_r = {1}, C = C, Coef_cr = {{-1}, {-1}, {1}, {1}}, Comp = 4, DO_cr = {{1}, {0}, {0}, {0}}, Ef_r = {0}, Mode = "Define_Out_Temperature", Nc = Nc, Nr = 1, Phase = 3, Tdef = 360, V = 10)  annotation(
     Placement(visible = true, transformation(origin = {0, 0}, extent = {{-20, -20}, {20, 20}}, rotation = 0)));

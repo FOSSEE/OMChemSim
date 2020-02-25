@@ -38,11 +38,11 @@ package Distillation
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] = {benz, tol};
     Simulator.Examples.Distillation.DistColumn distCol(Nc = Nc, C = C, Nt = 4, Ni = 1, InT_s = {3}, Ctype = "Partial") annotation(
       Placement(visible = true, transformation(origin = {-22, 8}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms feed(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms feed(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms distillate(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms distillate(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {64, 22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms bottoms(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms bottoms(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {68, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream cond_duty annotation(
       Placement(visible = true, transformation(origin = {38, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -76,29 +76,29 @@ package Distillation
     parameter data.Benzene benz;
     parameter data.Toluene tol;
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] = {benz, tol};
-    DistColumn distCol(Nc = Nc, C = C, Nt = 12, Ni = 1, InT_s = {7}) annotation(
-      Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
-    ms feed(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.DistColumn distCol(Nc = Nc, C = C, Nt = 12, Ni = 1, InT_s = {7}) annotation(
+      Placement(visible = true, transformation(origin = {-26, 6.66134e-16}, extent = {{-10, 10}, {10, -10}}, rotation = 0)));
+    Simulator.Examples.Distillation.ms feed(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms distillate(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms distillate(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {64, 22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms bottoms(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms bottoms(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {68, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream cond_duty annotation(
       Placement(visible = true, transformation(origin = {38, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream reb_duty annotation(
       Placement(visible = true, transformation(origin = {48, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-    connect(distCol.Cduty, cond_duty.In) annotation(
-      Line(points = {{12, 28}, {12, 28}, {12, 62}, {28, 62}, {28, 62}}));
-    connect(distCol.Rduty, reb_duty.In) annotation(
-      Line(points = {{16, -22}, {16, -22}, {16, -52}, {38, -52}, {38, -52}}));
-    connect(distCol.Bot, bottoms.In) annotation(
-      Line(points = {{22, -14}, {56, -14}, {56, -16}, {58, -16}}));
-    connect(distCol.Dist, distillate.In) annotation(
-      Line(points = {{22, 22}, {54, 22}, {54, 22}, {54, 22}}));
-    connect(feed.Out, distCol.In_s[1]) annotation(
-      Line(points = {{-66, 2}, {-30, 2}, {-30, 2}, {-28, 2}}));
+  connect(distCol.Cduty, cond_duty.In) annotation(
+      Line(points = {{-1, -60}, {-1, 62}, {28, 62}}));
+  connect(distCol.Rduty, reb_duty.In) annotation(
+      Line(points = {{-1, 60}, {-1, -52}, {38, -52}}));
+  connect(distCol.Bot, bottoms.In) annotation(
+      Line(points = {{-1, 30}, {56, 30}, {56, -16}, {58, -16}}));
+  connect(distCol.Dist, distillate.In) annotation(
+      Line(points = {{-1, -30}, {38, -30}, {38, 22}, {54, 22}}));
+  connect(feed.Out, distCol.In_s[1]) annotation(
+      Line(points = {{-66, 2}, {-60, 2}, {-60, 0}, {-51, 0}}));
     feed.P = 101325;
     feed.T = 298.15;
     feed.F_p[1] = 100;
@@ -116,13 +116,13 @@ package Distillation
     parameter data.Benzene benz;
     parameter data.Toluene tol;
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] = {benz, tol};
-    DistColumn distCol(Nc = Nc, C = C, Ni = 1, Nt = 22, InT_s = {10}) annotation(
+    Simulator.Examples.Distillation.DistColumn distCol(Nc = Nc, C = C, Ni = 1, Nt = 22, InT_s = {10}) annotation(
       Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
-    ms feed(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms feed(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms distillate(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms distillate(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {64, 22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms bottoms(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms bottoms(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {68, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream cond_duty annotation(
       Placement(visible = true, transformation(origin = {38, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -158,11 +158,11 @@ package Distillation
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] = {benz, tol};
     DistColumn distCol(Nc = Nc, C = C, Nt = 22, Ni = 1, InT_s = {10}, condenser.Ctype = "Partial") annotation(
       Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
-    ms feed(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms feed(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms distillate(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms distillate(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {64, 22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms bottoms(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms bottoms(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {68, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream cond_duty annotation(
       Placement(visible = true, transformation(origin = {38, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
@@ -196,19 +196,19 @@ package Distillation
     parameter data.Benzene benz;
     parameter data.Toluene tol;
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] = {benz, tol};
-    DistColumn distCol(Nc = Nc, C = C, Nt = 5, Ni = 2, InT_s = {3, 4}) annotation(
+    Simulator.Examples.Distillation.DistColumn distCol(Nc = Nc, C = C, Nt = 5, Ni = 2, InT_s = {3, 4}) annotation(
       Placement(visible = true, transformation(origin = {-3, 3}, extent = {{-25, -25}, {25, 25}}, rotation = 0)));
-    ms feed(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms feed(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-76, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms distillate(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms distillate(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {64, 22}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms bottoms(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms bottoms(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {68, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream cond_duty annotation(
       Placement(visible = true, transformation(origin = {38, 62}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Streams.EnergyStream reb_duty annotation(
       Placement(visible = true, transformation(origin = {48, -52}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    ms ms1(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Distillation.ms ms1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-80, 50}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
     connect(ms1.Out, distCol.In_s[2]) annotation(

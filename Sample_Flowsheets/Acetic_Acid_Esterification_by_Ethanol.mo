@@ -1,7 +1,7 @@
 package Acetic_Acid_Esterification_by_Ethanol
   model ms
-    extends Simulator.Streams.Material_Stream;
-    extends Simulator.Files.Thermodynamic_Packages.NRTL;
+    extends Simulator.Streams.MaterialStream;
+    extends Simulator.Files.ThermodynamicPackages.NRTL;
   end ms;
 
   model flowsheet
@@ -13,15 +13,15 @@ package Acetic_Acid_Esterification_by_Ethanol
     parameter data.Ethanol eth;
     parameter data.General_Properties comp[NOC] = {etac, wat, aa, eth};
   Acetic_Acid_Esterification_by_Ethanol.ms ethanol(NOC = NOC, comp = comp) annotation(
-      Placement(visible = true, transformation(origin = {-128, 30}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-168, 42}, extent = {{-14, -14}, {14, 14}}, rotation = 0)));
     Acetic_Acid_Esterification_by_Ethanol.ms acetic_acid(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-132, -26}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Unit_Operations.Mixer mix(NOC = NOC, comp = comp, NI = 3, outPress = "Inlet_Average") annotation(
-      Placement(visible = true, transformation(origin = {-77, 1}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {-65, 57}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.ms reactor_feed(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {-34, 6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.Conv_React CR(NOC = NOC, comp = comp, Nr = 1, Bc = {3}, Sc = {{1}, {1}, {-1}, {-1}}, X = {0.6}, calcMode = "Define_Outlet_Temperature", Tdef = 300) annotation(
-      Placement(visible = true, transformation(origin = {3, 5}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
+      Placement(visible = true, transformation(origin = {19, 63}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
   Acetic_Acid_Esterification_by_Ethanol.ms reactor_out(NOC = NOC, comp = comp) annotation(
       Placement(visible = true, transformation(origin = {52, 4}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Unit_Operations.Splitter split(NOC = NOC, comp = comp, NO = 2, calcType = "Split_Ratio") annotation(
@@ -69,13 +69,13 @@ package Acetic_Acid_Esterification_by_Ethanol
 
 
   model Conv_React
-    extends Simulator.Unit_Operations.Conversion_Reactor;
-    extends Simulator.Files.Models.ReactionManager.Reaction_Manager;
+    extends Simulator.UnitOperations.ConversionReactor;
+    extends Simulator.Files.Models.ReactionManager.ReactionManager;
   end Conv_React;
 
   model Fls
-    extends Simulator.Unit_Operations.Flash;
-    extends Simulator.Files.Thermodynamic_Packages.NRTL;
+    extends Simulator.UnitOperations.Flash;
+    extends Simulator.Files.ThermodynamicPackages.NRTL;
   end Fls;
 
 end Acetic_Acid_Esterification_by_Ethanol;

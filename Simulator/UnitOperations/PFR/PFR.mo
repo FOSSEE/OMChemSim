@@ -85,9 +85,9 @@ within Simulator.UnitOperations.PFR;
         
       Simulator.Files.Interfaces.enConn En annotation(
           Placement(visible = true, transformation(origin = {0, -98}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      Files.Interfaces.matConn In(Nc = Nc) annotation(
+      Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-348, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-348, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-      Files.Interfaces.matConn Out(Nc = Nc) annotation(
+      Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {350, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
 //============================================================================================================
       extends GuessModels.InitialGuess;

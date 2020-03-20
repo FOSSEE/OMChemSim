@@ -5,12 +5,18 @@ model ConversionReactor "Model of a conversion reactor to calculate the outlet s
 //=============================================================================
   //Header Files and Parameters
   extends Simulator.Files.Icons.ConversionReactor;
-   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-   parameter Integer Nc "Number of components";
-   parameter String CalcMode = "Isothermal" "Required mode of operation: Isothermal, Define_Out_Temperature, Adiabatic";
-  parameter Real Tdef(unit = "K") = 300 "Defined outlet temperature, applicable if Define_Out_Temperature mode is chosen";
-  parameter Real Pdel(unit = "Pa") = 0 "Pressure drop";
-  parameter Real X_r[Nr] = fill(0.4, Nr) "Conversion of base component";
+   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
+    Dialog(tab = "Reactor Specifications", group = "Component Parameters"));
+   parameter Integer Nc "Number of components" annotation(
+    Dialog(tab = "Reactor Specifications", group = "Component Parameters"));
+   parameter String CalcMode = "Isothermal" "Required mode of operation: Isothermal, Define_Out_Temperature, Adiabatic" annotation(
+    Dialog(tab = "Reactor Specifications", group = "Calculation Parameters"));
+  parameter Real Tdef(unit = "K") = 300 "Defined outlet temperature, applicable if Define_Out_Temperature mode is chosen" annotation(
+    Dialog(tab = "Reactor Specifications", group = "Calculation Parameters"));
+  parameter Real Pdel(unit = "Pa") = 0 "Pressure drop" annotation(
+    Dialog(tab = "Reactor Specifications", group = "Calculation Parameters"));
+  parameter Real X_r[Nr] = fill(0.4, Nr) "Conversion of base component" annotation(
+    Dialog(tab = "Reactions", group = "Conversion Reaction Parameters"));
  //=============================================================================
   //Model Variables
   Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
@@ -84,5 +90,5 @@ annotation(
     Icon(coordinateSystem(extent = {{-100, -200}, {100, 200}}, initialScale = 0.1)),
     Diagram(coordinateSystem(extent = {{-100, -200}, {100, 200}}, initialScale = 0.1)),
     __OpenModelica_commandLineOptions = "",
- Documentation(info = "<html><head></head><body><div>Conversion Reactor is used to calculate the mole fraction of components at outlet stream when the conversion of base component for the reaction is defined.</div><div><br></div>To simulate a convension reactor, following calculation parameters must be provided:<div><ol><li>Calculation Mode</li><li>Outlet Temperature (If calculation mode is Define_Out_Temperature\"</li><li>Number of Reactions</li><li>Base Component</li><li>Stoichiometric Coefficient of Components in Reaction</li><li>Conversion of Base Component</li><li>Pressure Drop</li></ol><div><br></div></div><div><span style=\"font-size: 12px;\">For example on simulating a conversion reactor, go to&nbsp;</span><i style=\"font-size: 12px;\"><b>Examples</b></i><span style=\"font-size: 12px;\">&nbsp;&gt;&gt;<i style=\"font-weight: bold;\">&nbsp;CR&nbsp;</i>&gt;&gt; <b><i>test</i></b></span></div><div><br></div></body></html>"));
+ Documentation(info = "<html><head></head><body><div>The <b>Conversion Reactor</b>&nbsp;is used to calculate the mole fraction of components at outlet stream when the conversion of base component for the reaction is defined.</div><div><br></div><div><div style=\"font-size: 12px;\"><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px; orphans: 2; widows: 2;\">The conversion reactor model have following connection ports:</span></div><div style=\"font-size: 12px;\"><div style=\"orphans: 2; widows: 2;\"><ol><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Two Material Streams:</span></font></li><ul><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">feed stream</span></li><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">outlet stream</span></li></ul><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">One Energy Stream:</span></font></li><ul><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">heat added</span></li></ul></ol></div></div></div><div><br></div>To simulate a conversion reactor, following calculation parameters must be provided:<div><ol><li>Calculation Mode (<b>CalcMode</b>)</li><li>Outlet Temperature&nbsp;(<b>Tdef</b>)&nbsp;(If calculation mode is Define_Out_Temperature)</li><li>Number of Reactions (<b>Nr</b>)</li><li>Base Component (<b>BC_r</b>)</li><li>Stoichiometric Coefficient of Components in Reaction (<b>Coef_cr</b>)</li><li>Conversion of Base Component (<b>X_r</b>)</li><li>Pressure Drop (<b>Pdel</b>)</li></ol><div><div style=\"font-size: 12px; orphans: 2; widows: 2;\"><span style=\"orphans: auto; widows: auto;\">All the above variables are of type <i>parameter Real</i> except the first one (<b>CalcMode</b>) which is of type&nbsp;<i>parameter String</i>. It can have either of the sting values among following:</span></div><div style=\"font-size: 12px; orphans: 2; widows: 2;\"><ol><li><b>Isothermal</b>: If the reactor is operated isothermally</li><li><b>Define_Out_Temperature</b>: If the reactor is operated at specified outlet temperature</li><li><b>Adiabatic</b>: If the reactor is operated adiabatically</li></ol></div></div><div><div style=\"font-size: 12px;\">During simulation, their values can specified directly under&nbsp;<b>Reactor Specifications</b>&nbsp;by double clicking on the reactor model instance.</div></div></div><div><br></div><div><br></div><div><span style=\"font-size: 12px;\">For detailed explaination on how to use this model to simulate a Conversion Reactor, go to&nbsp;</span><a href=\"modelica://Simulator.Examples.CR\" style=\"font-size: 12px;\">Conversion Reactor Example</a><span style=\"font-size: 12px;\">.</span></div><div><br></div></body></html>"));
  end ConversionReactor;

@@ -1,6 +1,6 @@
 within Simulator.UnitOperations.PFR;
 
-  function Integral
+  function Integral "Function to define the integral part used in the performance equation of a plug floiw reactor"
     extends Modelica.Math.Nonlinear.Interfaces.partialScalarFunction;
 
         input Integer Nc;

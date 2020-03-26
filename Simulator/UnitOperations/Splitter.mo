@@ -6,9 +6,9 @@ model Splitter "Model of a splitter to split one material stream into multiple o
   extends Simulator.Files.Icons.Splitter;
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
     Dialog(tab = "Splitter Specifications", group = "Component Parameters"));
-  parameter Integer Nc = 2 "Number of Components" annotation(
+  parameter Integer Nc "Number of Components" annotation(
     Dialog(tab = "Splitter Specifications", group = "Component Parameters"));
-  parameter Integer No = 2 "Number of outlet streams" annotation(
+  parameter Integer No "Number of outlet streams" annotation(
     Dialog(tab = "Splitter Specifications", group = "Splitter Parameters"));
   parameter String CalcType "Split_Ratio, Mass_Flow or Molar_Flow" annotation(
     Dialog(tab = "Splitter Specifications", group = "Splitter Parameters"));
@@ -26,7 +26,7 @@ model Splitter "Model of a splitter to split one material stream into multiple o
   
   Real Pout_s[No](each unit = "Pa", each min = 0, each start = Pg) "Outlet Pressure";
   Real Tout_s[No](each unit = "K", each min = 0, each start = Tg) "Outlet Temperature";
-  Real xout_sc[No, Nc](each unit = "-", each min = 0, each max = 1, start = xguess) "Outlet Mixture Molar Fraction";
+  Real xout_sc[No, Nc](each unit = "-", each min = 0, each max = 1) "Outlet Mixture Molar Fraction";
   Real Fout_c[No](each unit = "mol/s", each min = 0,  start = Fg) "Outlet Mixture Molar Flow";
   Real Fmout_c[No](each unit = "kg/s", each min = 0, start = Fg) "Outlet Mixture Mass Flow";
   

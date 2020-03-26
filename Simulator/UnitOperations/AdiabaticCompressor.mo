@@ -4,10 +4,12 @@ model AdiabaticCompressor "Model of an adiabatic compressor to provide energy to
   extends Simulator.Files.Icons.AdiabaticCompressor;
   
   extends Simulator.Files.Models.Flash;
-  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-  parameter Integer Nc "number of components";
+  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
+    Dialog(tab = "Compressor Specifications", group = "Component Parameters"));
+  parameter Integer Nc "number of components" annotation(
+    Dialog(tab = "Compressor Specifications", group = "Component Parameters"));
 
-  //====================================================================================
+//====================================================================================
   Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
   Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure"; 
   Real Tin(unit = "K", min = 0, start = Tg) "Inlet stream temperature";
@@ -27,9 +29,10 @@ model AdiabaticCompressor "Model of an adiabatic compressor to provide energy to
   Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
   Real x_c[Nc](each unit = "-", each min = 0, each max = 1,start=xg) "Component mole fraction";
  
-  parameter Real Eff(unit = "-") "Efficiency";
+  parameter Real Eff(unit = "-") "Efficiency" annotation(
+    Dialog(tab = "Compressor Specifications", group = "Calculation Parameters"));
 
-  //========================================================================================
+//========================================================================================
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
@@ -37,7 +40,6 @@ model AdiabaticCompressor "Model of an adiabatic compressor to provide energy to
   Simulator.Files.Interfaces.enConn En annotation(
     Placement(visible = true, transformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -66}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
-  
   extends GuessModels.InitialGuess;
   
 equation
@@ -74,5 +76,5 @@ equation
   Sin = S_p[1];
   x_c[:] = x_pc[1, :];
 annotation(
-    Documentation(info = "<html><head></head><body><div style=\"font-size: 12px;\">Adiabatic Compressor is generally used to provide energy to a vapor material stream. The energy supplied is in form of pressure.</div><div style=\"font-size: 12px;\"><br></div><span style=\"font-size: 12px;\">To simulate an adiabatic compressor, Efficiency of the compressor should be provided as calculation parameter. Additionally, one of the following variables must be defined:</span><div style=\"font-size: 12px;\"><ol><li>Outlet Pressure</li><li>Pressure Increase</li><li>Power Required</li></ol><div><br></div></div><div style=\"font-size: 12px;\">For example on simulating an adiabatic compressor, go to&nbsp;<i><b>Examples</b></i>&nbsp;&gt;&gt; <b><i>Compressor</i></b></div></body></html>"));
+    Documentation(info = "<html><head></head><body><div style=\"font-size: 12px;\">The <b>Adiabatic Compressor</b> is generally used to provide energy to a vapor material stream. The energy supplied is in form of pressure.</div><div style=\"font-size: 12px;\"><div><br></div><div><div><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px; orphans: 2; widows: 2;\">The adiabatic compressor model have following connection ports:</span></div><div><div style=\"orphans: 2; widows: 2;\"><ol><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Two Material Streams:</span></font></li><ul><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">feed stream</span></li><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">outlet stream</span></li></ul><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">One Energy Stream:</span></font></li><ul><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">power required</span></font></li></ul></ol></div></div></div><div><br></div><div><br></div>To simulate an adiabatic compressor, Efficiency (<b>Eff</b>) of the compressor should be provided as calculation parameter. The variable&nbsp;<b>Eff</b>&nbsp;is defined as of type&nbsp;<i>parameter Real.</i>&nbsp;</div><div style=\"font-size: 12px;\"><span style=\"font-size: medium;\">During simulation, its value can specified directly under&nbsp;</span><b style=\"font-size: medium;\">Compressor Specifications</b><span style=\"font-size: medium;\">&nbsp;by double clicking on the compressor model instance.</span><br><div><br></div><div><br></div><div>Additionally one of the following input variables must be defined:<div><ol><li>Outlet Pressure (<b>Pout</b>)</li><li>Pressure Increase (<b>Pdel</b>)</li><li>Power Required (<b>Q</b>)</li></ol><div>These variables are declared of type&nbsp;<i>Real.</i></div><div>During simulation, value of one of these variables need to be defined in the equation section.</div></div><div><br></div><div>For detailed explaination on how to use this model to simulate an Adiabatic Compressor, go to&nbsp;<a href=\"modelica://Simulator.Examples.Compressor\">Adiabatic Compressor Example</a>.</div></div></div></body></html>"));
     end AdiabaticCompressor;

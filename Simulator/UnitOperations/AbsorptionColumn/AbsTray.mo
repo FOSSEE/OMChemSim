@@ -1,6 +1,6 @@
 within Simulator.UnitOperations.AbsorptionColumn;
 
-model AbsTray
+model AbsTray "Model of a tray used in absorption column"
     import Simulator.Files.*;
     parameter Integer Nc;
     parameter ChemsepDatabase.GeneralProperties C[Nc];

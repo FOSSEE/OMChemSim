@@ -15,8 +15,8 @@ within Simulator.UnitOperations.DistillationColumn;
     Real Fvap_s[2](each unit = "mol/s", each min = 0,start={Fg,Fg}) "Vapor molar flow";
     Real Fliq_s[2](each unit = "mol/s", each min = 0,start={Fg,Fg}) "Liquid molar flow";  
     Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Components mole fraction at sidedraw";
-    Real xvap_sc[2, Nc](each unit = "-", each min = 0, each max = 1, start=yg) "Components vapor mole fraction";
-    Real xliq_sc[2, Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Components liquid mole fraction";
+    Real xvap_sc[2, Nc](each unit = "-", each min = 0, each max = 1, start={yg,yg}) "Components vapor mole fraction";
+    Real xliq_sc[2, Nc](each unit = "-", each min = 0, each max = 1, start={xg,xg}) "Components liquid mole fraction";
  
     Real Hvap_s[2](unit = "kJ/kmol",start=Hvapg) "Vapor molar enthalpy";
     Real Hliq_s[2](unit = "kJ/kmol",start=Hliqg) "Liquid molar enthalpy";

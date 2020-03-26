@@ -2,8 +2,10 @@ within Simulator.UnitOperations;
 
 model Valve "Model of a valve to regulate the pressure of a material stream"
   extends Simulator.Files.Icons.Valve;
-    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-    parameter Integer Nc = 3 "Number of components";
+    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
+    Dialog(tab = "Valve Specifications", group = "Component Parameters"));
+    parameter Integer Nc = 3 "Number of components" annotation(
+    Dialog(tab = "Valve Specifications", group = "Component Parameters"));
   //====================================================================================
   Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
   Real Pin(unit = "Pa", min = 0, start = Pg) "Inlet stream pressure"; 
@@ -23,14 +25,12 @@ model Valve "Model of a valve to regulate the pressure of a material stream"
   Real x_c[Nc](each unit = "-", each min = 0, each max = 1,  start = xg) "Component mole fraction";
   Real xvapout(unit = "-", min = 0, max = 1, start = xvapg) "Outlet stream vapor phase mole fraction";
   //========================================================================================
-
   //========================================================================================
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //========================================================================================
-
   extends GuessModels.InitialGuess;
 equation
 //connector equations
@@ -57,7 +57,7 @@ equation
 //pressure calculation
   Tin + Tdel = Tout;
 //temperature calculation
-annotation(
-    Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">The valve is used to simulate the pressure manipulation process of a material stream.</span><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">To simulate a valve, one of the following calculation parameter must be provided:</div><div style=\"font-size: 12px;\"><div><ol><li>Outlet Pressure (Pout)</li><li>Pressure Drop (Pdel)</li></ol><div><br></div></div><div>For example on simulating a valve, go to&nbsp;<b><i>Examples</i></b>&nbsp;&gt;&gt; <b><i>Valve</i></b></div></div></body></html>"));
+  annotation(
+    Documentation(info = "<html><head></head><body><!--StartFragment--><span style=\"font-size: 12px;\">The&nbsp;<b>Valve</b>&nbsp;is used to simulate the pressure manipulation process of a material stream.</span><div><br></div><div><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px; orphans: 2; widows: 2;\">The valve model have t</span><span style=\"font-size: 13px; font-family: Arial, Helvetica, sans-serif; orphans: 2; widows: 2;\">wo Material Streams connection ports as:</span></div><div><div style=\"orphans: 2; widows: 2;\"><ol><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">feed stream</span></li><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">outlet stream</span></li></ol></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">To simulate a valve, one of the following variables must be provided:</div><div style=\"font-size: 12px;\"><div><ol><li>Outlet Pressure (<b>Pout</b>)</li><li>Pressure Drop (<b>Pdel</b>)</li></ol></div><div><div><div><div>These variables are declared of type&nbsp;<i>Real.</i></div><div>During simulation, value of one of these variables need to be defined in the equation section.</div></div><div><br></div><div><br></div></div><div>For detailed explaination on how to use this model to simulate a Valve, go to&nbsp;<a href=\"modelica://Simulator.Examples.Valve\">Valve Example</a>.</div></div></div></div><!--EndFragment--></body></html>"));
     
     end Valve;

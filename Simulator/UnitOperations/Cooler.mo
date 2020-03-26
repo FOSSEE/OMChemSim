@@ -3,8 +3,10 @@ within Simulator.UnitOperations;
 model Cooler "Model of a cooler to heat a material stream"
   extends Simulator.Files.Icons.Cooler; 
   
-    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-    parameter Integer Nc "number of components";
+    parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
+    Dialog(tab = "Cooler Specifications", group = "Component Parameters"));
+    parameter Integer Nc "number of components" annotation(
+    Dialog(tab = "Cooler Specifications", group = "Component Parameters"));
   //====================================================================================
   Real Fin(unit = "mol/s", min = 0, start = Fg) "Inlet stream molar flow rate";
   Real Pin(unit = "Pa", min = 0, start =Pg) "Inlet stream pressure";
@@ -24,8 +26,10 @@ model Cooler "Model of a cooler to heat a material stream"
   Real Sout(unit = "kJ/[kmol.K]") "Outlet stream molar entropy"; 
   Real x_c[Nc](each unit = "-", each min = 0, each max = 1, start=xg) "Component mole fraction";
   //========================================================================================
-  parameter Real Pdel(unit = "Pa") "Pressure drop";
-  parameter Real Eff(unit = "-") "Efficiency";
+  parameter Real Pdel(unit = "Pa") "Pressure drop" annotation(
+    Dialog(tab = "Cooler Specifications", group = "Calculation Parameters"));
+  parameter Real Eff(unit = "-") "Efficiency" annotation(
+    Dialog(tab = "Cooler Specifications", group = "Calculation Parameters"));
 
 //========================================================================================
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -64,6 +68,6 @@ equation
   Tin - Tdel = Tout;
 //temperature calculation
   annotation(
-    Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">The cooler is used to simulate the cooling process of a material stream.</span><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">Following calculation parameters must be provided to the cooler:</div><div style=\"font-size: 12px;\"><ol><li>Pressure Drop</li><li>Efficiency</li></ol><div>In addition to the above parameters, any one additional variable from the below list must be provided for the model to simulate successfully:</div><div><ol><li>Outlet Temperature (Tout)</li><li>Temperature Drop (Tdel)</li><li>Heat Removed (Q)</li><li>Outlet Stream Vapor Phase Mole Fraction (xvapout)</li></ol><div><br></div></div><div>For example on simulating a cooler, go to <b><i>Examples</i></b> &gt;&gt; <i><b>Cooler</b></i></div></div></body></html>"));
+    Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">The <b>Cooler</b> is used to simulate the cooling process of a material stream.</span><div><br></div><div><div><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px; orphans: 2; widows: 2;\">The cooler model have following connection ports:</span></div><div><div style=\"orphans: 2; widows: 2;\"><ol><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Two Material Streams:</span></font></li><ul><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">feed stream</span></li><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">outlet stream</span></li></ul><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">One Energy Stream:</span></font></li><ul><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">heat removed</span></li></ul></ol></div></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">Following calculation parameters must be provided to the cooler:</div><div style=\"font-size: 12px;\"><ol><li>Pressure Drop (<b>Pdel</b>)</li><li>Efficiency (<b>Eff</b>)</li></ol><div><div>The above variables have been declared of type&nbsp;<i>parameter Real.&nbsp;</i></div><div>During simulation, their values can specified directly under&nbsp;<b>Cooler Specifications</b>&nbsp;by double clicking on the cooler model instance.</div></div><div><br></div><div><br></div><div>In addition to the above parameters, any one additional variable from the below list must be provided for the model to simulate successfully:</div><div><ol><li>Outlet Temperature (<b>Tout</b>)</li><li>Temperature Drop (<b>Tdel</b>)</li><li>Heat Removed (<b>Q</b>)</li><li>Outlet Stream Vapor Phase Mole Fraction (<b>xvapout</b>)</li></ol><div><div>These variables are declared of type&nbsp;<i>Real.</i></div><div>During simulation, value of one of these variables need to be defined in the equation section.</div></div><div><br></div><div><br></div></div><div>For detailed explaination on how to use this model to simulate a Cooler, go to <a href=\"modelica://Simulator.Examples.Cooler\">Cooler Example</a></div></div></div></body></html>"));
     
     end Cooler;

@@ -14,7 +14,7 @@ Compressor
 Expander
 Distillation
 PFR
-CR
+ConversionReactor
 Absorption
 EquilibriumReactor
 CSTR

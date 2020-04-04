@@ -1,9 +1,9 @@
 within Simulator.Examples;
 
-package MaterialStream
+package MaterialStream "Examples of Simulating Material Stream using Different Methods of Flash Specification"
   extends Modelica.Icons.ExamplesPackage;
 
-  model TPflash
+  model TPflash "Material Stream simulation with temperature and pressure flash specifications"
   
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Methanol meth;
@@ -20,7 +20,8 @@ package MaterialStream
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable standalone model to simualate the Material Stream example where all the components are defined, material stream specifications are declared.&nbsp;</span><a href=\"modelica://Simulator.Streams.MaterialStream\" style=\"font-size: 12px;\">MaterialStream</a><span style=\"font-size: 12px;\">&nbsp;model from the Streams package has been instantiated here.</span><div><br></div><div><b style=\"font-size: 12px;\">Component System:</b><span style=\"font-size: 12px;\">&nbsp;Methane, Ethane, Water</span><div style=\"font-size: 12px;\"><b>Thermodynamics:</b>&nbsp;Raoult's Law</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">This material stream is simulated using TP flash. In other words, Temperature and Pressure conditions are defined along with molar flow rate and mole fraction of the components.</div><div><span style=\"font-size: 12px;\"><br></span></div><div><div style=\"font-size: 12px;\"><b>Material Stream Information</b></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><b>Molar Flow Rate:</b>&nbsp;100 mol/s</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Methane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Ethane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Water):</b> 0.34</div><div style=\"font-size: 12px;\"><b>Pressure:</b>&nbsp;101325 Pa</div><div style=\"font-size: 12px;\"><b>Temperature:</b>&nbsp;351 K</div></div></div></body></html>"));
       end TPflash;
 
-  model TVFflash
+  model TVFflash"Material Stream simulation with temperature and vapor fraction flash specifications"
+  
     Simulator.Files.ChemsepDatabase data;
     parameter data.Methanol meth;
     parameter data.Ethanol eth;
@@ -36,7 +37,8 @@ package MaterialStream
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable standalone model to simualate the Material Stream example where all the components are defined, material stream specifications are declared.&nbsp;</span><a href=\"modelica://Simulator.Streams.MaterialStream\" style=\"font-size: 12px;\">MaterialStream</a><span style=\"font-size: 12px;\">&nbsp;model from the Streams package has been instantiated here.</span><div><br></div><div><b style=\"font-size: 12px;\">Component System:</b><span style=\"font-size: 12px;\">&nbsp;Methane, Ethane, Water</span><div style=\"font-size: 12px;\"><b>Thermodynamics:</b>&nbsp;Raoult's Law</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">This material stream is simulated using TVF flash. In other words, Temperature and Vapor Phase Mole Fraction conditions are defined along with molar flow rate and mole fraction of the components.</div><div><span style=\"font-size: 12px;\"><br></span></div><div><div style=\"font-size: 12px;\"><b>Material Stream Information</b></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><b>Molar Flow Rate:</b>&nbsp;31.346262 mol/s</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Methane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Ethane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Water):</b> 0.34</div><div style=\"font-size: 12px;\"><b>Vapor Phase Mole Fraction:</b> 0.036257</div><div style=\"font-size: 12px;\"><b>Temperature:</b>&nbsp;351 K</div></div></div></body></html>"));
       end TVFflash;
 
-  model PVFflash
+  model PVFflash "Material Stream simulation with pressure and vapor fraction flash specifications"
+  
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Methanol meth;
     parameter data.Ethanol eth;
@@ -52,7 +54,8 @@ package MaterialStream
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable standalone model to simualate the Material Stream example where all the components are defined, material stream specifications are declared.&nbsp;</span><a href=\"modelica://Simulator.Streams.MaterialStream\" style=\"font-size: 12px;\">MaterialStream</a><span style=\"font-size: 12px;\">&nbsp;model from the Streams package has been instantiated here.</span><div><br></div><div><b style=\"font-size: 12px;\">Component System:</b><span style=\"font-size: 12px;\">&nbsp;Methane, Ethane, Water</span><div style=\"font-size: 12px;\"><b>Thermodynamics:</b>&nbsp;Raoult's Law</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">This material stream is simulated using PVF flash. In other words, Pressure and Vapor Phase Mole Fraction conditions are defined along with molar flow rate and mole fraction of the components.</div><div><span style=\"font-size: 12px;\"><br></span></div><div><div style=\"font-size: 12px;\"><b>Material Stream Information</b></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><b>Molar Flow Rate:</b>&nbsp;100 mol/s</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Methane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Ethane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Water):</b> 0.34</div><div style=\"font-size: 12px;\"><b>Vapor Phase Mole Fraction:</b> 0.036257</div><div style=\"font-size: 12px;\"><b>Pressure:</b>&nbsp;101325 K</div></div></div></body></html>"));
       end PVFflash;
 
-  model PHflash
+  model PHflash "Material Stream simulation with pressure and enthalpy flash specifications"
+  
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Methanol meth;
     parameter data.Ethanol eth;
@@ -68,7 +71,8 @@ package MaterialStream
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable standalone model to simualate the Material Stream example where all the components are defined, material stream specifications are declared.&nbsp;</span><a href=\"modelica://Simulator.Streams.MaterialStream\" style=\"font-size: 12px;\">MaterialStream</a><span style=\"font-size: 12px;\">&nbsp;model from the Streams package has been instantiated here.</span><div><br></div><div><b style=\"font-size: 12px;\">Component System:</b><span style=\"font-size: 12px;\">&nbsp;Methane, Ethane, Water</span><div style=\"font-size: 12px;\"><b>Thermodynamics:</b>&nbsp;Raoult's Law</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">This material stream is simulated using PH flash. In other words, Pressure and Enthalpy conditions are defined along with molar flow rate and mole fraction of the components.</div><div><span style=\"font-size: 12px;\"><br></span></div><div><div style=\"font-size: 12px;\"><b>Material Stream Information</b></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><b>Molar Flow Rate:</b>&nbsp;31.346262 mol/s</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Methane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Ethane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Water):</b> 0.34</div></div></div><div style=\"font-size: 12px;\"><b>Pressure:</b> 101325 Pa</div><div style=\"font-size: 12px;\"><b>Enthalpy:</b> -34452 kJ/kmol</div></body></html>"));
       end PHflash;
 
-  model PSflash
+  model PSflash "Material Stream simulation with pressure and entropy flash specifications"
+  
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Methanol meth;
     parameter data.Ethanol eth;
@@ -85,6 +89,7 @@ package MaterialStream
       end PSflash;
 
   model BelBubl "Material Stream below Bubble Point"
+  
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Methanol meth;
     parameter data.Ethanol eth;
@@ -100,7 +105,8 @@ package MaterialStream
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable standalone model to simualate the Material Stream example where all the components are defined, material stream specifications are declared.&nbsp;</span><a href=\"modelica://Simulator.Streams.MaterialStream\" style=\"font-size: 12px;\">MaterialStream</a><span style=\"font-size: 12px;\">&nbsp;model from the Streams package has been instantiated here.</span><div><br></div><div><b style=\"font-size: 12px;\">Component System:</b><span style=\"font-size: 12px;\">&nbsp;Methane, Ethane, Water</span><div style=\"font-size: 12px;\"><b>Thermodynamics:</b>&nbsp;Raoult's Law</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">This material stream is simulated using TP flash. In other words, Temperature and Vapor Phase Mole Fraction conditions are defined along with molar flow rate and mole fraction of the components.</div><div><span style=\"font-size: 12px;\"><br></span></div><div><div style=\"font-size: 12px;\"><b>Material Stream Information</b></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><b>Molar Flow Rate:</b>&nbsp;31.346262 mol/s</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Methane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Ethane):</b>&nbsp;0.33</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Water):</b> 0.34</div><div style=\"font-size: 12px;\"><b>Temperature:</b>&nbsp;320 K</div></div></div><div style=\"font-size: 12px;\"><b>Pressure:</b> 202650 Pa</div></body></html>"));
       end BelBubl;
 
-  model UNIQUAC
+  model UNIQUAC "Material stream simulated with UNIQUAC property package"
+  
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Ethanol eth;
     parameter data.Water wat;
@@ -115,7 +121,8 @@ package MaterialStream
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable standalone model to simualate the Material Stream example where all the components are defined, material stream specifications are declared.&nbsp;</span><a href=\"modelica://Simulator.Streams.MaterialStream\" style=\"font-size: 12px;\">MaterialStream</a><span style=\"font-size: 12px;\">&nbsp;model from the Streams package has been instantiated here.</span><div><br></div><div><b style=\"font-size: 12px;\">Component System:</b><span style=\"font-size: 12px;\">&nbsp;Ethanol, Water</span><div style=\"font-size: 12px;\"><b>Thermodynamics:</b>&nbsp;UNIQUAC</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">This material stream is simulated using TP flash and UNIQUAC property package. In other words, Temperature and Pressure conditions are defined along with molar flow rate and mole fraction of the components.</div><div><span style=\"font-size: 12px;\"><br></span></div><div><div style=\"font-size: 12px;\"><b>Material Stream Information</b></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><b>Molar Flow Rate:</b>&nbsp;50 mol/s</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Ethanol):</b>&nbsp;0.5</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Water):</b> 0.5</div><div style=\"font-size: 12px;\"><b>Temperature:</b>&nbsp;354 K</div></div></div><div style=\"font-size: 12px;\"><b>Pressure:</b> 101325 Pa</div></body></html>"));
       end UNIQUAC;
 
-  model NRTL
+  model NRTL "Material stream simulated with NRTL property package"
+  
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Onehexene ohex;
     parameter data.Ethanol eth;
@@ -130,7 +137,8 @@ package MaterialStream
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable standalone model to simualate the Material Stream example where all the components are defined, material stream specifications are declared.&nbsp;</span><a href=\"modelica://Simulator.Streams.MaterialStream\" style=\"font-size: 12px;\">MaterialStream</a><span style=\"font-size: 12px;\">&nbsp;model from the Streams package has been instantiated here.</span><div><br></div><div><b style=\"font-size: 12px;\">Component System:</b><span style=\"font-size: 12px;\">&nbsp;Ethanol, 1-Hexane</span><div style=\"font-size: 12px;\"><b>Thermodynamics:</b>&nbsp;NRTL</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">This material stream is simulated using TP flash and NRTL property package. In other words, Temperature and Pressure conditions are defined along with molar flow rate and mole fraction of the components.</div><div><span style=\"font-size: 12px;\"><br></span></div><div><div style=\"font-size: 12px;\"><b>Material Stream Information</b></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><b>Molar Flow Rate:</b>&nbsp;100 mol/s</div><div style=\"font-size: 12px;\"><b>Mole Fraction (Ethanol):</b>&nbsp;0.5</div><div style=\"font-size: 12px;\"><b>Mole Fraction (1-Hexane):</b> 0.5</div><div style=\"font-size: 12px;\"><b>Temperature:</b>&nbsp;330 K</div></div></div><div style=\"font-size: 12px;\"><b>Pressure:</b> 101325 Pa</div></body></html>"));
       end NRTL;
 
-  model GraysonStreed
+  model GraysonStreed "Material stream simulated with Grayson-Streed property package"
+  
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Ethylene eth;
     parameter data.Acetylene acet;

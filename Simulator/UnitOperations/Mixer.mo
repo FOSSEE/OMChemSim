@@ -18,7 +18,7 @@ model Mixer "Model of a mixer to mix multiple material streams"
   Real Sin_s[NI](each unit = "kJ/[kmol.K]") "Inlet stream molar entropy";
   Real xvapin_s[NI](each unit = "-", each min = 0, each max = 1, each start = xvapg) "Inlet stream vapor phase mol fraction";
   
-  parameter String outPress "Calculation mode for outet pressure: Inlet_Minimum, Inlet_Average, Inlet_Maximum" annotation(
+  parameter String outPress "Calculation mode for outet pressure: ''Inlet_Minimum'', ''Inlet_Average'', ''Inlet_Maximum''" annotation(
     Dialog(tab = "Mixer Specifications", group = "Calculation Parameters"));
   
   Real Fout(unit = "mol/s", each min = 0, each start = Fg) "Outlet stream molar flow";
@@ -30,9 +30,9 @@ model Mixer "Model of a mixer to mix multiple material streams"
   Real xout_c[Nc](each unit = "-", each min = 0, each max = 1, start = xguess) "Outlet stream component mol fraction";
  //================================================================================
   //  Files.Interfaces.matConn inlet[NI](each Nc = Nc);
-  Simulator.Files.Interfaces.matConn outlet(Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-  Simulator.Files.Interfaces.matConn inlet[NI](each Nc = Nc) annotation(
+  Simulator.Files.Interfaces.matConn In[NI](each Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, -2}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   
   extends GuessModels.InitialGuess;
@@ -40,21 +40,21 @@ model Mixer "Model of a mixer to mix multiple material streams"
 equation
 //Connector equation
   for i in 1:NI loop
-    inlet[i].P = Pin[i];
-    inlet[i].T = Tin_s[i];
-    inlet[i].F = Fin_s[i];
-    inlet[i].H = Hin_s[i];
-    inlet[i].S = Sin_s[i];
-    inlet[i].x_pc[1, :] = xin_sc[i, :];
-    inlet[i].xvap = xvapin_s[i];
+    In[i].P = Pin[i];
+    In[i].T = Tin_s[i];
+    In[i].F = Fin_s[i];
+    In[i].H = Hin_s[i];
+    In[i].S = Sin_s[i];
+    In[i].x_pc[1, :] = xin_sc[i, :];
+    In[i].xvap = xvapin_s[i];
   end for;
-  outlet.P = Pout;
-  outlet.T = Tout;
-  outlet.F = Fout;
-  outlet.H = Hout;
-  outlet.S = Sout;
-  outlet.x_pc[1, :] = xout_c[:];
-  outlet.xvap = xvapout;
+  Out.P = Pout;
+  Out.T = Tout;
+  Out.F = Fout;
+  Out.H = Hout;
+  Out.S = Sout;
+  Out.x_pc[1, :] = xout_c[:];
+  Out.xvap = xvapout;
 //===================================================================================
 //Output Pressure
   if outPress == "Inlet_Minimum" then

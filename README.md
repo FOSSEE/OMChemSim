@@ -1,3 +1,6 @@
+
+[![Documentation Status](https://readthedocs.org/projects/simulator-documentation/badge/?version=latest)](https://simulator-documentation.readthedocs.io/en/latest/)
+
 # OMChemSim: OpenModelica Chemical Simulator
 
 The OMChemSim or OpenModelica Chemical Simulator is library of chemical system component models written in the Modelica language that can be used for chemical process simulations, such as creating binary phase envelopes, simulating a process plant flowsheet.

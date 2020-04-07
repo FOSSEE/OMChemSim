@@ -17,33 +17,33 @@ package HeatExchanger "Example of Simulating Heat Exchanger"
     parameter data.Toluene tol;
     parameter Integer Nc = 2;
     parameter data.GeneralProperties C[Nc] = {sty, tol};
-    Simulator.UnitOperations.HeatExchanger B1(Cmode = "Outlet_Temparatures", Qloss = 0, Mode = "CounterCurrent", Nc = Nc, C = C, Pdelc = 0, Pdelh = 0) annotation(
+    Simulator.UnitOperations.HeatExchanger B1(Cmode = "Outlet Temparature", Qloss = 0, Mode = "CounterCurrent", Nc = Nc, C = C, Pdelc = 0, Pdelh = 0) annotation(
       Placement(visible = true, transformation(origin = {-16, -2}, extent = {{-22, -22}, {22, 22}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS In_Hot(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-86, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS Out_Hot(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S3(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {58, 44}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS In_Cold(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-64, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS Out_Cold(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S4(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {46, -48}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-  connect(In_Cold.Out, B1.In_Cold) annotation(
+  connect(S2.Out, B1.In_Cold) annotation(
       Line(points = {{-54, 80}, {-16, 80}, {-16, 20}, {-16, 20}}, color = {0, 70, 70}));
-  connect(Out_Hot.In, B1.Out_Hot) annotation(
+  connect(S3.In, B1.Out_Hot) annotation(
       Line(points = {{48, 44}, {6, 44}, {6, -2}, {6, -2}}, color = {0, 70, 70}));
-  connect(In_Hot.Out, B1.In_Hot) annotation(
+  connect(S1.Out, B1.In_Hot) annotation(
       Line(points = {{-76, 38}, {-76, -2}, {-38, -2}}));
-  connect(B1.Out_Cold, Out_Cold.In) annotation(
+  connect(B1.Out_Cold, S4.In) annotation(
       Line(points = {{-16, -24}, {-16, -48}, {36, -48}}));
-    In_Hot.x_pc[1, :] = {1, 0};
-    In_Cold.x_pc[1, :] = {0, 1};
-    In_Hot.F_p[1] = 181.46776;
-    In_Cold.F_p[1] = 170.93083;
-    In_Hot.T = 422.03889;
-    In_Cold.T = 310.92778;
-    In_Hot.P = 344737.24128;
-    In_Cold.P = 620527.03429;
+  S1.x_pc[1, :] = {1, 0};
+  S2.x_pc[1, :] = {0, 1};
+  S1.F_p[1] = 181.46776;
+  S2.F_p[1] = 170.93083;
+  S1.T = 422.03889;
+  S2.T = 310.92778;
+  S1.P = 344737.24128;
+  S2.P = 620527.03429;
     B1.U = 300;
     B1.Qact = 2700E03;
   annotation(
@@ -64,32 +64,32 @@ package HeatExchanger "Example of Simulating Heat Exchanger"
     
     Simulator.UnitOperations.HeatExchanger B1( C = C,Cmode = "Design", Mode = "CounterCurrent", Nc = Nc, Pdelc = 0, Pdelh = 0, Qloss = 0) annotation(
       Placement(visible = true, transformation(origin = {-16, -2}, extent = {{-22, -22}, {22, 22}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS In_Hot(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S1(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-86, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS Out_Hot(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S3(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {68, 70}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS In_Cold(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S2(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {-22, 64}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.HeatExchanger.MS Out_Cold(Nc = Nc, C = C) annotation(
+    Simulator.Examples.HeatExchanger.MS S4(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {46, -48}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   
   equation
-  connect(In_Hot.Out, B1.In_Hot) annotation(
+  connect(S1.Out, B1.In_Hot) annotation(
       Line(points = {{-76, 38}, {-76, -2}, {-38, -2}}));
-  connect(B1.Out_Hot, Out_Hot.In) annotation(
+  connect(B1.Out_Hot, S3.In) annotation(
       Line(points = {{6, -2}, {6, 45}, {58, 45}, {58, 70}}));
-  connect(B1.Out_Cold, Out_Cold.In) annotation(
+  connect(B1.Out_Cold, S4.In) annotation(
       Line(points = {{-16, -24}, {-16, -48}, {36, -48}}));
-  connect(In_Cold.Out, B1.In_Cold) annotation(
+  connect(S2.Out, B1.In_Cold) annotation(
       Line(points = {{-12, 64}, {-12, 38}, {-16, 38}, {-16, 20}}));
-    In_Hot.x_pc[1, :] = {0, 0,0.1,0.9};
-    In_Cold.x_pc[1, :] = {1,0,0,0};
-    In_Hot.F_p[1] =212.94371;
-    In_Cold.F_p[1] = 3077.38424;
-    In_Hot.T = 377.03889;
-    In_Cold.T = 304.26111;
-    In_Hot.P =1116948.66173;
-    In_Cold.P = 606737.54464;
+  S1.x_pc[1, :] = {0, 0, 0.1, 0.9};
+  S2.x_pc[1, :] = {1, 0, 0, 0};
+  S1.F_p[1] = 212.94371;
+  S2.F_p[1] = 3077.38424;
+  S1.T = 377.03889;
+  S2.T = 304.26111;
+  S1.P = 1116948.66173;
+  S2.P = 606737.54464;
   annotation(
       Documentation(info = "<html><head></head><body><span style=\"font-size: 12px;\">This is an executable model to simualate the Heat Exchanger example where all the components are defined, material stream &amp; heat exchanger specifications are declared, model instances are connected.&nbsp;</span><a href=\"modelica://Simulator.UnitOperations.HeatExchanger\" style=\"font-size: 12px;\">Heat Exchanger</a><span style=\"font-size: 12px;\">&nbsp;model from the UnitOperations package has been instantiated here.</span><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><div><b>Material Stream Information</b></div><div><br></div><div><b>Hot Stream</b></div><div><b>Molar Flow Rate:</b>&nbsp;212.94371 mol/s</div><div><b>Mole Fraction (Water):</b>&nbsp;0</div><div><b>Mole Fraction (N-Octane):</b>&nbsp;0</div><div><div><b>Mole Fraction (N-Nonane):</b>&nbsp;0.1</div><div><b>Mole Fraction (N-Decane):</b>&nbsp;0.9</div></div><div><b>Pressure:</b>&nbsp;1116948.66 Pa</div><div><b>Temperature:</b>&nbsp;377.03889 K</div><div><br></div><div><br></div><div><b>Cold Stream</b></div><div><div><b>Molar Flow Rate:</b>&nbsp;3077.38424 mol/s</div><div><div><b>Mole Fraction (Water):</b>&nbsp;1</div><div><b>Mole Fraction (N-Octane):</b>&nbsp;0</div><div><div><b>Mole Fraction (N-Nonane):</b>&nbsp;1</div></div><div><b>Mole Fraction (N-Decane):</b>&nbsp;0</div><div><b>Pressure:</b>&nbsp;606737.54464 Pa</div></div><div><b>Temperature:</b>&nbsp;304.26111 K</div></div></div></body></html>"));
       end ShellnTubeHXSimulation;

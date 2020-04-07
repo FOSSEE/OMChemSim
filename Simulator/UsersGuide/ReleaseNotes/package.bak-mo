@@ -1,5 +1,0 @@
-within Simulator.UsersGuide;
-
-package ReleaseNotes
-extends Modelica.Icons.ReleaseNotes;
-end ReleaseNotes;

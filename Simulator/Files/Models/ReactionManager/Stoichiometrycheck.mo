@@ -1,6 +1,6 @@
 within Simulator.Files.Models.ReactionManager;
 
-function Stoichiometrycheck
+function Stoichiometrycheck "Function to check the stoichiometric balance in a reaction equation"
     extends Modelica.Icons.Function;
     //This functions checks the stoichiometry of the reaction we have given and returns "1" as output if the stoichiometry is okay and returns 0 otherwise.
     input Integer Nr"No. of Reactions";

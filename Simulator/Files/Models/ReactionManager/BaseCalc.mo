@@ -1,7 +1,6 @@
 within Simulator.Files.Models.ReactionManager;
 
-function BaseCalc
-//This function is used to detect the base component of the stream
+function BaseCalc "Function to determine the base component in a reaction equation"
 extends Modelica.Icons.Function;
 input Integer Nc"Numner of components";
 input Real F[Nc]"Stream flow rate";

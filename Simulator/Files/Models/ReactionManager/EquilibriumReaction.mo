@@ -6,10 +6,10 @@ model EquilibriumReaction "Model of an equilibrium reaction used in equilibrium 
   import data = Simulator.Files.ChemsepDatabase;
 
   parameter Integer Nr "Number of reactions" annotation(
-    Dialog(tab = "Reactor Specifications", group = "Calculation Parameters"));
+    Dialog(tab = "Reactions", group = "Equilibrium Reaction Parameters"));
   parameter Real Coef_cr[Nc, Nr] "Stoichiometric coefficient of components" annotation(
     Dialog(tab = "Reactions", group = "Equilibrium Reaction Parameters"));
-  parameter String Rmode = "ConstantK" "Mode of specifying equilibrium constant: ConstantK, Tempfunc" annotation(
+  parameter String Rmode = "ConstantK" "Mode of specifying equilibrium constant: ''ConstantK'', ''Tempfunc''" annotation(
     Dialog(tab = "Reactions", group = "Equilibrium Reaction Parameters"));
   parameter Real Kg[Nr] "Equilibrium Constant, applicable if ConstantK is chosen in Rmode" annotation(
     Dialog(tab = "Reactions", group = "Equilibrium Reaction Parameters"));

@@ -1,6 +1,6 @@
 within Simulator.Streams;
 
-model EnergyStream
+model EnergyStream "Model representing Energy Stream"
   extends Simulator.Files.Icons.EnergyStream;
   Real Q;
   Simulator.Files.Interfaces.enConn In annotation(

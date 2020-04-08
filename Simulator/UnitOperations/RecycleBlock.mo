@@ -1,6 +1,6 @@
 within Simulator.UnitOperations;
 model RecycleBlock 
-  extends Simulator.Files.Icons.Mixer;
+  extends Simulator.Files.Icons.Recycle;
 //========================================================================================
       Real Fin(start = Fg) "inlet mixture molar flow rate";
       Real Fout(start = Fg) "outlet mixture molar flow rate";

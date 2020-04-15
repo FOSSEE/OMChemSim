@@ -33,7 +33,7 @@ package Flash
       Placement(visible = true, transformation(origin = {56, -16}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Examples.Flash.ms S3(Nc = Nc, C = C) annotation(
       Placement(visible = true, transformation(origin = {54, 28}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
-    Simulator.Examples.Flash.fls B1(Nc = Nc, C = C) annotation(
+    Simulator.Examples.Flash.fls B1(BTdef = true, C = C,Nc = Nc, Tdef = 368) annotation(
       Placement(visible = true, transformation(origin = {-14, 2}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
 //=====================================================================

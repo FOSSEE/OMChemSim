@@ -21,6 +21,7 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
   //Model Variables
   Real T(unit = "K", start = Tg, min = 0) "Flash column temperature";
   Real P(unit = "Pa", start = Pg, min = 0) "Flash column pressure";
+  Real Hin(unit = "kJ/kmol") "Inlet Enthalpy";
   Real Pbubl(unit = "Pa", min = 0, start = Pmin) "Bubble point pressure";
   Real Pdew(unit = "Pa", min = 0, start = Pmax) "Dew point pressure";
   Real F_p[3](each unit = "mol/s", each min = 0,start = {Fg,Fliqg,Fvapg})"Feed stream mole flow";
@@ -33,6 +34,7 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
   Real S_p[3](each unit = "kJ/[kmol.K]") "Molar entropy in phase";
   Real xliq(unit = "-", min = 0, max = 1, start = xliqg)"Liquid phase mole fraction";
   Real xvap(unit = "-", min = 0, max = 1, start = xvapg) "Vapor phase mole fraction";
+  Real Q(unit = "W") "Heat Added / Removed";
   //===============================================================================
   //Instantiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
@@ -58,6 +60,7 @@ equation
     In.P = P;
   end if;
   In.F = F_p[1];
+  In.H = Hin;
   In.x_pc[1, :] = x_pc[1, :];
   Out2.T = T;
   Out2.P = P;
@@ -69,8 +72,10 @@ equation
   Out1.x_pc[1, :] = x_pc[3, :];
 //=================================================================================
 //Mole Balance
-  F_p[1] = F_p[2] + F_p[3];
-  x_pc[1, :] .* F_p[1] = x_pc[2, :] .* F_p[2] + x_pc[3, :] .* F_p[3];
+//  F_p[1] = F_p[2] + F_p[3];
+  for i in 1:Nc loop
+  x_pc[1, i] .* F_p[1] = x_pc[2, i] .* F_p[2] + x_pc[3, i] .* F_p[3];
+  end for;
 //==================================================================================
 //Bubble point calculation
   Pbubl = sum(gmabubl_c[:] .* x_pc[1, :] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6]) ./ philiqbubl_c[:]);
@@ -78,20 +83,23 @@ equation
 //Dew point calculation
   Pdew = 1 / sum(x_pc[1, :] ./ (gmadew_c[:] .* exp(C[:].VP[2] + C[:].VP[3] / T + C[:].VP[4] * log(T) + C[:].VP[5] .* T .^ C[:].VP[6])) .* phivapdew_c[:]);
   if P >= Pbubl then
-    x_pc[3, :] = zeros(Nc);
-    F_p[3] = 0;
+    x_pc[2, :] = x_pc[1, :];
+    F_p[2] = F_p[1];
+    F_p[3] = 1e-10;
   elseif P >= Pdew then
 //===================================================================================
 //VLE region
     for i in 1:Nc loop
-      x_pc[2, i] = x_pc[1, i] ./ (1 + xvap * (K_c[i] - 1));
+      x_pc[3, i] = K_c[i] * x_pc[2, i] ;
     end for;
+    sum(x_pc[3, :]) = 1;
     sum(x_pc[2, :]) = 1;
   else
 //==================================================================================
 //above dew point region
-    x_pc[2, :] = zeros(Nc);
-    F_p[2] = 0;
+    x_pc[3, :] = x_pc[1, :];
+    F_p[3] = F_p[1];
+    F_p[2] = 1e-10;
   end if;
 //===================================================================================
 //Energy Balance / Specific Heat and Enthalpy calculation from Thermodynamic Functions
@@ -117,6 +125,9 @@ equation
   H_pc[1, :] = x_pc[1, :] .* H_p[1];
   S_p[1] = xliq * S_p[2] + xvap * S_p[3];
   S_pc[1, :] = x_pc[1, :] * S_p[1];
+//=======================================================================================
+//Energy Balance
+F_p[1] * Hin + Q - F_p[2] * sum(H_pc[2, :] .* x_pc[2, :]) - F_p[3] * sum(H_pc[3, :] .* x_pc[3, :]) = 0;
 //=======================================================================================
 //phase molar fractions
   xliq = F_p[2] / F_p[1];

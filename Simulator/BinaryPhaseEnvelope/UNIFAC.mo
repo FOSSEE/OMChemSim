@@ -1,10 +1,10 @@
 within Simulator.BinaryPhaseEnvelope;
 
-package BinaryPhaseEnvelopeUNIFAC
+package UNIFAC
     extends Modelica.Icons.ExamplesPackage;
-  model PxyUNIFAC
-    extends Modelica.Icons.Example;
-  //Libraries
+  model Pxy
+  extends Modelica.Icons.Example;
+    //Libraries
     import Simulator.*;
     //Extension of Chemsep Database
     Simulator.Files.ChemsepDatabase data;
@@ -126,11 +126,11 @@ package BinaryPhaseEnvelopeUNIFAC
       y1[i] = K1[i] * z1[i];
       y2[i] = 1 - y1[i];
     end for;
-  end PxyUNIFAC;
+  end Pxy;
 
   //====================================================================================================
 
-  model TxyUNIFAC
+  model Txy
     extends Modelica.Icons.Example;
     //Libraries
     import Simulator.*;
@@ -261,7 +261,7 @@ package BinaryPhaseEnvelopeUNIFAC
       y1[i] = K1[i] * z1[i];
       y2[i] = 1 - y1[i];
     end for;
-  end TxyUNIFAC;
+  end Txy;
 
   //================================================================================================================
-end BinaryPhaseEnvelopeUNIFAC;
+end UNIFAC;

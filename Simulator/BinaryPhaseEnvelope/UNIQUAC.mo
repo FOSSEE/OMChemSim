@@ -1,10 +1,10 @@
 within Simulator.BinaryPhaseEnvelope;
 
-package BinaryPhaseEnvelopeUNIQUAC
+package UNIQUAC
   extends Modelica.Icons.ExamplesPackage;
   //==============================================================================================================
 
-  function GammaUNIQUAC
+  function Gamma
   extends Modelica.Icons.Function;
   input Integer Choice "Enter if choice of VLE curve is Pxy or Txy";
     //Note : Choice = 1 = P-x-y-Envelope
@@ -73,7 +73,7 @@ package BinaryPhaseEnvelopeUNIQUAC
 //Calculation of activity coefficients at different temperatures (T-x-y calculation routine)
 //Calculation of residual contribution term of activity coefficient
 //Calculation of combinatorial term of activity coefficient
-  end GammaUNIQUAC;
+  end Gamma;
 
   //================================================================================================
   //Binary Phase Envelope
@@ -82,7 +82,7 @@ package BinaryPhaseEnvelopeUNIQUAC
   //Nature of System    : Azeotropic System
   //========================================================================================
 
-  model PxyUNIQUAC
+  model Pxy
     extends Modelica.Icons.Example;
     //Libraries
     import Simulator.*;
@@ -150,7 +150,7 @@ package BinaryPhaseEnvelopeUNIQUAC
       z2[i] = 1 - z1[i];
     end for;
 //Calculation of Activity coefficients at different conditions using the function "Gamma_UNIQUAC"
-    (gammaBubl1, gammaBubl2) = BinaryPhaseEnvelopeUNIQUAC.GammaUNIQUAC(Choice, N, NOC, z1, z2, R, Q, tow, towk);
+    (gammaBubl1, gammaBubl2) = BinaryPhaseEnvelope.UNIQUAC.Gamma(Choice, N, NOC, z1, z2, R, Q, tow, towk);
 //Bubble point calculation
     for i in 1:N + 1 loop
       P[i] = gammaBubl1[i] * z1[i] * exp(comp[1].VP[2] + comp[1].VP[3] / T + comp[1].VP[4] * log(T) + comp[1].VP[5] * T ^ comp[1].VP[6]) + gammaBubl2[i] * z2[i] * exp(comp[2].VP[2] + comp[2].VP[3] / T + comp[2].VP[4] * log(T) + comp[2].VP[5] * T ^ comp[2].VP[6]);
@@ -161,11 +161,11 @@ package BinaryPhaseEnvelopeUNIQUAC
       y1[i] = K1[i] * z1[i];
       y2[i] = 1 - y1[i];
     end for;
-  end PxyUNIQUAC;
+  end Pxy;
 
   //=====================================================================================================
 
-  model TxyUNIQUAC
+  model Txy
     extends Modelica.Icons.Example;
     //Libraries
     import Simulator.*;
@@ -235,7 +235,7 @@ package BinaryPhaseEnvelopeUNIQUAC
       z2[i] = 1 - z1[i];
     end for;
 //Calculation of Activity coefficients at different conditions using the function "Gamma_UNIQUAC"
-    (gammaBubl1, gammaBubl2) = BinaryPhaseEnvelopeUNIQUAC.GammaUNIQUAC(Choice, N, NOC, z1, z2, R, Q, tow, towk);
+    (gammaBubl1, gammaBubl2) = BinaryPhaseEnvelope.UNIQUAC.Gamma(Choice, N, NOC, z1, z2, R, Q, tow, towk);
 //Bubble point calculation
     for i in 1:N + 1 loop
       P = gammaBubl1[i] * z1[i] * exp(comp[1].VP[2] + comp[1].VP[3] / T[i] + comp[1].VP[4] * log(T[i]) + comp[1].VP[5] * T[i] ^ comp[1].VP[6]) + gammaBubl2[i] * z2[i] * exp(comp[2].VP[2] + comp[2].VP[3] / T[i] + comp[2].VP[4] * log(T[i]) + comp[2].VP[5] * T[i] ^ comp[2].VP[6]);
@@ -250,9 +250,9 @@ package BinaryPhaseEnvelopeUNIQUAC
     for i in 1:N + 1 loop
       Psat[i, 1] = Simulator.Files.ThermodynamicFunctions.Psat(comp[1].VP, T[i]);
     end for;
-  end TxyUNIQUAC;
+  end Txy;
 
   //================================================================================================
   //==============================================================================================================
   //================================================================================================================
-end BinaryPhaseEnvelopeUNIQUAC;
+end UNIQUAC;

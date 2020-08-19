@@ -1,6 +1,6 @@
 within Simulator.BinaryPhaseEnvelope;
 
-package BinaryPhaseEnvelopeNRTL
+package NRTL
   extends Modelica.Icons.ExamplesPackage;
   model NRTLmodel
     import Simulator.Files.ThermodynamicFunctions.*;
@@ -56,7 +56,7 @@ package BinaryPhaseEnvelopeNRTL
     sum(y[:]) = 1;
   end base;
 
-  model OnehexeneAcetoneTxy
+  model Txy
     extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Onehexene ohex;
@@ -73,9 +73,9 @@ package BinaryPhaseEnvelopeNRTL
     for i in 1:41 loop
       x[i, 1] = 0 + (i - 1) * 0.025;
     end for;
-  end OnehexeneAcetoneTxy;
+  end Txy;
 
-  model OnehexeneAcetonePxy
+  model Pxy
     extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Onehexene ohex;
@@ -92,5 +92,5 @@ package BinaryPhaseEnvelopeNRTL
     for i in 1:41 loop
       x[i, 1] = 0 + (i - 1) * 0.025;
     end for;
-  end OnehexeneAcetonePxy;
-end BinaryPhaseEnvelopeNRTL;
+  end Pxy;
+end NRTL;

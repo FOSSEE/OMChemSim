@@ -1,6 +1,6 @@
 within Simulator.BinaryPhaseEnvelope;
 
-package BinaryPhaseEnvelopePR
+package PR
   extends Modelica.Icons.ExamplesPackage;
   function CompresseblityFactor
     extends Modelica.Icons.Function;
@@ -115,7 +115,7 @@ package BinaryPhaseEnvelopePR
     sum(y[:]) = 1;
   end PhaseEquilibria;
 
-  model PengRobinsonPxy
+  model Pxy
     extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Ethane eth;
@@ -141,9 +141,9 @@ package BinaryPhaseEnvelopePR
     for i in 1:N loop
       x1[i] = 0.5 + (i - 1) * 0.025;
     end for;
-  end PengRobinsonPxy;
+  end Pxy;
 
-  model PengRobinsonTxy
+  model Txy
     extends Modelica.Icons.Example;
     import data = Simulator.Files.ChemsepDatabase;
     parameter data.Ethane eth;
@@ -166,5 +166,5 @@ package BinaryPhaseEnvelopePR
     for i in 1:N loop
       x[i, 1] = 0 + (i - 1) * 0.025;
     end for;
-  end PengRobinsonTxy;
-end BinaryPhaseEnvelopePR;
+  end Txy;
+end PR;

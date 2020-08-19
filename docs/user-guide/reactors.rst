@@ -90,18 +90,18 @@ Below listed points are the step by step explaination as to how to create and si
  10. Now, create two instances of the ``MaterialStream`` model ``MS`` as we require two material streams which will go as input and comes out as output.
  To do this, open diagram view of ``test`` model, drag & drop ``MS`` twice as shown in fig. Name the instances as ``S1`` and ``S2``.
 
-	 .. image:: ../img/cr-ms-drop.png
+	 .. image:: ../images/cr-ms-drop.png
 	
  11. Now, create an instance of the ``ConversionReactor`` model ``conv_react``. Switch to the diagram view of ``test`` model, drag & drop ``conv_react``. A pop up will appear asking the name of the component. Enter the name as ``B1``.
 
-	 .. image:: ../img/cr-drop.png
+	 .. image:: ../images/cr-drop.png
 	
  12. Now double click on ``S1``. Component Parameters window opens. Go to Stream Specifications tab. 
  There are two parameter ``Nc`` and ``C`` for which the values are to be entered. 
  As the value for ``Nc`` and ``C`` are already declared earlier in step 6 while defining the variables, these variables are passed here instead of the values. 
  Repeat this for the other material stream.
 	 
-	  	.. image:: ../img/cr-in-par.png
+	  	.. image:: ../images/cr-in-par.png
 	  
  13. Now double click on ``B1``. Component Parameters window opens. 
  Go to Reactor Specifications tab and enter the values for parameters as mentioned below:
@@ -109,7 +109,7 @@ Below listed points are the step by step explaination as to how to create and si
 	 - ``Nc`` and ``C`` can be entered same as material stream 
 	 - ``CalcMode`` represents the operation mode for conversion reactor. Currently conversion reactor support three different modes of operation which are Isothermal,Adiabatic and Defined Outlet Temperature. As per the problem statement, Isothermal is to be used here. So enter ``"Isothermal"``.
 
-	    .. image:: ../img/cr-par.png
+	    .. image:: ../images/cr-par.png
 
  14. Go to Reactions tab and enter the reaction details as mentioned below:
 	 
@@ -118,7 +118,7 @@ Below listed points are the step by step explaination as to how to create and si
 	 - ``BC_r`` represents the base component for the reaction. Enter the corresponding component index from variable ``C[Nc]`` which represents the base component. Here, Acetic acid is the base component, so enter the value as ``{3}``
 	 - ``Coef_cr`` represents the stoichiometric coefficients of the components in the reaction. Enter the value as ``{{1}, {1}, {-1}, {-1}}``
 	   
-	 .. image:: ../img/crx-par.png
+	 .. image:: ../images/crx-par.png
 	 
  15. Switch to text view. Following lines of code will be autogenrated ::
 	 
@@ -128,7 +128,7 @@ Below listed points are the step by step explaination as to how to create and si
   
  16. Now, connect the streams with unit operations. For this, switch back to Diagram view.
  
-     .. image:: ../img/cr-connected.png
+     .. image:: ../images/cr-connected.png
  
 
  17. Switch to text view. Following lines of code will be autogenrated under ``equation`` section :: 
@@ -235,18 +235,18 @@ Below listed points are the step by step explaination as to how to create and si
 		
  7. Now, create two instances of the ``MaterialStream`` model ``MS`` as we require two material streams which will go as input and comes out as output. To do this, open diagram view of ``EqReactorSimulation_Ex1`` model, drag & drop ``MS`` twice as shown in fig. Name the instances as ``S1`` and ``S2``.
 
-	 .. image:: ../img/eq-ms-drop.png
+	 .. image:: ../images/eq-ms-drop.png
 	
  8. Now, Drag and drop the ``EquilibriumReactor`` model available under ``UnitOperations``. Name the instance as ``Eqreactor``.
 
-	 .. image:: ../img/eq-drop.png
+	 .. image:: ../images/eq-drop.png
 	
  9. Now double click on ``Inlet``. Component Parameters window opens. Go to Stream Specifications tab. 
  There are two parameter ``Nc`` and ``C`` for which the values are to be entered. 
  As the value for ``Nc`` and ``C`` are already declared earlier in step 6 while defining the variables, these variables are passed here instead of the values. 
  Repeat this for the other material stream.
 	 
-	  	.. image:: ../img/eq-in-par.png
+	  	.. image:: ../images/eq-in-par.png
 	  
  10. Now double click on ``B1``. Component Parameters window opens. 
  Go to Reactor Specifications tab and enter the values for parameters as mentioned below:
@@ -254,7 +254,7 @@ Below listed points are the step by step explaination as to how to create and si
 	 - ``Nc`` and ``C`` can be entered same as material stream 
 	 - ``CalcMode`` represents the operation mode for equilibrium reactor. Currently, equilibrium reactor support three different modes of operation which are Isothermal,Adiabatic and Defined Outlet Temperature. As per the problem statement, Isothermal is to be used here. So enter ``"Isothermal"``.
 
-	    .. image:: ../img/eq-par.png
+	    .. image:: ../images/eq-par.png
 
  11. Go to Reactions tab and enter the reaction details as mentioned below:
 	 
@@ -264,7 +264,7 @@ Below listed points are the step by step explaination as to how to create and si
 	 - ``Rmode`` represents the different modes by which the equilibrium constant an be defined. Currently, equilibrium reactor supports two modes: Constant K and K as a function of temperature. As per the problem statement, equilibirum constant value is given. So enter ``Rmode`` as ``ConstantK``.
 	 - ``Kg`` represents the equilibrium constant value. Enter the value as ``{0.5}``.
 	   
-	 .. image:: ../img/eqx-par.png
+	 .. image:: ../images/eqx-par.png
 	 
  12. Switch to text view. Following lines of code will be autogenrated ::
 	 
@@ -274,7 +274,7 @@ Below listed points are the step by step explaination as to how to create and si
   
  13. Now, connect the streams with unit operations. For this, switch back to Diagram view.
  
-     .. image:: ../img/eq-connected.png
+     .. image:: ../images/eq-connected.png
  
 
  14. Switch to text view. Following lines of code will be autogenrated under ``equation`` section :: 
@@ -391,18 +391,18 @@ Below listed points are the step by step explaination as to how to create and si
 		
  7. Now, create two instances of the ``MaterialStream`` model ``MS`` as we require two material streams which will go as input and comes out as output. To do this, open diagram view of ``PFRSimulation` model, drag & drop ``MS`` twice as shown in fig. Name the instances as ``S1`` and ``S2``.
 
-	 .. image:: ../img/pfr-ms-drop.png
+	 .. image:: ../images/pfr-ms-drop.png
 	
  8. Now, Drag and drop the ``PFR`` model available under ``PFR`` package under ``UnitOperations``. Name the instance as ``B1``.
 
-	 .. image:: ../img/pfr-drop.png
+	 .. image:: ../images/pfr-drop.png
 	
  9. Now double click on ``S1``. Component Parameters window opens. Go to Stream Specifications tab. 
  There are two parameter ``Nc`` and ``C`` for which the values are to be entered. 
  As the value for ``Nc`` and ``C`` are already declared earlier in step 6 while defining the variables, these variables are passed here instead of the values. 
  Repeat this for the other material stream.
 	 
-	  	.. image:: ../img/pfr-in-par.png
+	  	.. image:: ../images/pfr-in-par.png
 	  
  10. Now double click on ``B1``. Component Parameters window opens. 
  Go to Reactor Specifications tab and enter the values for parameters as mentioned below:
@@ -411,7 +411,7 @@ Below listed points are the step by step explaination as to how to create and si
 	 - ``Mode`` represents the operation mode for equilibrium reactor. Currently, plug flow reactor support three different modes of operation which are Isothermal,Adiabatic and Defined Outlet Temperature. As per the problem statement, Isothermal is to be used here. So enter ``"Isothermal"``.
 	 - ``Pdel`` represents the pressure drop across the PFR. Enter the value as ``90.65``.
 
-	    .. image:: ../img/pfr-par.png
+	    .. image:: ../images/pfr-par.png
 
  11. Go to Reactions tab and enter the reaction details as mentioned below:
 	 
@@ -423,7 +423,7 @@ Below listed points are the step by step explaination as to how to create and si
 	 - ``Rmode`` represents the different modes by which the equilibrium constant an be defined. Currently, equilibrium reactor supports two modes: Constant K and K as a function of temperature. As per the problem statement, equilibirum constant value is given. So enter ``Rmode`` as ``ConstantK``.
 	 - ``Kg`` represents the equilibrium constant value. Enter the value as ``{0.5}``.
 	   
-	 .. image:: ../img/eqx-par.png
+	 .. image:: ../images/eqx-par.png
 	 
  12. Switch to text view. Following lines of code will be autogenrated ::
 	 
@@ -433,7 +433,7 @@ Below listed points are the step by step explaination as to how to create and si
   
  13. Now, connect the streams with unit operations. For this, switch back to Diagram view.
  
-     .. image:: ../img/eq-connected.png
+     .. image:: ../images/eq-connected.png
  
 
  14. Switch to text view. Following lines of code will be autogenrated under ``equation`` section :: 

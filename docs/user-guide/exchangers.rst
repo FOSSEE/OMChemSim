@@ -65,18 +65,18 @@ Simulating a Heater
  7. Now, create three instances of the ``MaterialStream`` model ``MS`` as we require one material stream which will 
     go as input and two material streams which will come as output. To do this, open diagram view of ``HeaterSimulation`` model, drag & drop ``MS`` teice as shown in fig. Name the instances as ``S1`` and ``S2``.
 	
-		.. image:: ../img/heater-ms-drop.png
+		.. image:: ../images/heater-ms-drop.png
 
 
  8.  Now, drag and drop the ``Heater`` model available under ``UnitOperations``. Name the instance as ``B1``
  
- 	    .. image:: ../img/heater-drop.png
+ 	    .. image:: ../images/heater-drop.png
 
  9. Now, drag and drop the ``EnergyStream`` model available under ``Streams``. name the instance as ``E1``.
  
  10. Now double click on ``S1``. Component Parameters window opens. Go to Stream Specifications tab. There are two parameter ``Nc`` and ``C`` for which the values are to be entered. As the value for ``Nc`` and ``C`` are already declared earlier in step 6 while defining the variables, these variables are passed here instead of the values. Repeat this for the other material streams.
 	 
-	  	.. image:: ../img/heater-in-par.png
+	  	.. image:: ../images/heater-in-par.png
 	  
  11. Now double click on ``B1``. Component Parameters window opens. Go to Heater Specifications tab and enter the values for parameters as mentioned below:
      
@@ -84,7 +84,7 @@ Simulating a Heater
 	 - ``Pdel`` represents the pressure drop across the heater. As per the problem statement, enter ``Pdel`` as ``101325``.
 	 - ``Eff`` represents the heater efficiency. As per the problem statement, enter ``Eff`` as ``1``.
 	   
-	   .. image:: ../img/heater-par.png
+	   .. image:: ../images/heater-par.png
 	 
  12. Switch to text view. Following lines of code will be autogenrated ::
 	 
@@ -95,7 +95,7 @@ Simulating a Heater
   
  13. Now, connect the streams with unit operations. For this, switch back to Diagram view.
  
-     .. image:: ../img/heater-connected.png
+     .. image:: ../images/heater-connected.png
  
  14. Switch to text view. Following lines of code will be autogenrated under ``equation`` section :: 
   
@@ -181,18 +181,18 @@ Simulating a Cooler
  7. Now, create three instances of the ``MaterialStream`` model ``MS`` as we require one material stream which will 
     go as input and two material streams which will come as output. To do this, open diagram view of ``HeaterSimulation`` model, drag & drop ``MS`` teice as shown in fig. Name the instances as ``S1`` and ``S2``.
 	
-		.. image:: ../img/cooler-ms-drop.png
+		.. image:: ../images/cooler-ms-drop.png
 
 
  8.  Now, drag and drop the ``Cooler`` model available under ``UnitOperations``. Name the instance as ``B1``
  
- 	    .. image:: ../img/cooler-drop.png
+ 	    .. image:: ../images/cooler-drop.png
 
  9. Now, drag and drop the ``EnergyStream`` model available under ``Streams``. name the instance as ``E1``.
  
  10. Now double click on ``S1``. Component Parameters window opens. Go to Stream Specifications tab. There are two parameter ``Nc`` and ``C`` for which the values are to be entered. As the value for ``Nc`` and ``C`` are already declared earlier in step 6 while defining the variables, these variables are passed here instead of the values. Repeat this for the other material streams.
 	 
-	  	.. image:: ../img/cooler-in-par.png
+	  	.. image:: ../images/cooler-in-par.png
 	  
  11. Now double click on ``B1``. Component Parameters window opens. Go to Heater Specifications tab and enter the values for parameters as mentioned below:
      
@@ -200,7 +200,7 @@ Simulating a Cooler
 	 - ``Pdel`` represents the pressure drop across the cooler. As per the problem statement, enter ``Pdel`` as ``0``.
 	 - ``Eff`` represents the cooler efficiency. As per the problem statement, enter ``Eff`` as ``1``.
 	   
-	   .. image:: ../img/cooler-par.png
+	   .. image:: ../images/cooler-par.png
 	 
  12. Switch to text view. Following lines of code will be autogenrated ::
 	 
@@ -211,7 +211,7 @@ Simulating a Cooler
   
  13. Now, connect the streams with unit operations. For this, switch back to Diagram view.
  
-     .. image:: ../img/cooler-connected.png
+     .. image:: ../images/cooler-connected.png
  
  14. Switch to text view. Following lines of code will be autogenrated under ``equation`` section :: 
   

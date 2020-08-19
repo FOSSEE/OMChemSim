@@ -1,6 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-function PoyntingCF
+function PoyntingCF "Function to compute the Poynting Correction Factor"
   extends Modelica.Icons.Function;
   import Simulator.Files.Thermodynamic_Functions.*;
   input Integer Nc;

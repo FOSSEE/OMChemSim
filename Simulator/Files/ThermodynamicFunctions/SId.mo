@@ -1,6 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-  function SId
+  function SId "Function to compute Ideal Entropy"
     extends Modelica.Icons.Function;
     import Modelica.Constants.*;
     

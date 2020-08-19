@@ -1,7 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-  function HVapId
-    /* Calculates enthalpy of ideal vapor */
+  function HVapId "Function to compute the Enthalpy of Ideal Vapor"
     extends Modelica.Icons.Function;
     input Real SH(unit = "J/kmol") "from chemsep database std. Heat of formation";
     input Real VapCp[6] "from chemsep database";

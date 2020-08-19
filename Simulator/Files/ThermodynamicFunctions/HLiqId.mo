@@ -1,7 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-  function HLiqId
-    /* Calculates Enthalpy of Ideal Liquid*/
+  function HLiqId "Function to compute the Enthalpy of Ideal Liquid"
     extends Modelica.Icons.Function;
     input Real SH(unit = "J/kmol") "from chemsep database std. Heat of formation";
     input Real VapCp[6] "from chemsep database";

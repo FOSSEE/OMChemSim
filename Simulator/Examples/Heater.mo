@@ -23,7 +23,7 @@ package Heater "Example of Simulating a Heater"
       Placement(visible = true, transformation(origin = {20, 8}, extent = {{-12, -12}, {12, 12}}, rotation = 0)));
     Simulator.Streams.EnergyStream E1 annotation(
       Placement(visible = true, transformation(origin = {-75, -35}, extent = {{-13, -13}, {13, 13}}, rotation = 0)));
-  UnitOperations.Heater B1(C = C, Eff = 1, Nc = Nc, Pdel = 101325)  annotation(
+    Simulator.UnitOperations.Heater B1(C = C, Eff = 1, Nc = Nc, Pdel = 101325)  annotation(
       Placement(visible = true, transformation(origin = {-30, 6}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
     connect(E1.Out, B1.En) annotation(

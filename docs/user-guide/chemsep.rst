@@ -126,8 +126,8 @@ the below line of code ::
 Here, ``C[Nc]`` is an array variable which can be used to access all the thermophysical properties available in ``GeneralProperties`` model
 of ``ChemsepDatabase``.
 		
-Using Chemsep Database in a Simulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using Components from Chemsep Database in a Simulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Following are the steps that must be followed to use any component from ``ChemsepDatabase`` while creating a simulation:
 
@@ -156,6 +156,3 @@ This can be done by writing the following lines of code ::
 
 	  parameter data.GeneralProperties C[Nc] = {meth, eth};
 		
-		
-
-

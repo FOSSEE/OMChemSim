@@ -55,20 +55,20 @@ Simulating a Mixer
  7. Now, create six instances of the ``MaterialStream`` model ``MS`` as we require six material streams which will 
     go as input. To do this, open diagram view of ``MixerSimulation`` model, drag & drop ``MS`` for six times for six input streams as shown in fig. Name the instances as ``S1``, ``S2``, ``S3``, ``S4``, ``S5`` and ``S6``
 	
-	.. image:: ../img/mixer-ms-in-drop.png
+	.. image:: ../images/mixer-ms-in-drop.png
 	
  8. Similarly, create amother instance of the ``MaterialStream`` model ``MS`` which will act as the outlet stream. Name the instance as ``S7``
  
- 	.. image:: ../img/mixer-ms-out-drop.png
+ 	.. image:: ../images/mixer-ms-out-drop.png
  
  9. Now, Drag and drop the ``Mixer`` model available under ``UnitOperations``. Name the instance as ``B1``
  
- 	.. image:: ../img/mixer-drop.png
+ 	.. image:: ../images/mixer-drop.png
 
  10. Now double click on ``S1``. Component Parameters window opens. Go to Stream Specifications tab. There are two parameter ``Nc`` and ``C`` for which the values are to be entered. 
      As the value for ``Nc`` and ``C`` are already declared earlier in step 6 while defining the variables, these variables are passed here instead of the values. Repeat this for remaining five input material streams and the output material stream.
 	 
-	  	.. image:: ../img/mixer-in-par.png
+	  	.. image:: ../images/mixer-in-par.png
 	  
  11. Now double click on ``B1``. Component Parameters window opens. Go to Mixer Specifications tab and enter the values for parameters as mentioned below:
      
@@ -77,7 +77,7 @@ Simulating a Mixer
 	 - ``outPress`` represents the pressure calculation mode for outlet material stream. Currently mixer support three different 
 	   calculation mode which are inlet minimum,inlet average and inlet maximum. Here inlet average will be selected. So enter ``"Inlet_Average"``
 	   
-	   .. image:: ../img/mixer-par.png
+	   .. image:: ../images/mixer-par.png
 	 
  12. Switch to text view. Following lines of code will be autogenrated ::
 	 
@@ -92,7 +92,7 @@ Simulating a Mixer
   
  13. Now, connect the streams with unit operations. For this, switch back to Diagram view.
  
-     .. image:: ../img/mixer-connected.png
+     .. image:: ../images/mixer-connected.png
  
  14. Switch to text view. Following lines of code will be autogenrated under ``equation`` section :: 
   
@@ -202,16 +202,16 @@ Simulating a Splitter
  7. Now, create three instances of the ``MaterialStream`` model ``MS`` as we require one material stream which will 
     go as input and two material streams which will come as output. To do this, open diagram view of ``SplitterSimulation`` model, drag & drop ``MS`` for three times as shown in fig. Name the instances as ``S1``, ``S2`` and ``S3``
 	
-		.. image:: ../img/splitter-ms-drop.png
+		.. image:: ../images/splitter-ms-drop.png
 
 
  8.  Now, Drag and drop the ``Splitter`` model available under ``UnitOperations``. Name the instance as ``B1``
  
- 	    .. image:: ../img/splitter-drop.png
+ 	    .. image:: ../images/splitter-drop.png
 
  9. Now double click on ``S1``. Component Parameters window opens. Go to Stream Specifications tab. There are two parameter ``Nc`` and ``C`` for which the values are to be entered. As the value for ``Nc`` and ``C`` are already declared earlier in step 6 while defining the variables, these variables are passed here instead of the values. Repeat this for remaining two material streams.
 	 
-	  	.. image:: ../img/splitter-in-par.png
+	  	.. image:: ../images/splitter-in-par.png
 	  
  10. Now double click on ``B1``. Component Parameters window opens. Go to Splitter Specifications tab and enter the values for parameters as mentioned below:
      
@@ -221,7 +221,7 @@ Simulating a Splitter
 	   calculation type which are split ratio,mass flow and molar flow. Here molar flow will be selected. 
 	   So enter ``"Molar_Flow"``
 	   
-	   .. image:: ../img/splitter-par.png
+	   .. image:: ../images/splitter-par.png
 	 
  11. Switch to text view. Following lines of code will be autogenrated ::
 	 
@@ -232,7 +232,7 @@ Simulating a Splitter
   
  12. Now, connect the streams with unit operations. For this, switch back to Diagram view.
  
-     .. image:: ../img/splitter-connected.png
+     .. image:: ../images/splitter-connected.png
  
  13. Switch to text view. Following lines of code will be autogenrated under ``equation`` section :: 
   

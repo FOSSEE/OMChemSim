@@ -18,9 +18,8 @@ Journal Publications
   and Peter Fritzson "`Implementation of a Property Database and Thermodynamic Calculations in OpenModelica 
   for Chemical Process Simulation <https://pubs.acs.org/doi/abs/10.1021/acs.iecr.9b00104>`_",
   *Industrial & Engineering Chemistry Research* **2019** 58 (18), 7551-7560 (DOI: 10.1021/acs.iecr.8b05147).
-- Priyam Nayak, Pravin Dalve, Rahul Anandi Sai, Rahul Jain, Kannan M. Moudgalya, P. R. Naren, Peter Fritzson, 
-and Daniel Wagner "`Chemical Process Simulation Using OpenModelica <https://pubs.acs.org/doi/abs/10.1021/acs.iecr.9b00104>`_", 
-*Industrial & Engineering Chemistry Research* **2019** 58 (26), 11164-11174 `DOI: 10.1021/acs.iecr.9b00104.
+- Priyam Nayak, Pravin Dalve, Rahul Anandi Sai, Rahul Jain, Kannan M. Moudgalya, P. R. Naren, Peter 
+  Fritzson, and Daniel Wagner "`Chemical Process Simulation Using OpenModelica <https://pubs.acs.org/doi/abs/10.1021/acs.iecr.9b00104>`_", *Industrial & Engineering Chemistry Research* **2019** 58 (26), 11164-11174 `DOI: 10.1021/acs.iecr.9b00104.
   
 Conference Proceedings
 -----------------------

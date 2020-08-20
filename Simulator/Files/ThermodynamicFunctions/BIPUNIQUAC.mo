@@ -1,6 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-function BIPUNIQUAC
+function BIPUNIQUAC "Function to contain the Binary Interaction Parameters for UNIQUAC Property Package"
   extends Modelica.Icons.Function;
     input Integer Nc;
     input String C[Nc];

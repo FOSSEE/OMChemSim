@@ -1,6 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
- function BIPPR
+ function BIPPR "Function to contain the Binary Interaction Parameters for Peng-Robinson Property Package"
  extends Modelica.Icons.Function;
     input Integer Nc;
     input String C[Nc];

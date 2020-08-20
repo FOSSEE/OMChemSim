@@ -1,6 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-   function SolublityParameter
+   function SolublityParameter "Function to compute the Solubility Parameter"
    extends Modelica.Icons.Function;
    
    input Integer Nc;

@@ -1,7 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-  function VapCpId
-    /*Calculates Vapor Specific Heat*/
+  function VapCpId "Function to compute Vapor Specific Heat at given temperature"
     extends Modelica.Icons.Function;
     input Real VapCp[6] "from chemsep database";
     input Real T(unit = "K") "Temperature";

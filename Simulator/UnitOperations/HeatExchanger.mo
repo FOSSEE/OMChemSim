@@ -1,25 +1,13 @@
 within Simulator.UnitOperations;
 
-model HeatExchanger
-  extends Simulator.Files.Icons.HeatExchanger;
-  //Heat-Exchanger Operates in various modes
-  //Mode-I - Estimation of Hot Fluid Outlet Temperature
-  //      Inputs : Pdelh,deltap_cold,Heat_Loss,Tcout,Flow Direction,Name of the calculation type,Area
-  //Mode-II - Estimation of Cold Fluid Outlet Temperature
-  //      Inputs : Pdelh,deltap_cold,Heat_Loss,Thout,Flow Direction,Name of the calculation type,Area
-  //Mode-III - Estimation of Both the fluid outlet temperature
-  //      Inputs : Pdelh,deltap_cold,Heat_Loss,Qact,Flow Direction,Name of the calculation type,Area
-  //Mode-IV - Estimation of both the fluid outlet temperature-NTU Method
-  //      Inputs : Pdelh,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type,Area
-  //Mode-V-Estimation of Heat Transfer Area
-  //      Inputs : Pdelh,deltap_cold,Heat_Loss,U,Flow Direction,Name of the calculation type
-  //Mode-VI-Estimation of all parameters given the heat transfer Eff
-  //      Inputs : Pdelh,deltap_cold,Heat_Loss,U,Eff,Flow Direction,Name of the calculation type
-  
+model HeatExchanger "Model of a heat exchanger used for two streams heat exchange"
+  extends Simulator.Files.Icons.HeatExchanger;  
   import Simulator.Files.*;
   import Simulator.Files.Thermodynamic_Functions.*;
-  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
-  parameter Integer Nc "number of compounds ";
+  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
+    Dialog(tab = "Heat Exchanger Specifications", group = "Component Parameters"));
+  parameter Integer Nc "Number of components" annotation(
+    Dialog(tab = "Heat Exchanger Specifications", group = "Component Parameters"));
   Simulator.Files.Interfaces.matConn In_Hot(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-74, 38}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out_Hot(Nc = Nc) annotation(
@@ -30,46 +18,52 @@ model HeatExchanger
     Placement(visible = true, transformation(origin = {76, -30}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {0, -100}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   //Parameters
   //Mode-I -Outlet Temperature-Hot Stream Calculaions
-  parameter Real Qloss = 0;
-  parameter Real Pdelh = 0;
-  parameter Real Pdelc = 0;
-  parameter String Mode"''CoCurrent'',''CounterCurrent''";
-  parameter String Cmode"''BothOutletTemp(UA)''";
+  parameter Real Qloss(unit = "kW") = 0 "Heat Loss" annotation(
+    Dialog(tab = "Heat Exchanger Specifications", group = "Calculation Parameters"));
+  parameter Real Pdelh(unit = "Pa") = 0 "Hot fluid pressure drop" annotation(
+    Dialog(tab = "Heat Exchanger Specifications", group = "Calculation Parameters"));
+  parameter Real Pdelc(unit = "Pa") = 0 "Cold fluid pressure drop" annotation(
+    Dialog(tab = "Heat Exchanger Specifications", group = "Calculation Parameters"));
+  parameter String Mode "Flow Direction: ''CoCurrent'', ''CounterCurrent''" annotation(
+    Dialog(tab = "Heat Exchanger Specifications", group = "Calculation Parameters"));
+  parameter String Cmode "Calculation Mode: ''Hot Fluid Outlet Temperature'', ''Cold Fluid Outlet Temperature'', ''Outlet Temperature'', ''Outlet Temperature UA'', ''Heat Transfer Area'', ''Efficiency'', ''Design''" annotation(
+    Dialog(tab = "Heat Exchanger Specifications", group = "Calculation Parameters"));
+    
   Real mu_c,mu_h,k_c,k_h,rho_c,rho_h,MW_h,MW_c;
   //Variables
   //Hot Stream Inlet
-  Real Phin(start=Pg);
-  Real Thin(start=Tg);
-  Real Fhin(start=Fg);
-  Real Hhin(start=Htotg);
-  Real Shin;
-  Real xhin_pc[2, Nc](start={xg,xg});
-  Real xvaphin(start=xvapg);
+  Real Phin(unit = "Pa", start=Pg) "Hot inlet stream pressure";
+  Real Thin(unit = "K", start=Tg) "Hot inlet stream temperature";
+  Real Fhin(unit = "mol/s", start=Fg) "Hot inlet stream molar flow rate";
+  Real Hhin(unit = "kJ/kmol", start=Htotg) "Hot inlet stream molar enthalpy";
+  Real Shin(unit = "kJ/[kmol.K]") "Hot inlet stream molar entropy";
+  Real xhin_pc[2, Nc](each unit = "-", start={xg,xg}) "Hot intlet stream component mole fraction";
+  Real xvaphin(unit = "-", start=xvapg) "Hot inlet stream vapor phase mole fraction";
   //Hot Stream Outlet
-  Real Phout(start=Pg);
-  Real Thout(start=Tg);
-  Real Fhout(start=Fg);
-  Real Hhout(start=Htotg);
-  Real Shout;
-  Real xhout_pc[2, Nc](start={xg,xg});
-  Real xvaphout;
+  Real Phout(unit = "Pa", start=Pg) "Hot outlet stream pressure";
+  Real Thout(unit = "K", start=Tg) "Hot outlet stream temperature";
+  Real Fhout(unit = "mol/s", start=Fg) "Hot outlet stream molar flow rate";
+  Real Hhout(unit = "kJ/kmol", start=Htotg) "Hot outlet stream molar enthalpy";
+  Real Shout(unit = "kJ/[kmol.K]") "Hot outlet stream molar entropy";
+  Real xhout_pc[2, Nc](each unit = "-", start={xg,xg}) "Hot outlet stream component mole fraction";
+  Real xvaphout(unit = "-") "Hot outlet stream vapor phase mole fraction";
   //Cold Stream Inlet
-  Real Pcin(start=Pg);
-  Real Tcin(start=Tg);
-  Real Fcin[1](start=Fg);
-  Real Hcin(start=Htotg);
-  Real Scin;
-  Real xcin_pc[2, Nc];
-  Real xvapcin(start=xvapg);
+  Real Pcin(unit = "Pa", start=Pg) "Cold inlet stream pressure";
+  Real Tcin(unit = "K", start=Tg) "Cold inlet stream temperature";
+  Real Fcin[1](unit = "mol/s", start=Fg) "Cold inlet stream molar flow rate";
+  Real Hcin(unit = "kJ/kmol", start=Htotg) "Cold inlet stream molar enthalpy";
+  Real Scin(unit = "kJ/[kmol.K]") "Cold inlet stream molar entropy";
+  Real xcin_pc[2, Nc](unit = "-") "Cold inlet stream component mole fraction";
+  Real xvapcin(unit = "-", start=xvapg) "Cold inlet stream vapor phase mole fraction";
   //Cold Stream Outlet
-  Real Pcout(start=Pg);
-  Real Tcout(start=Tg);
-  Real couttT(start=Tg);
-  Real Fcout[1](start=Fg);
-  Real Hcout(start=Htotg);
-  Real Scout;
-  Real xcout_pc[2, Nc](start={xg,xg});
-  Real xvapcout(start=xvapg);
+  Real Pcout(unit = "Pa", start=Pg) "Cold outlet stream pressure";
+  Real Tcout(unit = "K", start=Tg)"Cold outlet stream temperature";
+  Real couttT(unit = "K", start=Tg) ;
+  Real Fcout[1](unit = "mol/s", start=Fg) "Cold outlet stream molar flow rate";
+  Real Hcout(unit = "kJ/kmol", start=Htotg) "Cold outlet stream molar enthalpy";
+  Real Scout(unit = "kJ/kmol.K") "Cold outlet stream molar entropy";
+  Real xcout_pc[2, Nc](each unit = "-", start={xg,xg}) "Cold outlet stream component mole fraction";
+  Real xvapcout(unit = "-", start=xvapg) "Cold outlet stream vapor phase mole fraction";
   
   Real Qact(start = 2000) "Actual Heat Load";
   Real Qmax, Qmaxh, Qmaxc;
@@ -81,7 +75,7 @@ model HeatExchanger
   Real Hcin_p[3](start={Htotg,Hliqg,Hvapg});
   Real Hdel;
   //Heat Exchanger Effeciency
-  Real Eff(start=xliqg);
+  Real Eff(unit = "-", start=xliqg) "Heat exchanger efficiency";
   //LMTD
   Real Tdel1(start = Tg), Tdel2(start = Tg);
   Real LMTDf "Final Log Mean Temperature Difference";
@@ -89,7 +83,8 @@ model HeatExchanger
   //Global Heat Transfer Coefficient
   Real U(start=Fg),Uf(start=Fg);
   //Heat Transfer A
-  Real Af"Final Heat Transfer Area",A;
+  Real Af(unit = "m2") "Final Heat Transfer Area";
+  Real A;
   
   //==========================================================================================================
   //Mode-4-NTU Method-when both the outlet temperatures are unknown
@@ -101,14 +96,16 @@ model HeatExchanger
   Real Rc, Rh;
   //Effectiveness Factor
   Real Effc, Effh;
-//==============================================================================================================  
-//==============================================================================================================
-  parameter String Case = "Cold in Tube";
+ //==============================================================================================================
+  //==============================================================================================================
+  parameter String Case = "Cold in Tube" "Fluid in Tubes: ''Cold in Tube'', ''Hot in Tube''" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
   //Case -Refers to the type of Fluid in the Tubes
   //Case-1 - Cold Fluid in Tubes
   //Case-2 - Hot  Fluid in Tubes
 
-  parameter String Layout = "Square";
+  parameter String Layout = "Square" "Tube Layout: ''Square'', ''Triangle'', ''Rotated Triangle'', ''Rotated Square''" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
   //Layout - Referes to the Tube Layout arrangment
   //Layout-1 - Triangle
   //Layout-2 - Rotated Triangle
@@ -138,24 +135,39 @@ model HeatExchanger
   
   //Heat Exchanger Geometry
   //Tube-Side Specifications
-  parameter Real Do(unit = "mm") = 19.04999 "External diameter of the tube";
-  parameter Real Di(unit = "mm") = 14.83004 "Internal diameter of the tube";
-  parameter Real L(unit = "m") = 6.5 "Tube Length";
-  parameter Real Pt(unit = "mm") = 25.39999 "Tube Spacing";
-  parameter Real n = 2 "Number of Shell Passes";
-  parameter Real Nts =500 "Tube Number per Shell";
-  parameter Real Tube_F(unit = "K.m^2/W") = 0.00035222 "Tube side Fouling Fractor";
-  parameter Real kt(unit = "W/m.K") = 70 "Thermal Conductivity of the tube material";
-  parameter Real Epsilon(unit = "mm") = 0.045 "Roughness";
+  parameter Real Do(unit = "mm") = 19.04999 "Tube External diameter" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real Di(unit = "mm") = 14.83004 "Tube Internal Diameter" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real L(unit = "m") = 6.5 "Tube Length" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real Pt(unit = "mm") = 25.39999 "Tube Spacing" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real n(unit = "-") = 2 "Tube Passes per Shell" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real Nts(unit = "-") =500 "Tubes per Shell" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real Tube_F(unit = "K.m^2/W") = 0.00035222 "Fouling Fractor" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real kt(unit = "W/m.K") = 70 "Thermal Conductivity" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
+  parameter Real Epsilon(unit = "mm") = 0.045 "Roughness" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Tube Specifications"));
   
   //===========================================================================================
   //Shell Side Specifications
-  parameter Real Shells = 1 "Number of Shells in Series";
-  parameter Real nt = 2 "Number of Tube Passes per shell";
-  parameter Real Dsi(unit = "mm") = 736.5996 "Shell Internal Diameter";
-  parameter Real Baffle_Cut(unit = "%") = 25;
-  parameter Real Baffle_Spacing(unit = "mm") = 406.40003 "Baffle Spacing";
-  parameter Real Shell_F(unit = "K.m^2/W") = 0.0005283309 "Shell side Fouling Factor";
+  parameter Real Shells(unit = "-") = 1 "Shells in Series" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Shell Specifications"));
+  parameter Real nt(unit = "-") = 2 "Shell Passes" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Shell Specifications"));
+  parameter Real Dsi(unit = "mm") = 736.5996 "Shell Internal Diameter" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Shell Specifications"));
+  parameter Real Baffle_Cut(unit = "%") = 25 "Baffle Cut" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Shell Specifications"));
+  parameter Real Baffle_Spacing(unit = "mm") = 406.40003 "Baffle Spacing" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Shell Specifications"));
+  parameter Real Shell_F(unit = "K.m^2/W") = 0.0005283309 "Fouling Factor" annotation(
+    Dialog(tab = "Shell and Tube Exchanger Properties", group = "Shell Specifications"));
   //==========================================================================================
   //Thermo-Physical Properties evaluated at repsective temperatures
   //==============================================================================================
@@ -264,7 +276,7 @@ model HeatExchanger
   parameter Real cc9 = -3.627346599678;
   parameter Real F =0.9828;
   parameter Real m = 0.96;
-//=========================================================================================================== 
+ //===========================================================================================================
  extends GuessModels.InitialGuess;
 equation
 //Hot Stream Inlet
@@ -381,9 +393,8 @@ equation
     Effc = (1-exp((Rc-1)*Ntuc))/(1 -Rc*  exp((Rc-1)*Ntuc));
     Effh =  (1-exp((Rh-1) *Ntuh ))/(1 -Rh *  exp((Rh-1)*Ntuh));
   end if;
- 
-//=========================================================================================================  
-  Uf = (Qact) / (Af * LMTDf);
+//=========================================================================================================
+  Uf = Qact / (Af * LMTDf);
 //===========================================================================================================
 f1 = Do * 1E-3 / (hi * (Di * 1E-3));
 f2 = Tube_F * (Do * 1E-3) / (Di * 1E-3);
@@ -524,7 +535,7 @@ f5 = 1 / he;
     Prs = mu_c * (Cpcin / MW_c) / (k_c * 1E-3);
   end if;
   Z = Pt / Do;
-//=============================================================================================================  
+//=============================================================================================================
 //======================================================================================================
 //Shell-Side Calculations
   if Layout == "Triangle" and Layout == "Rotated Triangle" then
@@ -643,16 +654,16 @@ mu_h = (mu_hin + mu_hout)/2;
 //k_cin =0.304;
 //k_hin =0.11505;
 //k_cout = 0.29663;
-//k_hout = 0.12535; 
-k_c = (k_cin + k_cout)/2;
+//k_hout = 0.12535;
+  k_c = (k_cin + k_cout) / 2;
 k_h = (k_hin + k_hout)/2;
-//========================================================================================================= 
+//=========================================================================================================
   Atc = Af / Shells;
 //=======================================================================================================
-  Nt = Nts / nt; 
-//=======================================================================================================  
+  Nt = Nts / nt;
+//=======================================================================================================
 //Calculation of Corrected LMTD
-if Case == "Cold in Tube" then
+  if Case == "Cold in Tube" then
     R = (Thin - Thout) / (Tcout - Tcin);
     P = (Tcout - Tcin) / (Thin - Tcin);
   else
@@ -732,9 +743,9 @@ end for;
  Cpc_p[1] = (1-xvapcin) * Cpc_p[2] + xvapcin * Cpc_p[3]; 
  Cpc_pc[1, :] = xcin_pc[1, :] .* Cpc_p[1];  
  Cpcin = Cpc_p[1];
- //=====================================================================================================
-//======================================================================================================== 
-  Fmhin = Fhin * MWhin*1E-3;
+//=====================================================================================================
+//========================================================================================================
+  Fmhin = Fhin * MWhin * 1E-3;
   Fmcin = Fcin[1] * MWcin*1E-3;
 //=========================================================================================================
 //==========================================================================================================
@@ -748,4 +759,6 @@ algorithm
     MWcout :=  MWcout +  C[i].MW *   xcout_pc[1,i];
   end for;   
 
-end HeatExchanger;
+annotation(
+    Documentation(info = "<html><head></head><body><div><div style=\"font-size: 12px;\">The&nbsp;<b>Heat Exchanger</b>&nbsp;is used to simulate the simultaneous heating and cooling process of two material streams.</div><div style=\"font-size: 12px;\"><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px; orphans: 2; widows: 2;\"><br></span></div><div style=\"font-size: 12px;\"><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px; orphans: 2; widows: 2;\">The heat exchanger model have following four material stream connection ports:</span></div><div><ul><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Hot Inlet</span></font></li><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Hot Outlet</span></font></li><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Cold Inlet</span></font></li><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Cold Outlet</span></font></li></ul></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">Following calculation parameters must be provided to the heat exchanger:</div><div><ol style=\"font-size: 12px;\"><li>Heat Loss (<b>Qloss</b>)</li><li>Hot Fluid Pressure Drop (<b>Pdelh</b>)</li><li>Cold Fluid Pressure Drop&nbsp;(<b>Pdelc</b>)</li><li>Flow Direction&nbsp;(<b>Mode</b>)</li><li>Calculation Mode&nbsp;(<b>Cmode</b>)</li></ol><div style=\"font-size: 12px;\">The above variables have been declared of type&nbsp;<i>parameter Real&nbsp;</i>except the last two which are of type <i>parameter String</i>. They can have either of the string values as mentioned below:</div><div style=\"font-size: 12px;\"><div><br></div><div>Flow Direction (<b>Mode</b>) can have one of the below mentioned string values:</div><div><ol><li>CoCurrent</li><li>CounterCurrent</li></ol><div>Calculation Mode (<b>Cmode</b>) can have one of the below mentioned string values:</div></div><div><ol style=\"font-size: medium;\"><li>Hot Fluid Outlet Temperature</li><li>Cold Fluid Outlet Temperature</li><li>Outlet Temperature</li><li>Outlet Temperature UA</li><li>Heat Transfer Area</li><li>Efficiency</li><li>Design</li></ol></div></div><div style=\"font-size: 12px;\">During simulation, all these values can specified directly under&nbsp;<b>Heat Exchanger Specifications</b>&nbsp;by double clicking on the heat exchanger model instance.</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">Depending on the string value of&nbsp;<b>Cmode</b> selected except <b>Design</b>,&nbsp;any two additional variables must be provided for the model to simulate successfully:</div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\">When <b>Cmode</b> is <b>Hot Fluid Outlet Temperature</b>:</div><div><ol><li>Cold Fluid Outlet Temperature (<b>Tcout</b>)</li><li>Heat Exchange Area (<b>A</b>)</li></ol><div><div style=\"font-size: 12px;\">When <b>Cmode</b> is&nbsp;<b>Hot Fluid Outlet Temperature</b>:</div><div><ol><li>Hot Fluid Outlet Temperature (<b>Thout</b>)</li><li>Heat Exchange Area (<b>A</b>)</li></ol><div><div style=\"font-size: 12px;\">When <b>Cmode</b> is <b>Outlet Temperature</b>:</div><div><ol><li>Overall Heat Transfer Coeffiicient (<b>U</b>)</li><li>Heat Transferred (<b>Qact</b>)</li></ol><div><div style=\"font-size: 12px;\">When <b>Cmode</b> is <b>Outlet Temperature UA</b>:</div><div><ol><li>Overall Heat Transfer Coeffiicient (<b>U</b>)</li><li>Heat Exchange Area (<b>A</b>)</li></ol><div><div style=\"font-size: 12px;\">When <b>Cmode</b> is <b>Heat Transfer Area</b>:</div><div><ol><li>Overall Heat Transfer Coeffiicient&nbsp;(<b>U</b>)</li><li>Cold Fluid Outlet Temperature (<b>Tcout</b>)</li></ol><div><div style=\"font-size: 12px;\">When&nbsp;<b>Cmode</b>&nbsp;is&nbsp;<b>Efficiency</b>:</div><div><ol><li>Overall Heat Transfer Coeffiicient (<b>U</b>)</li><li>Efficiency (<b>Eff</b>)</li></ol></div></div></div></div></div></div></div></div></div></div></div><div style=\"font-size: 12px;\"><br></div><div style=\"font-size: 12px;\"><div>These variables are declared of type&nbsp;<i>Real.</i></div><div>During simulation, value of these variables need to be defined in the equation section depending on the <b>Cmode</b> selected.</div></div></div></div><div><br></div><div>When the Heat Exchanger is operated in <b>Design</b> mode, values for the following shell and tube side specifications needs to be entered:</div><div><br></div><b><u>Tube Side Specifications:</u></b><div><ol><li>Tube External Diameter (<b>Do</b>)</li><li>Tube Internal Diameter (<b>Di</b>)</li><li>Tube Length (<b>L</b>)</li><li>Tube Spacing (<b>Pt</b>)</li><li>Tube Passes per Shell (<b>n</b>)</li><li>Number of Tubes per Shell (<b>Nts</b>)</li><li>Tube Side Fouling Factor (<b>Tube_F</b>)</li><li>Tube Thermal Conductivity (<b>kt</b>)</li><li>Roughness (<b>Epsilon</b>)</li><li>Tube Layout (<b>Layout</b>)</li><li>Fluid in Tubes (<b>Case</b>)</li></ol><div><br></div></div><div><b><u>Shell Side Specifications:</u></b></div><div><ol><li>Shells in Series (<b>Shells</b>)</li><li>Shell Passes (<b>nt</b>)</li><li>Shell Internal Diameter (<b>Dsi</b>)</li><li>Baffle Cut (<b>Baffle_Cut</b>)</li><li>Baffle Spacing (<b>Baffle_Spaing</b>)</li><li>Shell Side Fouling Factor(<b>Shell_F</b>)</li></ol><div>All the above defined variables are of type <i>parameter Real </i>except the last two under tube side specifications which are of type <i>parameter String</i>. They can have either of the string values as mentioned below:</div></div><div><br></div><div>Tube Layout (<b>Layout</b>) can have one of the below mentioned string values:</div><div><ol><li>Triangle</li><li>Rotated Triangle</li><li>Square</li><li>Rotated Square</li></ol><div>Fluid in Tubes (<b>Case</b>) can have one of the below mentioned string values:</div></div><div><ol><li>Cold in Tube</li><li>Hot in Tube</li></ol><div><span style=\"font-size: 12px;\">During simulation, all these values can specified directly under&nbsp;</span><b style=\"font-size: 12px;\">Shell and Tube Exchanger Properties</b><span style=\"font-size: 12px;\">&nbsp;by double clicking on the heat exchanger model instance. It is to be noted that <b>Shell and Tube Exchanger Properties</b> are to be specified only when <b>Cmode</b> is <b>Design</b>.</span></div></div><div><span style=\"font-size: 12px;\"><br></span></div><div><span style=\"font-size: 12px;\"><br></span></div><div><span style=\"font-size: 12px;\">For detailed explanation on how to use this model to simulate a Heat Exchanger, go to&nbsp;</span><a href=\"modelica://Simulator.Examples.HeatExchanger\" style=\"font-size: 12px;\">Heat Exchanger Example</a><span style=\"font-size: 12px;\">.</span></div></body></html>"));
+    end HeatExchanger;

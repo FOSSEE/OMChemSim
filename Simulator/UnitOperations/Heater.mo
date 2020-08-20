@@ -61,5 +61,40 @@ equation
   Tin + Tdel = Tout;
 //temperature calculation
   annotation(
-    Documentation(info = "<html><head></head><body>The <b>Heater</b> is used to simulate the heating process of a material stream.<div><br></div><div><div><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px; orphans: 2; widows: 2;\">The heater model have following connection ports:</span></div><div><div style=\"orphans: 2; widows: 2;\"><ol><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">Two Material Streams:</span></font></li><ul><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">feed stream</span></li><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">outlet stream</span></li></ul><li><font face=\"Arial, Helvetica, sans-serif\"><span style=\"font-size: 13px;\">One Energy Stream:</span></font></li><ul><li><span style=\"font-family: Arial, Helvetica, sans-serif; font-size: 13px;\">heat added</span></li></ul></ol></div></div><div><br></div><div>Following calculation parameters must be provided to the heater:</div><div><ol><li>Pressure Drop (<b>Pdel</b>)</li><li>Efficiency (<b>Eff</b>)</li></ol><div>The above variables have been declared of type <i>parameter Real.&nbsp;</i></div><div>During simulation, their values can specified directly under <b>Heater Specifications</b> by double clicking on the heater model instance.</div><div><br></div><div><br></div><div>In addition to the above parameters, any one additional variable from the below list must be provided for the model to simulate successfully:</div><div><ol><li>Outlet Temperature (<b>Tout</b>)</li><li>Temperature Increase (<b>Tdel</b>)</li><li>Heat Added (<b>Q</b>)</li><li>Outlet Stream Vapor Phase Mole Fraction (<b>xvapout</b>)</li></ol><div>These variables are declared of type <i>Real.</i></div><div>During simulation, value of one of these variables need to be defined in the equation section.</div><div><br></div></div><div><br></div><div><span style=\"font-size: 12px;\">For detailed explaination on how to use this model to simulate a Heater, go to <a href=\"modelica://Simulator.Examples.Heater\">Heater Example</a>.</span></div></div></div></body></html>"));
+    Documentation(info = "<html>
+    <p>The <b>Heater</b> is used to simulate the heating process of a material stream.</p>
+    <p>The heater model have following connection ports:
+    <ol>
+    <li>Two Material Streams:</li>
+    <ul>
+    <li>feed stream</li>
+    <li>outlet stream</li>
+    </ul>
+    <li>One Energy Stream:</li>
+    <ul>
+    <li>heat added</li>
+    </ul>
+    </ol>
+    </p>
+    
+    <p>Following calculation parameters must be provided to the heater:
+    <ol><li>Pressure Drop (<b>Pdel</b>)</li>
+    <li>Efficiency (<b>Eff</b>)</li>
+    </ol>
+    <div>The above variables have been declared of type <i>parameter Real.</i></div>
+    <div>During simulation, their values can specified directly under <b>Heater Specifications</b> by double clicking on the heater model instance.</div>
+    </p>
+    <p>In addition to the above parameters, any one additional variable from the below list must be provided for the model to simulate successfully:
+    <ol>
+    <li>Outlet Temperature (<b>Tout</b>)</li>
+    <li>Temperature Increase (<b>Tdel</b>)</li>
+    <li>Heat Added (<b>Q</b>)</li>
+    <li>Outlet Stream Vapor Phase Mole Fraction (<b>xvapout</b>)</li>
+    </ol>
+    <div>These variables are declared of type <i>Real.</i></div>
+    <div>During simulation, value of one of these variables need to be defined in the equation section.</div></p>
+    <p>&nbsp;</p>
+    
+    <p>For detailed explanation on how to use this model to simulate a Heater, go to <a href=\"modelica://Simulator.Examples.Heater\">Heater Example</a></p>
+    </html>"));
 end Heater;

@@ -1,6 +1,6 @@
 within Simulator.Files.ThermodynamicFunctions;
 
-function BIPNRTL
+function BIPNRTL "Function to contain the Binary Interaction Parameters for NRTL Property Package"
 extends Modelica.Icons.Function;
 input Integer Nc;
 input String CAS[Nc];

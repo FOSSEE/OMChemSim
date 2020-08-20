@@ -1,6 +1,6 @@
 within Simulator.Files.Models.ReactionManager;
 
-    function Arhenious
+    function Arhenious "Function to compute the Arrhenius rate constant"
       extends Modelica.Icons.Function;
     // Reaction rate constant k = A*exp(-E/RT)
       input Integer Nr ;    

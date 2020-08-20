@@ -1,6 +1,6 @@
 within Simulator.Files.Interfaces;
 
-connector matConn
+connector matConn "Connector to connect material stream with unit operation"
  Real P, T, F, H, S,x_pc[3, Nc], xvap;
     parameter Integer Nc;
   annotation(

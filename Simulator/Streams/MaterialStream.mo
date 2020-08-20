@@ -4,8 +4,10 @@ model MaterialStream "Model representing Material Stream"
   //1 -  Mixture, 2 - Liquid phase, 3 - Gas Phase
   extends Simulator.Files.Icons.MaterialStream;
   import Simulator.Files.*;
-  parameter Integer Nc "Number of components";
-  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
+  parameter Integer Nc "Number of components" annotation(
+    Dialog(tab = "Stream Specifications", group = "Component Parameters"));
+  parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
+    Dialog(tab = "Stream Specifications", group = "Component Parameters"));
   Real P(unit = "Pa", min = 0, start = Pg) "Pressure";
   Real T(unit = "K", start = Tg) "Temperature";
   Real Pbubl(unit = "Pa", min = 0, start = Pmin) "Bubble point pressure";

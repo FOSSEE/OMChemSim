@@ -1,6 +1,6 @@
 within Simulator.UnitOperations;
 model RecycleBlock 
-  extends Simulator.Files.Icons.Mixer;
+  extends Simulator.Files.Icons.Recycle;
 //========================================================================================
       Real Fin(start = Fg) "inlet mixture molar flow rate";
       Real Fout(start = Fg) "outlet mixture molar flow rate";
@@ -24,12 +24,12 @@ model RecycleBlock
 //connector equations
       inlet.P = Pin;
       inlet.T = Tin;
-      inlet.Fmol = Fin;
-      inlet.xfrac[1, :] = xin_c[:];
+      inlet.F = Fin;
+      inlet.x_pc[1, :] = xin_c[:];
       outlet.P = Pout;
       outlet.T = Tout;
-      outlet.Fmol = Fout;
-      outlet.xfrac[1, :] = xout_c[:];
+      outlet.F = Fout;
+      outlet.x_pc[1, :] = xout_c[:];
 //=============================================================================================
       Fin = Fout;
 //material balance

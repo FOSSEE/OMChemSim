@@ -1,6 +1,6 @@
 within Simulator.Files.Interfaces;
 
-connector trayConn
+connector trayConn "Connector to connect trays within distillation column and absorption column"
    Real F, H, x_c[Nc];
     parameter Integer Nc;
   annotation(

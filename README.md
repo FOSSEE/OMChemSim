@@ -1,5 +1,5 @@
 
-[![Documentation Status](https://readthedocs.org/projects/simulator-documentation/badge/?version=latest)](https://simulator-documentation.readthedocs.io/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/simulator-documentation/badge/?version=latest)](https://omchemsim.readthedocs.io/en/latest/)
 
 # OMChemSim: OpenModelica Chemical Simulator
 

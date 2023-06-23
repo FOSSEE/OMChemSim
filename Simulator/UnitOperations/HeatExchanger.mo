@@ -1,9 +1,10 @@
 within Simulator.UnitOperations;
 
 model HeatExchanger "Model of a heat exchanger used for two streams heat exchange"
-  extends Simulator.Files.Icons.HeatExchanger;  
+  extends Simulator.Files.Icons.HeatExchanger;
+  extends GuessModels.InitialGuess;
   import Simulator.Files.*;
-  import Simulator.Files.Thermodynamic_Functions.*;
+  import Simulator.Files.ThermodynamicFunctions.*;
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
     Dialog(tab = "Heat Exchanger Specifications", group = "Component Parameters"));
   parameter Integer Nc "Number of components" annotation(
@@ -277,7 +278,6 @@ model HeatExchanger "Model of a heat exchanger used for two streams heat exchang
   parameter Real F =0.9828;
   parameter Real m = 0.96;
  //===========================================================================================================
- extends GuessModels.InitialGuess;
 equation
 //Hot Stream Inlet
   In_Hot.P = Phin;

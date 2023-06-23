@@ -4,8 +4,9 @@ model MaterialStream "Model representing Material Stream"
   //1 -  Mixture, 2 - Liquid phase, 3 - Gas Phase
   extends Simulator.Files.Icons.MaterialStream;
   import Simulator.Files.*;
-  parameter Integer Nc "Number of components" annotation(
-    Dialog(tab = "Stream Specifications", group = "Component Parameters"));
+  parameter Real Cpres_p[3], Hres_p[3], Sres_p[3], gmabubl_c[Nc], philiqbubl_c[Nc], gmadew_c[Nc], phivapdew_c[Nc], K_c[Nc];
+  /*parameter Integer Nc "Number of components" annotation(
+    Dialog(tab = "Stream Specifications", group = "Component Parameters"));*/
   parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(
     Dialog(tab = "Stream Specifications", group = "Component Parameters"));
   Real P(unit = "Pa", min = 0, start = Pg) "Pressure";
@@ -23,12 +24,12 @@ model MaterialStream "Model representing Material Stream"
   Real xm_pc[3, Nc](each unit ="-", start={xguess,xg,yg}, each min = 0, each max = 1) "Component mass fraction in phase";
   Real F_pc[3, Nc](each unit = "mol/s", each start = Fg, each min = 0) "Component molar flow in phase";
   Real Fm_pc[3, Nc](each unit = "kg/s", each min = 0, each start = Fg) "Component mass flow in phase";
-  Real Cp_p[3](each unit = "kJ/[kmol.K]",start={Hmixg,Hliqg,Hvapg}) "Phase molar specific heat";
-  Real Cp_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar specific heat in phase";
+  Real Cp_p[3](each unit = "kJ/kmol.K",start={Hmixg,Hliqg,Hvapg}) "Phase molar specific heat";
+  Real Cp_pc[3, Nc](each unit = "kJ/kmol.K") "Component molar specific heat in phase";
   Real H_p[3](each unit = "kJ/kmol",start={Hmixg,Hliqg,Hvapg}) "Phase molar enthalpy";
   Real H_pc[3, Nc](each unit = "kJ/kmol") "Component molar enthalpy in phase";
-  Real S_p[3](each unit = "kJ/[kmol.K]") "Phase molar entropy";
-  Real S_pc[3, Nc](each unit = "kJ/[kmol.K]") "Component molar entropy in phase";
+  Real S_p[3](each unit = "kJ/kmol.K") "Phase molar entropy";
+  Real S_pc[3, Nc](each unit = "kJ/kmol.K") "Component molar entropy in phase";
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(
     Placement(visible = true, transformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-100, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   Simulator.Files.Interfaces.matConn Out(Nc = Nc) annotation(

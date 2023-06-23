@@ -3,11 +3,13 @@ within Simulator.GuessModels;
 model InitialGuess
 
    //Inputs Required to generate Guess Values
-      extends GuessInput;
-      //==========================================================================================
-      //Guess variables for Pressures and Temperatures
+   extends GuessInput;
+      
+      import data = Simulator.Files.ChemsepDatabase;
+       parameter input Integer Nc;
+       parameter data.GeneralProperties C[Nc];
       protected
-      parameter Real xguess[Nc](each fixed = false);
+       parameter Real xguess[Nc](each fixed = false);
        parameter Real Tg(fixed = false);
        parameter Real Temp(fixed = false, start = 300);
        parameter Real Pxc[Nc](each fixed = false), Pxm[Nc](each fixed = false);
@@ -82,8 +84,8 @@ model InitialGuess
       end if;
       Alpha = 1 - Beta;
       for i in 1:Nc loop
-        if xguess[i] <> 0 then
-          if Beta > 0 and Beta <> 1 then
+        if xguess[i] < 0 and xguess[i] > 0 then
+          if Beta > 0 and Beta < 1 and Beta > 1 then
             ymol[i] = xguess[i] * K_guess[i] / ((K_guess[i] - 1) * xvapg + 1);
           elseif Beta == 1 then
             ymol[i] = xguess[i];

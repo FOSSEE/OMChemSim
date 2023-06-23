@@ -4,7 +4,7 @@ within Simulator.Files.ThermodynamicPackages;
   
   //====================================================================
   //Header Files and Parameters
-    import Simulator.Files.Thermodynamic_Functions.*;
+    import Simulator.Files.ThermodynamicFunctions.*;
     parameter Real R = 8.314;
     parameter Real u = 1;
     import Simulator.Files.*;

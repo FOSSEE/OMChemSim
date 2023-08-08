@@ -4,8 +4,8 @@ within Simulator.Files.Models.ReactionManager;
   //===================================================================================================
   import Simulator.Files.*;
   import data = Simulator.Files.Chemsep_Database;
-  //  parameter ChemsepDatabase.GeneralProperties C[Nc];
-  //  parameter Integer Nc;
+  parameter ChemsepDatabase.GeneralProperties C[Nc];
+  parameter Integer Nc;
   parameter Integer Nr "Number of reactions" annotation (Dialog(tab = "Reactions", group = "Kinetic Reaction Parameters"));
   parameter Integer BC_r[Nr] "Base component of reactions" annotation(Dialog(tab = "Reactions", group = "Kinetic Reaction Parameters"));
  //  parameter Integer Comp annotation(

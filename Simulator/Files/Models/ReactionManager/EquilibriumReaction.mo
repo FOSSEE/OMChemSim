@@ -26,7 +26,7 @@ model EquilibriumReaction "Model of an equilibrium reaction used in equilibrium 
   Integer BC_r[Nr];
   
   //Equilibrium Constant
-  Real K[Nr](start=xliqg);
+  Real K[Nr](each start=xliqg);
   Real N[Nr](each start= Fg),D[Nr](each start=Fg);
   
   extends Simulator.GuessModels.InitialGuess;

@@ -23,7 +23,7 @@ model EquilibriumReaction "Model of an equilibrium reaction used in equilibrium 
   //Returns whether the specified stoichiometry is correct
   Real Hf_c[Nc];
   Real Hr_r[Nr];
-
+  Real BC_r[Nr];
   
   //Equilibrium Constant
   Real K[Nr](start=xliqg);

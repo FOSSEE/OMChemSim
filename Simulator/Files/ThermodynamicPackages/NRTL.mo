@@ -7,6 +7,9 @@ within Simulator.Files.ThermodynamicPackages;
     parameter Integer Nc;
     parameter Simulator.Files.ChemsepDatabase.GeneralProperties C[Nc];
     
+    Real x_pc[Nc, Nc], Pdew;
+    Real T(unit = "K"), P;
+    
     Simulator.Files.Models.gammaNRTL Gma(Nc = Nc, C = C, x_c = x_pc[2, :], T = T), GmaDew(Nc = Nc, C = C, x_c = xliqdew_c, T = T), GmaBubl(Nc = Nc, C = C, x_c = x_pc[1, :], T = T);
     Real xliqdew_c[Nc], rho_c[Nc];
     Real Cpres_p[3] "residual specific heat", Hres_p[3] "residual enthalpy", Sres_p[3] "residual Entropy", K_c[Nc], gma_c[Nc](each start = 1), gmabubl_c[Nc](each start = 1), gmadew_c[Nc](each start = 1);

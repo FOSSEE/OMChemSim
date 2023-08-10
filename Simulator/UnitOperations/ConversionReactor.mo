@@ -9,6 +9,7 @@ model ConversionReactor "Model of a conversion reactor to calculate the outlet s
     Dialog(tab = "Reactor Specifications", group = "Component Parameters"));
    parameter Integer Nc "Number of components" annotation(
     Dialog(tab = "Reactor Specifications", group = "Component Parameters"));
+   parameter Integer Nr "Number of Reactions";
    parameter String CalcMode = "Isothermal" "Required mode of operation: ''Isothermal'', ''Define_Out_Temperature'', ''Adiabatic''" annotation(
     Dialog(tab = "Reactor Specifications", group = "Calculation Parameters"));
   parameter Real Tdef(unit = "K") = 300 "Defined outlet temperature, applicable if Define_Out_Temperature mode is chosen" annotation(

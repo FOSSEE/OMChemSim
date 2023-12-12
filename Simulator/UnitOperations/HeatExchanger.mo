@@ -724,7 +724,7 @@ Cph_pc[2, i] = ThermodynamicFunctions.LiqCpId(C[i].LiqCp, Thin);
 Cph_pc[3, i] = ThermodynamicFunctions.VapCpId(C[i].VapCp, Thin);
 end for;
 //==================================================================================================
- for i in 2:Nc loop
+ for i in 1:2 loop
     Cph_p[i] = sum(xhin_pc[i, :] .* Cph_pc[i, :]);
   end for;
  Cph_p[1] = (1-xvaphin) * Cph_p[2] + xvaphin * Cph_p[3];  
@@ -737,7 +737,7 @@ Cpc_pc[2, i] = ThermodynamicFunctions.LiqCpId(C[i].LiqCp, Tcin);
 Cpc_pc[3, i] = ThermodynamicFunctions.VapCpId(C[i].VapCp, Tcin);
 end for;
 
- for i in 2:Nc loop
+ for i in 1:2 loop
     Cpc_p[i] = sum(xcin_pc[i, :] .* Cpc_pc[i, :]);
   end for;
  Cpc_p[1] = (1-xvapcin) * Cpc_p[2] + xvapcin * Cpc_p[3]; 

@@ -51,16 +51,16 @@ model HeatExchanger "Model of a heat exchanger used for two streams heat exchang
   //Cold Stream Inlet
   Real Pcin(unit = "Pa", start=Pg) "Cold inlet stream pressure";
   Real Tcin(unit = "K", start=Tg) "Cold inlet stream temperature";
-  Real Fcin[1](unit = "mol/s", start=Fg) "Cold inlet stream molar flow rate";
+  Real Fcin[1](each unit = "mol/s", each start=Fg) "Cold inlet stream molar flow rate";
   Real Hcin(unit = "kJ/kmol", start=Htotg) "Cold inlet stream molar enthalpy";
   Real Scin(unit = "kJ/[kmol.K]") "Cold inlet stream molar entropy";
-  Real xcin_pc[2, Nc](unit = "-") "Cold inlet stream component mole fraction";
+  Real xcin_pc[2, Nc](each unit = "-") "Cold inlet stream component mole fraction";
   Real xvapcin(unit = "-", start=xvapg) "Cold inlet stream vapor phase mole fraction";
   //Cold Stream Outlet
   Real Pcout(unit = "Pa", start=Pg) "Cold outlet stream pressure";
   Real Tcout(unit = "K", start=Tg)"Cold outlet stream temperature";
   Real couttT(unit = "K", start=Tg) ;
-  Real Fcout[1](unit = "mol/s", start=Fg) "Cold outlet stream molar flow rate";
+  Real Fcout[1](each unit = "mol/s", each start=Fg) "Cold outlet stream molar flow rate";
   Real Hcout(unit = "kJ/kmol", start=Htotg) "Cold outlet stream molar enthalpy";
   Real Scout(unit = "kJ/kmol.K") "Cold outlet stream molar entropy";
   Real xcout_pc[2, Nc](each unit = "-", start={xg,xg}) "Cold outlet stream component mole fraction";

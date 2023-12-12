@@ -28,7 +28,7 @@ model ShortcutColumn "Model of a shortcut column to calculate minimum reflux in 
   
   Real Ntmin(unit = "-", min = 0, start = 10) "Minimum Number of trays";
   Real RRmin(unit = "-", start = 1) "Minimum Reflux Ratio";
-  Real alpha_c[Nc](unit = "-") "Relative Volatility";
+  Real alpha_c[Nc](each unit = "-") "Relative Volatility";
   Real theta(unit = "-", start = 1) "Fraction";
   Real T(start=Tg) "Thermodynamic Adjustment", P(start=Pg) "Thermodynamic Adjustment";
   Real Tcond(unit = "K", start = max(C[:].Tb), min = 0)"Condenser temperature";

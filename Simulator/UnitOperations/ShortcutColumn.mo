@@ -42,6 +42,13 @@ model ShortcutColumn "Model of a shortcut column to calculate minimum reflux in 
   Real Hliqcond_c[Nc](each unit = "kJ/kmol") "Component enthalpy of vapor in condenser";
   Real xliqcond_c[Nc](each unit = "-", each min = 0, each max = 1,  start = xg)"Component mole fraction in liquid phase in condenser";
   Real xvapcond_c[Nc](each unit = "-", each min = 0, each max = 1,  start = yg)"Component mole fraction in vapor phase in condenser";
+  Real K_c[Nc];
+  Real gmabubl_c[Nc];
+  Real philiqbubl_c[Nc];
+  Real gmadew_c[Nc];
+  Real phivapdew_c[Nc];
+  Real gma_c[Nc];
+  Real K[Nc];
   
   Real Pdew(unit = "Pa", min = 0, start = Pmax)"Dew point pressure";
   Real Pbubl(unit = "Pa", min = 0, start = Pmin)"Bubble point pressure";

@@ -10,7 +10,7 @@ model Mixer "Model of a mixer to mix multiple material streams"
   parameter Integer NI = 6 "Number of inlet streams" annotation(
     Dialog(tab = "Mixer Specifications", group = "Calculation Parameters"));
   
-  Real Pin[NI](unit = "Pa", min = 0, start = Pg) "Inlet stream pressure";
+  Real Pin[NI](each unit = "Pa", each min = 0, each start = Pg) "Inlet stream pressure";
   Real xin_sc[NI, Nc](each unit = "-", each min = 0, each max = 1) "Inlet stream component mol fraction";
   Real Fin_s[NI](each unit = "mol/s", each min = 0, each start = Fg) "Inlet stream Molar Flow";
   Real Hin_s[NI](each unit = "kJ/kmol") "Inlet stream molar enthalpy";

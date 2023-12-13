@@ -8,10 +8,10 @@ model AbsTray "Model of a tray used in absorption column"
     Real T(min = 0, start = Tg);
     Real Fvap_s[2](each min = 0, start={Fg,Fg});
     Real Fliq_s[2](each min = 0, start={Fliqg,Fliqg});
-    Real xvap_sc[2, Nc](each min = 0, each max = 1, start=xvapg);
-    Real xliq_sc[2, Nc](each min = 0, each max = 1, start=xliqg);
+    Real xvap_sc[2, Nc](each min = 0, each max = 1, each start=xvapg);
+    Real xliq_sc[2, Nc](each min = 0, each max = 1, each start=xliqg);
     Real Hvap_s[2](start={Hvapg,Hvapg}), Hliq_s[2](start={Hliqg,Hliqg}), Hvapout_c[Nc], Hliqout_c[Nc];
-    Real x_pc[3, Nc](each min =0, each max = 0,start=xliqg);
+    Real x_pc[3, Nc](each min =0, each max = 0, each start=xliqg);
     Real Pdew(min = 0, start =Pmax);
     Real Pbubl(min = 0, start =Pmin);
     Real gmabubl_c[Nc];

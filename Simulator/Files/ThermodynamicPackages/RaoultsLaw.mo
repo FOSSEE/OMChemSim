@@ -23,7 +23,7 @@ within Simulator.Files.ThermodynamicPackages;
     for j in 1:Nc loop
       K_c[j] = Pvap_c[j] / P;
     end for;
-    Cpres_p[:] = zeros(3);
-    Hres_p[:] = zeros(3);
-    Sres_p[:] = zeros(3);
+    Cpres_p[:] = fill(0.0, 3);
+    Hres_p[:] = fill(0.0, 3);
+    Sres_p[:] = fill(0.0, 3);
   end RaoultsLaw;

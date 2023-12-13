@@ -22,6 +22,7 @@ within Simulator.UnitOperations.DistillationColumn;
     parameter String Ctype = "Total" "Condenser type: ''Total'' or ''Partial''" annotation(
     Dialog(tab = "Column Specifications", group = "Calculation Parameters"));
 
+    Simulator.Examples.Distillation.Condenser condenser;
     Real RR(min = 0);
     Simulator.Files.Interfaces.matConn In_s[Ni](each Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {-248, -40}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {-250, 0}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));

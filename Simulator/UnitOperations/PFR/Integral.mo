@@ -3,8 +3,7 @@ within Simulator.UnitOperations.PFR;
   function Integral "Function to define the integral part used in the performance equation of a plug floiw reactor"
     extends Modelica.Math.Nonlinear.Interfaces.partialScalarFunction;
 
-        parameter Integer Nc;
-        parameter Integer Nr;
+        
         input Integer Base_comp;
         input Real Co_dummy[Nc - 1];
         input Real DO_dummy[Nc - 1, Nr];
@@ -19,6 +18,8 @@ within Simulator.UnitOperations.PFR;
         input Real k;
       protected
         Real Rate;
+        parameter Integer Nc;
+        parameter Integer Nr;
       algorithm
         Rate := 1;
         for i in 2:Nc loop

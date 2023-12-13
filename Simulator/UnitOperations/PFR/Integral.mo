@@ -17,6 +17,7 @@ within Simulator.UnitOperations.PFR;
         input Real Bc[Nr];
         input Real Fao;
         input Real k;
+      protected
         Real Rate;
       algorithm
         Rate := 1;

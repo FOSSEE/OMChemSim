@@ -32,6 +32,10 @@ model ConversionReactor "Model of a conversion reactor to calculate the outlet s
   Real Pout(unit = "Pa", min = 0, start =Pg) "Outlet stream pressure";
   Real Tout(unit = "K", min = 0, start = Tg) "Outlet stream temperature";
   Real Fout_cr[Nc, Nr](each unit = "mol/s") "Molar flor rate of components after each reaction";
+  
+  Real Coef_cr[Nc, Nr];
+  Integer BC_r[Nr];
+  Real Hr_r[Nr];
  //=============================================================================
   //Instanstiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(

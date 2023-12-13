@@ -12,8 +12,8 @@ within Simulator.Files.ThermodynamicFunctions;
   input Real MW_c[Nc];
   input Real Psat[Nc];
   output Real rho_c[Nc];
-  parameter Real R = 83.14;
 protected
+  parameter Real R = 83.14;
   Real Tr_c[Nc], Pcbar_c[Nc], temp[Nc], Tcor_c[Nc], a, b, c_c[Nc], d, e_c[Nc], Beta_c[Nc], f, g, h, j, k, RPnew_c[Nc];
 algorithm
   for i in 1:Nc loop

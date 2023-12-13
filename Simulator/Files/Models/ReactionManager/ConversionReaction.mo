@@ -5,6 +5,8 @@ within Simulator.Files.Models.ReactionManager;
   import Simulator.Files.*;
   import data = Simulator.Files.Chemsep_Database;
     //Number of Reactions involved in the process
+  parameter ChemsepDatabase.GeneralProperties C[Nc] "Component instances array" annotation(Dialog(tab = "Flash Specifications", group = "Component Parameters"));
+  parameter Integer Nc "Number of components" annotation(Dialog(tab = "Flash Specifications", group = "Component Parameters"));
   parameter Integer Nr "Number of reactions" annotation(
     Dialog(tab = "Reactions", group = "Conversion Reaction Parameters"));
   parameter Integer BC_r[Nr] "Base component in the reactions" annotation(

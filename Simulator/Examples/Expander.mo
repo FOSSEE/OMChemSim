@@ -36,16 +36,16 @@ package Expander "Example of Simulating an Adiabatic Expander"
     Simulator.Streams.EnergyStream E1 annotation(
       Placement(visible = true, transformation(origin = {-30, -60}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
   equation
-//================================================================
-//Connections
+  //================================================================
+  //Connections
     connect(E1.Out, B1.En) annotation(
       Line(points = {{-20, -60}, {-2, -60}, {-2, -16}, {-2, -16}}, color = {255, 0, 0}));
     connect(B1.Out, S2.In) annotation(
       Line(points = {{20, 0}, {52, 0}, {52, 0}, {52, 0}}, color = {0, 70, 70}));
     connect(S1.Out, B1.In) annotation(
       Line(points = {{-72, 0}, {-26, 0}, {-26, 0}, {-26, 0}}, color = {0, 70, 70}));
-//================================================================
-//Inputs and Specifications
+  //================================================================
+  //Inputs and Specifications
     S1.x_pc[1, :] = {0.5, 0.5};
     S1.P = 131325;
     S1.T = 372;

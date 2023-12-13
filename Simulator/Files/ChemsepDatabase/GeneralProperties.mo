@@ -1,6 +1,6 @@
 within Simulator.Files.ChemsepDatabase;
 
-model GeneralProperties "Model to declare the variables for thermophysical properties"
+record GeneralProperties "Model to declare the variables for thermophysical properties"
     extends Modelica.Icons.Record;
   parameter Integer SN "Serial Number";
   parameter String name "Compound Name";
@@ -31,8 +31,8 @@ model GeneralProperties "Model to declare the variables for thermophysical prope
   parameter Real LiqCp[6] (each unit="J/kmol/K") "Liquid Heat Capacity Coefficients";
   parameter Real HOV[6] (each unit="J/kmol") "Heat of Vaporization Coefficients";
   parameter Real VapCp[6] (each unit="J/kmol/K") "Ideal Gas Heat Capacity Coefficients";
-  parameter Real LiqVis[6] (each unit="Pa s") "Liquid Viscosity Coefficients";
-  parameter Real VapVis[6] (each unit="Pa s") "Vapor Viscosity Coefficients";
+  parameter Real LiqVis[6] (each unit="Pa.s") "Liquid Viscosity Coefficients";
+  parameter Real VapVis[6] (each unit="Pa.s") "Vapor Viscosity Coefficients";
   parameter Real LiqK[6] (each unit="W/m/K") "Liquid Thermal Conductivity Coefficients";
   parameter Real VapK[6] (each unit="W/m/K") "Vapor Thermal Conductivity Coefficients";
   parameter Real Racketparam (unit="-") "Racket Parameter";

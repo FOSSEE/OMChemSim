@@ -23,10 +23,10 @@ model EquilibriumReaction "Model of an equilibrium reaction used in equilibrium 
   //Returns whether the specified stoichiometry is correct
   Real Hf_c[Nc];
   Real Hr_r[Nr];
-
+  Integer BC_r[Nr];
   
   //Equilibrium Constant
-  Real K[Nr](start=xliqg);
+  Real K[Nr](each start=xliqg);
   Real N[Nr](each start= Fg),D[Nr](each start=Fg);
   
   extends Simulator.GuessModels.InitialGuess;

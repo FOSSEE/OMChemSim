@@ -18,6 +18,7 @@ model AbsCol "Model of an absorption column representing fractionating towers wh
       Placement(visible = true, transformation(origin = {100, 80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, 300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
     Simulator.Files.Interfaces.matConn Out_Bot(Nc = Nc) annotation(
       Placement(visible = true, transformation(origin = {100, -80}, extent = {{-10, -10}, {10, 10}}, rotation = 0), iconTransformation(origin = {250, -300}, extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+    Simulator.Examples.Absorption.Tray tray[Nt];
   equation
 //connector equation
   tray[1].Fliq_s[1] = In_Top.F;

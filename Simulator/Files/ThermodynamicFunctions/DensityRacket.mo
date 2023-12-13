@@ -2,7 +2,6 @@ within Simulator.Files.ThermodynamicFunctions;
 
   function DensityRacket
   extends Modelica.Icons.Function;
-  input Integer Nc;
   input Real T;
   input Real P;
   input Real Pc_c[Nc];
@@ -12,8 +11,9 @@ within Simulator.Files.ThermodynamicFunctions;
   input Real MW_c[Nc];
   input Real Psat[Nc];
   output Real rho_c[Nc];
-  parameter Real R = 83.14;
 protected
+  parameter Real R = 83.14;
+  parameter Integer Nc;
   Real Tr_c[Nc], Pcbar_c[Nc], temp[Nc], Tcor_c[Nc], a, b, c_c[Nc], d, e_c[Nc], Beta_c[Nc], f, g, h, j, k, RPnew_c[Nc];
 algorithm
   for i in 1:Nc loop

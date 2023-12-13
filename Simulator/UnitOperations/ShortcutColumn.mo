@@ -28,7 +28,7 @@ model ShortcutColumn "Model of a shortcut column to calculate minimum reflux in 
   
   Real Ntmin(unit = "-", min = 0, start = 10) "Minimum Number of trays";
   Real RRmin(unit = "-", start = 1) "Minimum Reflux Ratio";
-  Real alpha_c[Nc](unit = "-") "Relative Volatility";
+  Real alpha_c[Nc](each unit = "-") "Relative Volatility";
   Real theta(unit = "-", start = 1) "Fraction";
   Real T(start=Tg) "Thermodynamic Adjustment", P(start=Pg) "Thermodynamic Adjustment";
   Real Tcond(unit = "K", start = max(C[:].Tb), min = 0)"Condenser temperature";
@@ -42,6 +42,13 @@ model ShortcutColumn "Model of a shortcut column to calculate minimum reflux in 
   Real Hliqcond_c[Nc](each unit = "kJ/kmol") "Component enthalpy of vapor in condenser";
   Real xliqcond_c[Nc](each unit = "-", each min = 0, each max = 1,  start = xg)"Component mole fraction in liquid phase in condenser";
   Real xvapcond_c[Nc](each unit = "-", each min = 0, each max = 1,  start = yg)"Component mole fraction in vapor phase in condenser";
+  Real K_c[Nc];
+  Real gmabubl_c[Nc];
+  Real philiqbubl_c[Nc];
+  Real gmadew_c[Nc];
+  Real phivapdew_c[Nc];
+  Real gma_c[Nc];
+  Real K[Nc];
   
   Real Pdew(unit = "Pa", min = 0, start = Pmax)"Dew point pressure";
   Real Pbubl(unit = "Pa", min = 0, start = Pmin)"Bubble point pressure";

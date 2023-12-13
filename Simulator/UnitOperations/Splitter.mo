@@ -26,8 +26,8 @@ model Splitter "Model of a splitter to split one material stream into multiple o
   Real Pout_s[No](each unit = "Pa", each min = 0, each start = Pg) "Outlet Pressure";
   Real Tout_s[No](each unit = "K", each min = 0, each start = Tg) "Outlet Temperature";
   Real xout_sc[No, Nc](each unit = "-", each min = 0, each max = 1) "Outlet Mixture Molar Fraction";
-  Real Fout_c[No](each unit = "mol/s", each min = 0,  start = Fg) "Outlet Mixture Molar Flow";
-  Real Fmout_c[No](each unit = "kg/s", each min = 0, start = Fg) "Outlet Mixture Mass Flow";
+  Real Fout_c[No](each unit = "mol/s", each min = 0,  each start = Fg) "Outlet Mixture Molar Flow";
+  Real Fmout_c[No](each unit = "kg/s", each min = 0, each start = Fg) "Outlet Mixture Mass Flow";
   //==============================================================================
   //Instantiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(

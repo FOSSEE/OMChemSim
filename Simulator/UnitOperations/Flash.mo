@@ -33,6 +33,15 @@ model Flash "Model of a flash column to separate vapor and liquid phases from a 
   Real S_p[3](each unit = "kJ/[kmol.K]") "Molar entropy in phase";
   Real xliq(unit = "-", min = 0, max = 1, start = xliqg)"Liquid phase mole fraction";
   Real xvap(unit = "-", min = 0, max = 1, start = xvapg) "Vapor phase mole fraction";
+  
+  Real gmabubl_c[Nc];
+  Real philiqbubl_c[Nc];
+  Real gmadew_c[Nc];
+  Real phivapdew_c[Nc];
+  Real K_c[Nc];
+  Real Cpres_p[Nc];
+  Real Hres_p[Nc];
+  Real Sres_p[Nc];
   //===============================================================================
   //Instantiation of Connectors
   Simulator.Files.Interfaces.matConn In(Nc = Nc) annotation(

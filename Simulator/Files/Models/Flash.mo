@@ -12,6 +12,14 @@ within Simulator.Files.Models;
     Real T(min = 0, start = Tg);
     Real Pbubl(start = Pmin, min = 0)"Bubble point pressure";
     Real Pdew(start = Pmax, min = 0)"dew point pressure";
+    Real gmabubl_c[Nc];
+    Real philiqbubl_c[Nc];
+    Real gmadew_c[Nc];
+    Real phivapdew_c[Nc];
+    Real K_c[Nc];
+    Real Cpres_p[Nc];
+    Real Hres_p[Nc];
+    Real Sres_p[Nc];
   
   extends GuessModels.InitialGuess;
   

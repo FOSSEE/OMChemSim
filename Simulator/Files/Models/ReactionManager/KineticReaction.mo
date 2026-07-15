@@ -3,7 +3,7 @@ within Simulator.Files.Models.ReactionManager;
   model KineticReaction "Model of a kinetic reaction used in PFR or CSTR"
   //===================================================================================================
   import Simulator.Files.*;
-  import data = Simulator.Files.Chemsep_Database;
+  import data = Simulator.Files.ChemsepDatabase;
   parameter ChemsepDatabase.GeneralProperties C[Nc];
   parameter Integer Nc;
   parameter Integer Nr "Number of reactions" annotation (Dialog(tab = "Reactions", group = "Kinetic Reaction Parameters"));
